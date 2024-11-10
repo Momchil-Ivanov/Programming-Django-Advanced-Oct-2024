@@ -1,0 +1,9 @@
+# from django.urls import path
+# from . import views
+#
+# urlpatterns = [
+#     path('my-tips/', views.MyTipsView.as_view(), name='my_tips'),
+#     path('create-tip/', views.CreateTipView.as_view(), name='create_tip'),
+#     path('edit-tip/<int:pk>/', views.EditTipView.as_view(), name='edit_tip'),
+#     path('tip/<int:pk>/', views.TipDetailView.as_view(), name='tip_detail'),
+# ]
