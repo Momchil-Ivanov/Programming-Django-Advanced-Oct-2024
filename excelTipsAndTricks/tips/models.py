@@ -1,0 +1,62 @@
+from django.db import models
+from django.contrib.auth.models import User
+
+
+class Tip(models.Model):
+    title = models.CharField(
+        max_length=100,
+    )
+
+    content = models.TextField()
+
+    image_url = models.URLField(
+        blank=True,
+        null=True,
+        help_text="Optional URL for an image to display under the title.",
+    )
+
+    created_at = models.DateTimeField(
+        auto_now_add=True,
+    )
+
+    updated_at = models.DateTimeField(
+        auto_now=True,
+    )
+
+    author = models.ForeignKey(
+        User, on_delete=models.CASCADE, related_name='tips',
+    )
+
+    category = models.ForeignKey(
+        to='categories.Category',
+        on_delete=models.SET_NULL,
+        null=True,
+        related_name='tips',
+    )
+
+    likes = models.ManyToManyField(
+        User,
+        related_name='liked_tips',
+        blank=True,
+    )
+
+    dislikes = models.ManyToManyField(
+        User,
+        related_name='disliked_tips',
+        blank=True,
+    )
+
+    tags = models.ManyToManyField(
+        'tags.Tag',
+        related_name='tips',
+        blank=True,
+    )
+
+    def __str__(self):
+        return self.title
+
+    def total_likes(self):
+        return self.likes.count()
+
+    def total_dislikes(self):
+        return self.dislikes.count()
