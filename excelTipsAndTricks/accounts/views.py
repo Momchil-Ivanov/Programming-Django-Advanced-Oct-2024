@@ -1,5 +1,6 @@
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.views import LoginView
+from django.contrib import messages
 from django.urls import reverse_lazy
 from django.views.generic.edit import FormView
 
@@ -16,5 +17,8 @@ class RegisterView(FormView):
 
 class CustomLoginView(LoginView):
     template_name = 'accounts/login-page.html'
-    redirect_authenticated_user = True  # Redirect logged-in users away from the login page
-    next_page = reverse_lazy('home')  # Redirect to the home page after login
+
+    def form_invalid(self, form):
+        # Adding custom message to the message framework
+        messages.error(self.request, "Account or Password are not correct")
+        return super().form_invalid(form)
