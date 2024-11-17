@@ -28,7 +28,7 @@
                     <a class="nav-link btn-excel mx-2 px-4" href="{% url 'about' %}">About</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link btn-excel mx-2 px-4" href="#">Categories</a>
+                    <a class="nav-link btn-excel mx-2 px-4" href="{% url 'view_category' %}">Categories</a>
                 </li>
                 {% if user.is_authenticated %}
                     <form action="{% url 'logout' %}" method="POST" style="display: inline;">

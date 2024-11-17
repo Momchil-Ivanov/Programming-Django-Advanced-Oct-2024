@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+
+{% block title %}Categories - Excel Tips and Tricks{% endblock %}
+
+{% block content %}
+    <div class="container my-4">
+        <h2>Categories</h2>
+
+        {% if no_categories_message %}
+            <p>{{ no_categories_message }}</p>
+        {% elif categories %}
+            <ul class="list-group">
+                {% for category in categories %}
+                    <li class="list-group-item">
+                        <strong>{{ category.name }}</strong><br>
+                        Description: {{ category.description }}
+                        <div class="d-flex flex-column align-items-start mt-2">
+                            <img src="{{ category.image_url }}" alt="{{ category.name }}" class="img-fluid mb-2" width="150">
+                            <a href="{% url 'category_edit' pk=category.pk %}" class="btn btn-warning btn-sm">Edit</a>
+                        </div>
+                    </li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+
+        <a href="{% url 'category_create' %}" class="btn btn-success mt-3">Create a New Category</a>
+    </div>
+{% endblock %}

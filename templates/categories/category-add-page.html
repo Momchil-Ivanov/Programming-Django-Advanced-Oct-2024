@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+
+{% block title %}Create Category - Excel Tips and Tricks{% endblock %}
+
+{% block content %}
+    <div class="container my-4">
+        <h2>Create a New Category</h2>
+
+        <form method="post">
+            {% csrf_token %}
+            {% for field in form %}
+                <div class="form-group">
+                    <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                    {{ field }}
+                    <div class="invalid-feedback">{{ field.errors }}</div>
+                </div>
+            {% endfor %}
+            <button type="submit" class="btn btn-primary">Create Category</button>
+        </form>
+    </div>
+{% endblock %}

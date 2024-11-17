@@ -28,16 +28,16 @@
                     <a class="nav-link btn-excel mx-2 px-4" href="{% url 'about' %}">About</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link btn-excel mx-2 px-4" href="#">Categories</a>
+                    <a class="nav-link btn-excel mx-2 px-4" href="">Categories</a>
                 </li>
-            {% if user.is_authenticated %}
-                <form action="{% url 'logout' %}" method="POST" style="display: inline;">
-                    {% csrf_token %}
-                    <button type="submit" class="btn-excel mx-2 px-4">Logout</button>
-                </form>
-            {% else %}
-                <a href="{% url 'login' %}" class="btn-excel mx-2 px-4">Login</a>
-            {% endif %}
+                {% if user.is_authenticated %}
+                    <form action="{% url 'logout' %}" method="POST" style="display: inline;">
+                        {% csrf_token %}
+                        <button type="submit" class="btn-excel mx-2 px-4">Logout</button>
+                    </form>
+                {% else %}
+                    <a href="{% url 'login' %}" class="btn-excel mx-2 px-4">Login</a>
+                {% endif %}
             </ul>
         </nav>
     </header>

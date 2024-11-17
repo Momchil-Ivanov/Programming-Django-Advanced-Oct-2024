@@ -1,0 +1,50 @@
+from django.apps import AppConfig
+from django.db.models.signals import post_save, post_migrate
+from django.dispatch import receiver
+from django.contrib.auth.models import Group
+from django.db.models.signals import post_save
+from django.contrib.auth.models import User
+from .models import UserProfile
+
+
+class AccountsConfig(AppConfig):
+    name = 'excelTipsAndTricks.accounts'
+
+    def ready(self):
+        # Connect signals after the app is ready
+        post_save.connect(create_user_profile, sender=User)
+        post_save.connect(save_user_profile, sender=User)
+        post_migrate.connect(create_groups, sender=self)
+
+
+
+def create_user_profile(sender, instance, created, **kwargs):
+    if created:
+        # Create the UserProfile for the new user
+        UserProfile.objects.create(user=instance)
+        # Assign a default role (e.g., 'Regular') to the user
+        assign_role_to_user(instance, 'Regular')
+
+
+def save_user_profile(sender, instance, **kwargs):
+    instance.profile.save()
+
+
+# Helper function to assign roles
+def assign_role_to_user(user, role):
+    try:
+        group = Group.objects.get(name=role)
+        user.groups.add(group)
+    except Group.DoesNotExist:
+        # Handle the case where the group doesn't exist (optional)
+        pass
+
+
+def create_groups(sender, **kwargs):
+    # Create Regular user group if it doesn't exist
+    if not Group.objects.filter(name='Regular').exists():
+        Group.objects.create(name='Regular')
+
+    # Create Admin user group if it doesn't exist
+    if not Group.objects.filter(name='Admin').exists():
+        Group.objects.create(name='Admin')

@@ -7,6 +7,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include('excelTipsAndTricks.common.urls')),
     path('accounts/', include('excelTipsAndTricks.accounts.urls')),
+    path('categories/', include('excelTipsAndTricks.categories.urls')),
     ]
 #     path('accounts/', include('excelTipsAndTricks.accounts.urls')),
 #     path('categories/', include('excelTipsAndTricks.categories.urls')),
