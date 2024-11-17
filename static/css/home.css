@@ -1,0 +1,16 @@
+/* Custom green color (Excel-like) */
+.excel-green {
+    color: #107C41; /* Example of Excel logo green */
+}
+
+/* Custom button styles */
+.btn-excel {
+    background-color: #107C41; /* Excel green background */
+    color: white;
+    border: none; /* Optional: Removes the button border */
+}
+
+.btn-excel:hover {
+    background-color: #FFC107; /* Yellow background on hover */
+    color: black; /* Change text to black for contrast when hovering */
+}

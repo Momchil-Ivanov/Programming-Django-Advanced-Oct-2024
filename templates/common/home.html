@@ -1,60 +1,22 @@
+{% extends 'base.html' %}
+
 {% load static %}
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Home - Excel Tips and Tricks</title>
 
-    <!-- Bootstrap CSS via CDN -->
-    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+{% block title %}Home - Excel Tips and Tricks{% endblock %}
 
-    <!-- Optionally, include a custom CSS file -->
-    <link rel="stylesheet" href="{% static 'css/home.css' %}">
-</head>
-<body class="d-flex flex-column min-vh-100">
-    <header class="bg-primary text-white text-center py-4">
-        <h1 class="display-4">Welcome to Excel Tips and Tricks</h1>
-        <nav>
-            <ul class="nav justify-content-center">
-                <li class="nav-item mx-2">
-                    <a class="nav-link text-dark btn btn-light btn-lg px-4 py-2" href="#">Home</a>
-                </li>
-                <li class="nav-item mx-2">
-                    <a class="nav-link text-dark btn btn-light btn-lg px-4 py-2" href="#">About</a>
-                </li>
-                <li class="nav-item mx-2">
-                    <a class="nav-link text-dark btn btn-light btn-lg px-4 py-2" href="#">Categories</a>
-                </li>
-                <li class="nav-item mx-2">
-                    <a class="nav-link text-dark btn btn-light btn-lg px-4 py-2" href="#">Login</a>
-                </li>
-            </ul>
-        </nav>
-    </header>
+{% block header_title %}Welcome to Excel Tips and Tricks{% endblock %}
 
-    <main class="container mt-5 text-center flex-grow-1">
+{% block content %}
+    <div class="container mt-5 text-center">
         <h2>Explore the Best Excel Tips</h2>
         <p>Get to know helpful tips and tricks to improve your Excel skills.</p>
         
-        <!-- Logos: Excel Logo on the left and Tips & Tricks Icon on the right -->
-        <div class="d-inline-flex align-items-center justify-content-center">
-            <!-- Excel Logo on the left -->
-            <img src="{% static 'images/common/Microsoft_Office_Excel_Logo_512px.png' %}" alt="Excel Logo" class="img-fluid my-4" style="max-height: 150px;">
-            
-            <!-- Tips and Tricks Logo on the right -->
-            <img src="{% static 'images/common/tips-tricks-with-lightbulb-icon-vector-illustration-quick-advice-helpful-tricks_1063836-83.png' %}" alt="Tips and Tricks Logo" 
-                class="img-fluid my-4" style="max-height: 150px; margin-left: 20px;">
+        <!-- Logos below the buttons -->
+        <div class="d-flex justify-content-center align-items-center mt-4">
+            <!-- Excel Logo -->
+            <img src="{% static 'images/common/Microsoft_Office_Excel_Logo_512px.png' %}" alt="Excel Logo" class="img-fluid" style="max-width: 150px;">
+            <!-- Tips and Tricks Logo -->
+            <img src="{% static 'images/common/tips-tricks-with-lightbulb-icon-vector-illustration-quick-advice-helpful-tricks_1063836-83.png' %}" alt="Tips and Tricks Logo" class="img-fluid" style="max-width: 150px;">
         </div>
-    </main>
-
-    <footer class="bg-dark text-white text-center py-3 mt-auto">
-        <p>&copy; 2024 Excel Tips and Tricks</p>
-    </footer>
-
-    <!-- Bootstrap JS and dependencies -->
-    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.3/dist/umd/popper.min.js"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
-</body>
-</html>
+    </div>
+{% endblock %}
