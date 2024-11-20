@@ -1,0 +1,14 @@
+from django import forms
+from .models import Tip
+from excelTipsAndTricks.tags.models import Tag
+
+class TipForm(forms.ModelForm):
+    tags = forms.ModelMultipleChoiceField(
+        queryset=Tag.objects.all(),
+        required=False,
+        widget=forms.CheckboxSelectMultiple
+    )
+
+    class Meta:
+        model = Tip
+        fields = ['title', 'content', 'image_url', 'category', 'tags']

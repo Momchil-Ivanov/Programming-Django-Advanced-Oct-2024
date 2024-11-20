@@ -1,0 +1,20 @@
+from django.http import JsonResponse
+from django.views.generic import ListView
+from .models import Tag
+
+def tag_autocomplete(request):
+    if 'term' in request.GET:
+        tags = Tag.objects.filter(name__icontains=request.GET['term'])
+        return JsonResponse(list(tags.values('name')), safe=False)
+    return JsonResponse([], safe=False)
+
+class TagSearchView(ListView):
+    model = Tag
+    template_name = 'tags/tag_search_results.html'
+    context_object_name = 'tags'
+
+    def get_queryset(self):
+        query = self.request.GET.get('query', '')
+        if query:
+            return Tag.objects.filter(name__icontains=query)
+        return Tag.objects.all()

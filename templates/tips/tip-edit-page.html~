@@ -1,0 +1,69 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Edit Tip: {{ tip.title }}</h2>
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+
+        <!-- Custom input for tags -->
+        <div class="form-group">
+            <label for="id_tags">Tags</label>
+            <input type="text" id="id_tags" name="tags" class="form-control" placeholder="Start typing tags" value="{{ tip.tags.all|join:', ' }}" />
+        </div>
+
+        <div id="tag-list" class="mt-2">
+            {% for tag in tip.tags.all %}
+                <span class="badge badge-info mr-2" data-tag="{{ tag.name }}">
+                    {{ tag.name }} 
+                    <button type="button" class="remove-tag btn btn-sm btn-danger ml-2">Remove</button>
+                </span>
+            {% endfor %}
+        </div>
+
+        <button type="button" id="add-tag" class="btn btn-success mt-2">Add Tag</button>
+
+        <button type="submit" class="btn btn-primary mt-2">Update Tip</button>
+    </form>
+</div>
+
+{% block extra_js %}
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+<script type="text/javascript">
+    $(document).ready(function() {
+        // Add tag functionality
+        $('#add-tag').click(function() {
+            var tagInput = $('#id_tags').val().trim();
+            if (tagInput !== '') {
+                // Create new tag item
+                var newTag = $('<span class="badge badge-info mr-2" data-tag="'+tagInput+'">'+tagInput+' <button type="button" class="remove-tag btn btn-sm btn-danger ml-2">Remove</button></span>');
+
+                // Append to the tag list
+                $('#tag-list').append(newTag);
+
+                // Clear the input
+                $('#id_tags').val('');
+            }
+        });
+
+        // Remove tag functionality
+        $(document).on('click', '.remove-tag', function() {
+            $(this).parent().remove();
+        });
+
+        // Handle form submission and pass the added tags
+        $('form').submit(function() {
+            var tags = [];
+            $('#tag-list span').each(function() {
+                tags.push($(this).data('tag'));
+            });
+            // Set the hidden input with the tags to submit the values
+            $('#id_tags').val(tags.join(', '));
+        });
+    });
+</script>
+{% endblock %}
+
+{% endblock %}

@@ -43,24 +43,25 @@ class EditTipView(UpdateView):
     form_class = TipForm
     template_name = 'tips/tip-edit-page.html'
     context_object_name = 'tip'
-    success_url = reverse_lazy('all_tips')  # Redirect to the list of all tips after updating
 
     def get_queryset(self):
         return Tip.objects.filter(author=self.request.user)
 
     def form_valid(self, form):
-        form.instance.author = self.request.user
+        form.instance.author = self.request.user  # Assign the logged-in user as the author
         response = super().form_valid(form)
 
-        # Process tags (from a custom input field)
+        # Process tags from the input field
         tags_input = self.request.POST.get('tags')
         if tags_input:
-            tags = [tag.strip() for tag in tags_input.split(',')]
+            tags = [tag.strip() for tag in tags_input.split(',')]  # Split by commas
             tag_objects = []
             for tag in tags:
                 tag_obj, created = Tag.objects.get_or_create(name=tag)
                 tag_objects.append(tag_obj)
-            form.instance.tags.set(tag_objects)
+            form.instance.tags.set(tag_objects)  # Associate the tags with the tip instance
+        else:
+            form.instance.tags.clear()  # Clear tags if none provided
 
         return response
 

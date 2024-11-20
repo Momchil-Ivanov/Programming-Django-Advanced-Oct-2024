@@ -1,0 +1,61 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Add a New Tip</h2>
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+
+        <!-- Tags Input Section -->
+        <div class="form-group">
+            <label for="tags-input">Tags</label>
+            <input type="text" id="tags-input" class="form-control" placeholder="Type a tag and press 'Add Tag'">
+            <button type="button" id="add-tag-btn" class="btn btn-primary mt-2">Add Tag</button>
+        </div>
+
+        <div class="form-group">
+            <label for="tags-list">Selected Tags</label>
+            <ul id="tags-list" class="list-group">
+                <!-- Tags will appear here -->
+            </ul>
+            <input type="hidden" name="tags" id="tags">
+        </div>
+
+        <button type="submit" class="btn btn-success">Submit</button>
+    </form>
+</div>
+
+{% block extra_js %}
+<script>
+    $(document).ready(function() {
+        // Add Tag Button Click Handler
+        $('#add-tag-btn').click(function() {
+            var tag = $('#tags-input').val().trim();
+            if (tag && !$('#tags-list').find('li:contains("' + tag + '")').length) {
+                // Add tag to the list if it's not already present
+                $('#tags-list').append('<li class="list-group-item d-flex justify-content-between align-items-center">' + tag + 
+                                        '<button type="button" class="btn btn-danger btn-sm remove-tag-btn">Remove</button></li>');
+                $('#tags-input').val('');  // Clear the input field
+                updateTagsInput();  // Update the hidden input with the current tags
+            }
+        });
+
+        // Remove Tag Button Click Handler
+        $(document).on('click', '.remove-tag-btn', function() {
+            $(this).parent().remove();  // Remove the tag from the list
+            updateTagsInput();  // Update the hidden input with the current tags
+        });
+
+        // Update the hidden input with the current list of tags
+        function updateTagsInput() {
+            var tags = [];
+            $('#tags-list li').each(function() {
+                tags.push($(this).text().trim());
+            });
+            $('#tags').val(tags.join(','));  // Set the hidden input value
+        }
+    });
+</script>
+{% endblock %}
+{% endblock %}

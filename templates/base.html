@@ -6,12 +6,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}Excel Tips and Tricks{% endblock %}</title>
-    
+
     <!-- Bootstrap CSS via CDN -->
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
     <!-- Optionally, include a custom CSS file -->
     <link rel="stylesheet" href="{% static 'css/home.css' %}">
-    
+
     {% block extra_head %}{% endblock %}
 </head>
 <body class="d-flex flex-column min-vh-100">
@@ -30,6 +30,9 @@
                 <li class="nav-item">
                     <a class="nav-link btn-excel mx-2 px-4" href="{% url 'view_category' %}">Categories</a>
                 </li>
+                <li class="nav-item">
+                    <a class="nav-link btn-excel mx-2 px-4" href="{% url 'all_tips' %}">Tips</a>
+                </li>
                 {% if user.is_authenticated %}
                     <form action="{% url 'logout' %}" method="POST" style="display: inline;">
                         {% csrf_token %}
@@ -40,6 +43,15 @@
                 {% endif %}
             </ul>
         </nav>
+
+        <!-- Search Bar for Tags -->
+        <div class="container mt-4">
+            <h2>Search Tags</h2>
+            <form method="GET" action="{% url 'search_tags' %}">
+                <input type="text" name="query" placeholder="Search for tags..." class="form-control" />
+                <button type="submit" class="btn btn-primary mt-2">Search</button>
+            </form>
+        </div>
     </header>
 
     {% block content %}{% endblock %}

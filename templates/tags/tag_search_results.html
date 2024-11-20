@@ -1,0 +1,16 @@
+<!-- tags/tag_search_results.html -->
+{% extends 'base.html' %}
+
+{% block content %}
+    <h2>Search Results for "{{ request.GET.query }}"</h2>
+    <ul>
+        {% for tip in tips %}
+            <li>
+                <a href="{% url 'tip_detail' tip.id %}">{{ tip.title }}</a> 
+                - Category: {{ tip.category.name }}
+            </li>
+        {% empty %}
+            <li>No tips found for the search term "{{ request.GET.query }}"</li>
+        {% endfor %}
+    </ul>
+{% endblock %}

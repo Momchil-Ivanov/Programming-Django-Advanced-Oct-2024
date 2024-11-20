@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>{{ tip.title }}</h2>
+    <p>{{ tip.content }}</p>
+    {% if tip.image_url %}
+        <img src="{{ tip.image_url }}" alt="Image for {{ tip.title }}" class="img-fluid">
+    {% endif %}
+    <p><strong>Author:</strong> {{ tip.author.username }}</p>
+    <p><strong>Category:</strong> {{ tip.category.name }}</p>
+    <p><strong>Created At:</strong> {{ tip.created_at|date:"M d, Y" }}</p>
+    <a href="{% url 'edit_tip' tip.pk %}" class="btn btn-warning">Edit</a>
+    <!-- Optionally, add a delete button here -->
+    <form method="post" action="{% url 'delete_tip' tip.pk %}" style="display:inline;">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+    </form>
+</div>
+{% endblock %}
