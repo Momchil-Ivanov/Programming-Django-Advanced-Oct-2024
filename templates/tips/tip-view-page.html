@@ -8,7 +8,14 @@
         <img src="{{ tip.image_url }}" alt="Image for {{ tip.title }}" class="img-fluid">
     {% endif %}
     <p><strong>Author:</strong> {{ tip.author.username }}</p>
-    <p><strong>Category:</strong> {{ tip.category.name }}</p>
+    
+    <!-- Categories: Show multiple categories -->
+    <p><strong>Categories:</strong> 
+        {% for category in tip.categories.all %}
+            {{ category.name }}{% if not forloop.last %}, {% endif %}
+        {% endfor %}
+    </p>
+
     <p><strong>Created At:</strong> {{ tip.created_at|date:"M d, Y" }}</p>
 
     <p><strong>Tags:</strong> 

@@ -1,14 +1,42 @@
+<!-- tags/tag_search_results.html -->
 {% extends 'base.html' %}
 
 {% block content %}
-<div class="container mt-4">
-    <h2>Tag Search Results</h2>
-    <ul>
-        {% for tag in tags %}
-            <li>{{ tag.name }}</li>
-        {% empty %}
-            <p>No tags found.</p>
-        {% endfor %}
-    </ul>
-</div>
+    <div class="container">
+        <h2>Search Results for "{{ query }}"</h2>
+
+        <!-- Tips Section -->
+        <div>
+            <h3>Tips</h3>
+            {% if tips %}
+                <ul>
+                    {% for tip in tips %}
+                        <li>
+                            <a href="{% url 'tip_detail' tip.id %}">{{ tip.name }}</a>
+                            (Tags: {{ tip.tags.all|join:", " }})
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <p>No tips found for "{{ query }}".</p>
+            {% endif %}
+        </div>
+
+        <!-- Categories Section -->
+        <div>
+            <h3>Categories</h3>
+            {% if categories %}
+                <ul>
+                    {% for category in categories %}
+                        <li>
+                            {{ category.name }}
+                            (Tags: {{ category.tags.all|join:", " }})
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <p>No categories found for "{{ query }}".</p>
+            {% endif %}
+        </div>
+    </div>
 {% endblock %}

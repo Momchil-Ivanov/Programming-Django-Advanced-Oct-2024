@@ -21,20 +21,18 @@ class CreateTipView(CreateView):
     success_url = reverse_lazy('all_tips')
 
     def form_valid(self, form):
-        form.instance.author = self.request.user  # Assign the logged-in user as the author
+        form.instance.author = self.request.user
         response = super().form_valid(form)
 
-        # Process tags from the input field
+        # Process tags
         tags_input = self.request.POST.get('tags')
         if tags_input:
-            tags = [tag.strip() for tag in tags_input.split(',')]  # Split by commas
+            tags = [tag.strip() for tag in tags_input.split(',')]
             tag_objects = []
             for tag in tags:
                 tag_obj, created = Tag.objects.get_or_create(name=tag)
                 tag_objects.append(tag_obj)
-            form.instance.tags.set(tag_objects)  # Associate the tags with the tip instance
-        else:
-            form.instance.tags.clear()  # Clear tags if none provided
+            form.instance.tags.set(tag_objects)
 
         return response
 
@@ -43,7 +41,7 @@ class EditTipView(UpdateView):
     form_class = TipForm
     template_name = 'tips/tip-edit-page.html'
     context_object_name = 'tip'
-    success_url = reverse_lazy('all_tips')  # Redirect to the list of all tips after updating
+    success_url = reverse_lazy('all_tips')
 
     def get_queryset(self):
         return Tip.objects.filter(author=self.request.user)
@@ -52,7 +50,7 @@ class EditTipView(UpdateView):
         form.instance.author = self.request.user
         response = super().form_valid(form)
 
-        # Process tags (from a custom input field)
+        # Process tags
         tags_input = self.request.POST.get('tags')
         if tags_input:
             tags = [tag.strip() for tag in tags_input.split(',')]

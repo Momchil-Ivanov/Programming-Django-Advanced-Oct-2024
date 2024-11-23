@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <h1>{{ category.name }}</h1>
+    <p>{{ category.description }}</p>
+    <img src="{{ category.image_url }}" alt="{{ category.name }}">
+
+    <h3>Tips in this Category</h3>
+    <ul>
+        {% for tip in related_tips %}
+            <li>
+                <a href="{% url 'tip_detail' tip.id %}">{{ tip.title }}</a>
+            </li>
+        {% empty %}
+            <li>No tips in this category.</li>
+        {% endfor %}
+    </ul>
+
+    <a href="{% url 'view_category' %}">Back to Categories</a>
+{% endblock %}

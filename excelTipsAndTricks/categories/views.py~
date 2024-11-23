@@ -1,5 +1,5 @@
 from django.shortcuts import get_object_or_404, redirect
-from django.views.generic import ListView, CreateView, UpdateView, DeleteView
+from django.views.generic import ListView, CreateView, UpdateView, DeleteView, DetailView
 from django.urls import reverse_lazy
 from .models import Category
 from .forms import CategoryForm
@@ -43,3 +43,13 @@ class CategoryDeleteView(DeleteView):
     def post(self, request, *args, **kwargs):
         # Add any custom logic here if needed
         return super().post(request, *args, **kwargs)
+
+class CategoryDetailView(DetailView):
+    model = Category
+    template_name = 'categories/category-details-page.html'
+    context_object_name = 'category'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['related_tips'] = self.object.tips.all()
+        return context

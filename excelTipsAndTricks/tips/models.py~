@@ -4,6 +4,7 @@ from django.contrib.auth.models import User
 
 class Tip(models.Model):
     title = models.CharField(
+        unique=True,
         max_length=100,
     )
 
@@ -31,6 +32,12 @@ class Tip(models.Model):
         to='categories.Category',
         on_delete=models.SET_NULL,
         null=True,
+        related_name='tips',
+    )
+
+    categories = models.ManyToManyField(
+        Category,
+        blank=True,
         related_name='tips',
     )
 

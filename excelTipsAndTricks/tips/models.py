@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
+from excelTipsAndTricks.categories.models import Category
 
 
 class Tip(models.Model):
@@ -28,10 +29,9 @@ class Tip(models.Model):
         User, on_delete=models.CASCADE, related_name='tips',
     )
 
-    category = models.ForeignKey(
-        to='categories.Category',
-        on_delete=models.SET_NULL,
-        null=True,
+    categories = models.ManyToManyField(
+        Category,
+        blank=True,
         related_name='tips',
     )
 

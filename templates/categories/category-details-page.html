@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+
+{% block title %}Categories - Excel Tips and Tricks{% endblock %}
+
+{% block content %}
+    <div class="container my-4">
+        <h2>Categories</h2>
+
+        {% if no_categories_message %}
+            <p>{{ no_categories_message }}</p>
+        {% elif categories %}
+            <ul class="list-group">
+                {% for category in categories %}
+                    <li class="list-group-item">
+                        <strong>{{ category.name }}</strong><br>
+                        Description: {{ category.description }}
+                        <div class="d-flex flex-column align-items-start mt-2">
+                            {% if category.image_url %}
+                                <img src="{{ category.image_url }}" alt="{{ category.name }}" class="img-fluid mb-2" width="150">
+                            {% else %}
+                                <p>No image available</p>
+                            {% endif %}
+                            <div class="d-flex">
+                                <a href="{% url 'category_edit' pk=category.pk %}" class="btn btn-warning btn-sm mr-2">Edit</a>
+                                <form action="{% url 'category_delete' pk=category.pk %}" method="POST" style="display: inline;">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+                                </form>
+                            </div>
+                        </div>
+                    </li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+
+        <a href="{% url 'category_create' %}" class="btn btn-success mt-3">Create a New Category</a>
+    </div>
+{% endblock %}

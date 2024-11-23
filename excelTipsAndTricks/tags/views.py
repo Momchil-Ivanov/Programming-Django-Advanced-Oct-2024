@@ -1,7 +1,9 @@
 from django.http import JsonResponse
-from django.views.generic import ListView
+from django.db.models import Q
+from django.views.generic import TemplateView
 from .models import Tag
-from excelTipsAndTricks.tips.models import Tip  # Assuming the Tip model is in the 'tips' app
+from excelTipsAndTricks.tips.models import Tip
+from excelTipsAndTricks.categories.models import Category
 
 # Autocomplete view for tags
 def tag_autocomplete(request):
@@ -11,15 +13,28 @@ def tag_autocomplete(request):
         return JsonResponse(list(tags), safe=False)  # Return tags as a JSON response
     return JsonResponse([], safe=False)  # Return an empty list if no 'term' is provided
 
-# Search view for tags (filtering tips by tags)
-class TagSearchView(ListView):
-    model = Tip  # You want to filter tips by tags, not just tags
+# Search view for tips and categories based on tags
+class TagSearchView(TemplateView):
     template_name = 'tags/tag_search_results.html'
-    context_object_name = 'tips'  # We are displaying tips, not tags
 
-    def get_queryset(self):
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
         query = self.request.GET.get('query', '')  # Get the query parameter 'query'
-        if query:
-            # Filter tips based on the tags' names matching the query (case-insensitive)
-            return Tip.objects.filter(tags__name__icontains=query).distinct()
-        return Tip.objects.none()  # Return no tips if no query is provided
+
+        # Search for tips by title or associated tags
+        tips = Tip.objects.filter(
+            Q(title__icontains=query) |  # Use 'title' instead of 'name'
+            Q(tags__name__icontains=query)  # Search for tags associated with tips
+        ).distinct()
+
+        # Search for categories by name or associated tags
+        categories = Category.objects.filter(
+            Q(name__icontains=query) |  # Search for categories by name
+            Q(tags__name__icontains=query)  # Assuming Category has a ManyToManyField to Tag
+        ).distinct()
+
+        # Pass tips and categories to the context
+        context['tips'] = tips
+        context['categories'] = categories
+        context['query'] = query  # Include the search query for display
+        return context

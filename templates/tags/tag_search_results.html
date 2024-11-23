@@ -1,16 +1,28 @@
-<!-- tags/tag_search_results.html -->
 {% extends 'base.html' %}
 
 {% block content %}
-    <h2>Search Results for "{{ request.GET.query }}"</h2>
-    <ul>
-        {% for tip in tips %}
-            <li>
-                <a href="{% url 'tip_detail' tip.id %}">{{ tip.title }}</a> 
-                - Category: {{ tip.category.name }}
-            </li>
-        {% empty %}
-            <li>No tips found for the search term "{{ request.GET.query }}"</li>
-        {% endfor %}
-    </ul>
+<h2>Search Results for "{{ query }}"</h2>
+
+<h3>Tips</h3>
+<ul>
+    {% for tip in tips %}
+        <li>
+            <a href="{% url 'tip_detail' tip.id %}">{{ tip.title }}</a>
+            - Category: {{ tip.category.name }}
+        </li>
+    {% empty %}
+        <li>No tips found for "{{ query }}"</li>
+    {% endfor %}
+</ul>
+
+<h3>Categories</h3>
+<ul>
+    {% for category in categories %}
+        <li>
+            <a href="{% url 'category_detail' category.id %}">{{ category.name }}</a>
+        </li>
+    {% empty %}
+        <li>No categories found for "{{ query }}"</li>
+    {% endfor %}
+</ul>
 {% endblock %}
