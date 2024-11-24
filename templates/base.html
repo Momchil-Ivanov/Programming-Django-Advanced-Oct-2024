@@ -33,13 +33,20 @@
                 <li class="nav-item">
                     <a class="nav-link btn-excel mx-2 px-4" href="{% url 'all_tips' %}">Tips</a>
                 </li>
+                
                 {% if user.is_authenticated %}
+                    <!-- Profile Link -->
+                    <li class="nav-item">
+                        <a href="{% url 'profile' %}" class="nav-link btn-info mx-2 px-4">Profile</a>
+                    </li>
                     <form action="{% url 'logout' %}" method="POST" style="display: inline;">
                         {% csrf_token %}
                         <button type="submit" class="btn-excel mx-2 px-4">Logout</button>
                     </form>
                 {% else %}
-                    <a href="{% url 'login' %}" class="btn-excel mx-2 px-4">Login</a>
+                    <li class="nav-item">
+                        <a href="{% url 'login' %}" class="nav-link btn-excel mx-2 px-4">Login</a>
+                    </li>
                 {% endif %}
             </ul>
         </nav>

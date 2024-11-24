@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+
+{% block title %}Delete Profile - Excel Tips and Tricks{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2 class="mb-4">Delete Profile</h2>
+
+    <form method="POST" class="needs-validation">
+        {% csrf_token %}
+        
+        <div class="form-group">
+            <label for="id_password">Enter your password to confirm</label>
+            <input type="password" name="password" id="id_password" class="form-control" required>
+        </div>
+
+        <button type="submit" class="btn btn-danger">Delete Profile</button>
+        <a href="{% url 'profile' %}" class="btn btn-secondary ml-3">Cancel</a>
+    </form>
+</div>
+{% endblock %}

@@ -33,16 +33,35 @@
                 <li class="nav-item">
                     <a class="nav-link btn-excel mx-2 px-4" href="{% url 'all_tips' %}">Tips</a>
                 </li>
+                
                 {% if user.is_authenticated %}
+                    <!-- Profile and Change Password Links -->
+                    <li class="nav-item">
+                        <a href="{% url 'profile' %}" class="nav-link btn-info mx-2 px-4">Profile</a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="{% url 'password_change' %}" class="nav-link btn-warning mx-2 px-4">Change Password</a>
+                    </li>
                     <form action="{% url 'logout' %}" method="POST" style="display: inline;">
                         {% csrf_token %}
                         <button type="submit" class="btn-excel mx-2 px-4">Logout</button>
                     </form>
                 {% else %}
-                    <a href="{% url 'login' %}" class="btn-excel mx-2 px-4">Login</a>
+                    <li class="nav-item">
+                        <a href="{% url 'login' %}" class="nav-link btn-excel mx-2 px-4">Login</a>
+                    </li>
                 {% endif %}
             </ul>
         </nav>
+
+        <!-- Search Bar for Tags -->
+        <div class="container mt-4">
+            <h2>Search Tags</h2>
+            <form method="GET" action="{% url 'search_tags' %}">
+                <input type="text" name="query" placeholder="Search for tags..." class="form-control" />
+                <button type="submit" class="btn btn-primary mt-2">Search</button>
+            </form>
+        </div>
     </header>
 
     {% block content %}{% endblock %}

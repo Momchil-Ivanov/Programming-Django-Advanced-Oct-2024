@@ -1,6 +1,7 @@
 from django.contrib import admin
 from .models import UserProfile
 
+
 @admin.register(UserProfile)
 class UserProfileAdmin(admin.ModelAdmin):
     list_display = (
@@ -8,7 +9,7 @@ class UserProfileAdmin(admin.ModelAdmin):
         'bio',
         'website',
         'age',
-        'profile_picture_url',  # Updated field name
+        'profile_picture',
     )
     search_fields = (
         'user__username',
