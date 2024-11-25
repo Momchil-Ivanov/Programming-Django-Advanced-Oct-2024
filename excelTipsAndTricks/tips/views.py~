@@ -5,6 +5,7 @@ from django.views.generic import ListView, CreateView, UpdateView, DetailView, D
 from .models import Tip
 from .forms import TipForm
 from ..tags.models import Tag
+from django.contrib.auth.decorators import login_required
 
 class AllTipsView(ListView):
     model = Tip
@@ -12,7 +13,8 @@ class AllTipsView(ListView):
     context_object_name = 'tips'
 
     def get_queryset(self):
-        return Tip.objects.filter(author=self.request.user)
+        # Fetch all tips regardless of the author for public access
+        return Tip.objects.all()
 
 class CreateTipView(CreateView):
     model = Tip
@@ -21,20 +23,18 @@ class CreateTipView(CreateView):
     success_url = reverse_lazy('all_tips')
 
     def form_valid(self, form):
-        form.instance.author = self.request.user  # Assign the logged-in user as the author
+        form.instance.author = self.request.user
         response = super().form_valid(form)
 
-        # Process tags from the input field
+        # Process tags
         tags_input = self.request.POST.get('tags')
         if tags_input:
-            tags = [tag.strip() for tag in tags_input.split(',')]  # Split by commas
+            tags = [tag.strip() for tag in tags_input.split(',')]
             tag_objects = []
             for tag in tags:
                 tag_obj, created = Tag.objects.get_or_create(name=tag)
                 tag_objects.append(tag_obj)
-            form.instance.tags.set(tag_objects)  # Associate the tags with the tip instance
-        else:
-            form.instance.tags.clear()  # Clear tags if none provided
+            form.instance.tags.set(tag_objects)
 
         return response
 
@@ -70,10 +70,12 @@ class TipDetailView(DetailView):
     context_object_name = 'tip'
 
     def get_object(self, queryset=None):
-        # Ensure the tip is only accessible by the author or admin
+        # Ensure that the tip is accessible to all authenticated users, but only editable or deletable by the author or superuser
         obj = super().get_object(queryset)
         if obj.author != self.request.user and not self.request.user.is_superuser:
-            raise PermissionDenied("You do not have permission to view this tip.")
+            # You can remove the restriction or just return the object for view purpose
+            # raise PermissionDenied("You do not have permission to view this tip.")  # This line can be removed for non-sensitive views
+            pass
         return obj
 
 class TipDeleteView(DeleteView):
@@ -89,3 +91,22 @@ class TipDeleteView(DeleteView):
     def form_valid(self, form):
         # You can perform additional checks before deletion if needed
         return super().form_valid(form)
+
+@login_required
+def like_tip(request, pk):
+    tip = get_object_or_404(Tip, pk=pk)
+    if request.user in tip.dislikes.all():
+        tip.dislikes.remove(request.user)
+    if request.user not in tip.likes.all():
+        tip.likes.add(request.user)
+    return redirect('tip_detail', pk=tip.pk)
+
+@login_required
+def dislike_tip(request, pk):
+    tip = get_object_or_404(Tip, pk=pk)
+    if request.user in tip.likes.all():
+        tip.likes.remove(request.user)
+    if request.user not in tip.dislikes.all():
+        tip.dislikes.add(request.user)
+    return redirect('tip_detail', pk=tip.pk)
+

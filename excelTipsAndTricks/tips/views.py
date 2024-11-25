@@ -5,6 +5,7 @@ from django.views.generic import ListView, CreateView, UpdateView, DetailView, D
 from .models import Tip
 from .forms import TipForm
 from ..tags.models import Tag
+from django.contrib.auth.decorators import login_required
 
 class AllTipsView(ListView):
     model = Tip
@@ -12,7 +13,9 @@ class AllTipsView(ListView):
     context_object_name = 'tips'
 
     def get_queryset(self):
-        return Tip.objects.filter(author=self.request.user)
+        # Fetch all tips for public viewing (no filtering)
+        return Tip.objects.all()
+
 
 class CreateTipView(CreateView):
     model = Tip
@@ -36,6 +39,7 @@ class CreateTipView(CreateView):
 
         return response
 
+
 class EditTipView(UpdateView):
     model = Tip
     form_class = TipForm
@@ -44,6 +48,7 @@ class EditTipView(UpdateView):
     success_url = reverse_lazy('all_tips')
 
     def get_queryset(self):
+        # Only allow authors to edit their own tips
         return Tip.objects.filter(author=self.request.user)
 
     def form_valid(self, form):
@@ -62,28 +67,51 @@ class EditTipView(UpdateView):
 
         return response
 
+
 class TipDetailView(DetailView):
     model = Tip
     template_name = 'tips/tip-view-page.html'
     context_object_name = 'tip'
 
     def get_object(self, queryset=None):
-        # Ensure the tip is only accessible by the author or admin
+        # Allow all authenticated users to view the tip
         obj = super().get_object(queryset)
         if obj.author != self.request.user and not self.request.user.is_superuser:
-            raise PermissionDenied("You do not have permission to view this tip.")
+            # Only the author or superuser can edit/delete, but viewing is open
+            pass
         return obj
+
 
 class TipDeleteView(DeleteView):
     model = Tip
     template_name = 'tips/tip-delete-page.html'
     context_object_name = 'tip'
-    success_url = reverse_lazy('all_tips')  # Redirect to My Tips after deletion
+    success_url = reverse_lazy('all_tips')  # Redirect to All Tips after deletion
 
     def get_queryset(self):
-        # Ensure the tip is only deletable by the author or admin
+        # Ensure only the author or superuser can delete the tip
         return Tip.objects.filter(author=self.request.user)
 
     def form_valid(self, form):
         # You can perform additional checks before deletion if needed
         return super().form_valid(form)
+
+
+@login_required
+def like_tip(request, pk):
+    tip = get_object_or_404(Tip, pk=pk)
+    if request.user in tip.dislikes.all():
+        tip.dislikes.remove(request.user)
+    if request.user not in tip.likes.all():
+        tip.likes.add(request.user)
+    return redirect('tip_detail', pk=tip.pk)
+
+
+@login_required
+def dislike_tip(request, pk):
+    tip = get_object_or_404(Tip, pk=pk)
+    if request.user in tip.likes.all():
+        tip.likes.remove(request.user)
+    if request.user not in tip.dislikes.all():
+        tip.dislikes.add(request.user)
+    return redirect('tip_detail', pk=tip.pk)

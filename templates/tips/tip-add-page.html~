@@ -5,56 +5,73 @@
     <h2>Add a New Tip</h2>
     <form method="post">
         {% csrf_token %}
-        {{ form.as_p }}
-
-        <!-- Tags Input Section -->
+        
+        <!-- Title -->
         <div class="form-group">
-            <label for="tags-input">Tags</label>
-            <input type="text" id="tags-input" class="form-control" placeholder="Type a tag and press 'Add Tag'">
-            <button type="button" id="add-tag-btn" class="btn btn-primary mt-2">Add Tag</button>
+            <label for="id_title">Title</label>
+            <input type="text" id="id_title" name="title" class="form-control" placeholder="Enter title" required />
+        </div>
+        
+        <!-- Content -->
+        <div class="form-group">
+            <label for="id_content">Content</label>
+            <textarea id="id_content" name="content" class="form-control" rows="5" placeholder="Enter tip content" required></textarea>
         </div>
 
+        <!-- Categories -->
         <div class="form-group">
-            <label for="tags-list">Selected Tags</label>
-            <ul id="tags-list" class="list-group">
-                <!-- Tags will appear here -->
-            </ul>
-            <input type="hidden" name="tags" id="tags">
+            <label for="id_categories">Categories</label>
+            {{ form.categories }}
         </div>
 
-        <button type="submit" class="btn btn-success">Submit</button>
+        <!-- Tags -->
+        <div class="form-group">
+            <label for="id_tags">Tags</label>
+            <input type="text" id="id_tags" name="tags" class="form-control" placeholder="Add tags separated by commas" />
+        </div>
+
+        <!-- Tag Management -->
+        <div id="tag-list" class="mt-2">
+            <!-- Tags will be displayed here dynamically -->
+        </div>
+        <div class="mt-2">
+            <button type="button" id="add-tag-btn" class="btn btn-secondary">Add Tag</button>
+        </div>
+
+        <button type="submit" class="btn btn-success mt-3">Submit</button>
     </form>
 </div>
 
 {% block extra_js %}
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
     $(document).ready(function() {
-        // Add Tag Button Click Handler
+        // Handle Add Tag Button Click
         $('#add-tag-btn').click(function() {
-            var tag = $('#tags-input').val().trim();
-            if (tag && !$('#tags-list').find('li:contains("' + tag + '")').length) {
-                // Add tag to the list if it's not already present
-                $('#tags-list').append('<li class="list-group-item d-flex justify-content-between align-items-center">' + tag + 
-                                        '<button type="button" class="btn btn-danger btn-sm remove-tag-btn">Remove</button></li>');
-                $('#tags-input').val('');  // Clear the input field
-                updateTagsInput();  // Update the hidden input with the current tags
+            const tagInput = $('#id_tags');
+            const tagValue = tagInput.val().trim();
+
+            if (tagValue) {
+                $('#tag-list').append(`<span class="badge badge-primary mx-1" data-tag="${tagValue}">
+                    ${tagValue} <button type="button" class="btn-close btn-sm remove-tag" aria-label="Remove"></button>
+                </span>`);
+                tagInput.val('');
             }
         });
 
-        // Remove Tag Button Click Handler
-        $(document).on('click', '.remove-tag-btn', function() {
-            $(this).parent().remove();  // Remove the tag from the list
-            updateTagsInput();  // Update the hidden input with the current tags
+        // Handle Remove Tag Button Click
+        $('#tag-list').on('click', '.remove-tag', function() {
+            $(this).parent().remove();
         });
 
-        // Update the hidden input with the current list of tags
-        function updateTagsInput() {
-            var tags = [];
-            $('#tags-list li').each(function() {
-                tags.push($(this).text().trim());
+        // Collect Tags on Form Submit
+        $('form').submit(function() {
+            const tags = [];
+            $('#tag-list span').each(function() {
+                tags.push($(this).data('tag'));
             });
-            $('#tags').val(tags.join(','));  // Set the hidden input value
-        }
+            $('#id_tags').val(tags.join(', ')); // Set the hidden input with the tags
+        });
     });
 </script>
 {% endblock %}

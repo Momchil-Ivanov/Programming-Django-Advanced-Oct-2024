@@ -35,12 +35,9 @@
                 </li>
                 
                 {% if user.is_authenticated %}
-                    <!-- Profile and Change Password Links -->
+                    <!-- Profile Link -->
                     <li class="nav-item">
                         <a href="{% url 'profile' %}" class="nav-link btn-info mx-2 px-4">Profile</a>
-                    </li>
-                    <li class="nav-item">
-                        <a href="{% url 'password_change' %}" class="nav-link btn-warning mx-2 px-4">Change Password</a>
                     </li>
                     <form action="{% url 'logout' %}" method="POST" style="display: inline;">
                         {% csrf_token %}
