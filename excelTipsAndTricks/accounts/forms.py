@@ -40,33 +40,25 @@ class ProfileUpdateForm(forms.ModelForm):
 
     def clean_email(self):
         email = self.cleaned_data.get('email')
-        # Check if the email is being changed and if it's already in use
         if email:
-            user = self.instance.user  # Get the current user
+            user = self.instance.user
             if User.objects.filter(email=email).exclude(id=user.id).exists():
                 raise forms.ValidationError("This email address is already in use by another account.")
         return email
 
     def save(self, commit=True):
-        # Save the profile data
         user_profile = super().save(commit=False)
-
-        # Update the user's email
         if 'email' in self.cleaned_data:
             user_profile.user.email = self.cleaned_data['email']
             user_profile.user.save()
-
-        # Save the profile
         if commit:
             user_profile.save()
         return user_profile
 
     def clean(self):
         cleaned_data = super().clean()
-        profile_picture = cleaned_data.get('profile_picture')  # This assumes `profile_picture` exists in the model
+        profile_picture = cleaned_data.get('profile_picture')
         profile_picture_url = cleaned_data.get('profile_picture_url')
-
-        # Ensure only one of profile_picture or profile_picture_url is filled
         if profile_picture and profile_picture_url:
             raise forms.ValidationError(
                 "Please provide only one profile picture: either upload an image or provide an external URL."

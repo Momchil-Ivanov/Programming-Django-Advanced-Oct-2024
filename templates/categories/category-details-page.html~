@@ -1,20 +1,37 @@
 {% extends 'base.html' %}
 
+{% block title %}Category: {{ category.name }} - Excel Tips and Tricks{% endblock %}
+
 {% block content %}
-    <h1>{{ category.name }}</h1>
-    <p>{{ category.description }}</p>
-    <img src="{{ category.image_url }}" alt="{{ category.name }}">
+    <div class="container my-4">
+        <h2>{{ category.name }}</h2>
+        <p>{{ category.description }}</p>
+        
+        {% if category.image_url %}
+            <img src="{{ category.image_url }}" alt="{{ category.name }}" class="img-fluid mb-2" width="150">
+        {% else %}
+            <p>No image available</p>
+        {% endif %}
 
-    <h3>Tips in this Category</h3>
-    <ul>
-        {% for tip in related_tips %}
-            <li>
-                <a href="{% url 'tip_detail' tip.id %}">{{ tip.title }}</a>
-            </li>
-        {% empty %}
-            <li>No tips in this category.</li>
-        {% endfor %}
-    </ul>
+        <div class="d-flex flex-column align-items-start mt-2">
+            <a href="{% url 'category_edit' pk=category.pk %}" class="btn btn-warning btn-sm mr-2">Edit</a>
+            <form action="{% url 'category_delete' pk=category.pk %}" method="POST" style="display: inline;">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+            </form>
+        </div>
 
-    <a href="{% url 'view_category' %}">Back to Categories</a>
+        <h4>Tips in this category:</h4>
+        {% if related_tips %}
+            <ul class="list-group mt-3">
+                {% for tip in related_tips %}
+                    <li class="list-group-item">
+                        <a href="{% url 'tip_detail' pk=tip.pk %}">{{ tip.title }}</a>
+                    </li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <p>No tips available for this category yet.</p>
+        {% endif %}
+    </div>
 {% endblock %}

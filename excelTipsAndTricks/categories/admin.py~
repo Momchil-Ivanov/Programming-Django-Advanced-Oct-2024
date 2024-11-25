@@ -9,7 +9,9 @@ class CategoryAdmin(admin.ModelAdmin):
         'description',
     )
 
-    search_fields = ('name',)
+    search_fields = (
+        'name',
+    )
 
     def image_url(self, obj):
         return f'<img src="{obj.image_url}" style="width: 50px; height: 50px;" />'
@@ -23,18 +25,20 @@ class CategoryAdmin(admin.ModelAdmin):
         if request.user.is_staff:
             return queryset
 
-        return queryset  # You can add custom filtering logic if needed for non-staff users.
+        # You can filter based on some condition if needed, e.g., categories the user is associated with.
+        # For example, if categories are related to a user in some way, add that filter here.
+        return queryset  # For now, it returns all categories, adjust as necessary.
 
     def has_change_permission(self, request, obj=None):
         # Allow staff users to change any category
         if request.user.is_staff:
             return True
-        # For normal users, deny edit permissions
+        # For regular users, modify the permission based on your specific requirements
         return False
 
     def has_delete_permission(self, request, obj=None):
         # Allow staff users to delete any category
         if request.user.is_staff:
             return True
-        # For normal users, deny delete permissions
+        # For regular users, modify the permission based on your specific requirements
         return False

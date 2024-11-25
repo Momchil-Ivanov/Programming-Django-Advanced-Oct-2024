@@ -2,42 +2,40 @@ from django.contrib.auth.views import LoginView, PasswordChangeView
 from django.contrib import messages
 from django.shortcuts import redirect
 from django.urls import reverse_lazy
-from django.views.generic.edit import FormView, UpdateView
-from django.views.generic import TemplateView
+from django.views.generic import TemplateView, FormView, UpdateView
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.contrib.auth.models import Group
-from .forms import CustomUserCreationForm, ProfileUpdateForm, CustomPasswordChangeForm
-from django.contrib.auth import authenticate
+from django.contrib.auth import authenticate, login
+from .forms import CustomUserCreationForm, ProfileUpdateForm, CustomPasswordChangeForm, CustomAuthenticationForm  # Import CustomAuthenticationForm
 
 
 # Registration View
 class RegisterView(FormView):
     template_name = 'accounts/register-page.html'
-    form_class = CustomUserCreationForm  # Use custom form
+    form_class = CustomUserCreationForm
     success_url = reverse_lazy('login')
 
     def form_valid(self, form):
-        form.save()
-        messages.success(self.request, "Registration successful. You can now log in.")
+        user = form.save()
+        login(self.request, user)  # Automatically log the user in after registration
+        messages.success(self.request, "Registration successful. You are now logged in.")
         return super().form_valid(form)
 
 
 # Custom Login View
 class CustomLoginView(LoginView):
     template_name = 'accounts/login-page.html'
+    form_class = CustomAuthenticationForm
 
     def form_invalid(self, form):
         messages.error(self.request, "Account or Password are not correct")
         return super().form_invalid(form)
 
     def form_valid(self, form):
-        remember_me = self.request.POST.get('remember_me')  # Get checkbox value
+        remember_me = self.request.POST.get('remember_me')  # Handle "remember me" checkbox
         if not remember_me:
-            # Session will expire when the browser is closed
             self.request.session.set_expiry(0)
         else:
-            # Session will expire in 30 days
-            self.request.session.set_expiry(2592000)
+            self.request.session.set_expiry(2592000)  # 30 days
         return super().form_valid(form)
 
 
@@ -47,7 +45,6 @@ class ProfilePageView(LoginRequiredMixin, TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        # Get the user's profile information
         user_profile = self.request.user.profile
         context['user_profile'] = user_profile
 
@@ -82,6 +79,7 @@ class CustomPasswordChangeView(LoginRequiredMixin, PasswordChangeView):
     success_url = reverse_lazy('password_change_done')
 
 
+# Profile Delete View
 class ProfileDeleteView(LoginRequiredMixin, TemplateView):
     template_name = 'accounts/profile-delete.html'
 
@@ -95,4 +93,4 @@ class ProfileDeleteView(LoginRequiredMixin, TemplateView):
             return redirect('home')
         else:
             messages.error(request, 'Incorrect password. Please try again.')
-            return redirect('profile-delete')  # Redirect back to the delete profile page
+            return redirect('profile-delete')

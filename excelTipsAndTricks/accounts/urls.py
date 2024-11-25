@@ -1,7 +1,6 @@
 from django.urls import path
-from django.contrib.auth.views import LogoutView, PasswordChangeView
+from django.contrib.auth.views import LogoutView
 from django.views.generic import TemplateView
-
 from . import views
 
 urlpatterns = [
@@ -10,7 +9,7 @@ urlpatterns = [
     path('logout/', LogoutView.as_view(next_page='home'), name='logout'),
     path('password-change/', views.CustomPasswordChangeView.as_view(), name='password_change'),
     path('password-change/done/', TemplateView.as_view(template_name='accounts/password-change-done.html'), name='password_change_done'),
-    path('profile/', views.ProfilePageView.as_view(), name='profile'),  # Profile page
-    path('profile/update/', views.ProfileUpdateView.as_view(), name='profile_update'),  # Profile update page
-    path('profile/delete/', views.ProfileDeleteView.as_view(), name='profile_delete'),  # Profile delete page
+    path('profile/', views.ProfilePageView.as_view(), name='profile'),
+    path('profile/update/', views.ProfileUpdateView.as_view(), name='profile_update'),
+    path('profile/delete/', views.ProfileDeleteView.as_view(), name='profile_delete'),
 ]

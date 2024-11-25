@@ -12,17 +12,39 @@
             <ul class="list-group">
                 {% for category in categories %}
                     <li class="list-group-item">
-                        <strong>{{ category.name }}</strong><br>
+                        <!-- Make the category name clickable -->
+                        <a href="{% url 'category_detail' pk=category.pk %}">
+                            <strong>{{ category.name }}</strong>
+                        </a><br>
                         Description: {{ category.description }}
                         <div class="d-flex flex-column align-items-start mt-2">
                             <img src="{{ category.image_url }}" alt="{{ category.name }}" class="img-fluid mb-2" width="150">
-                            <a href="{% url 'category_edit' pk=category.pk %}" class="btn btn-warning btn-sm">Edit</a>
+                            
+                            <!-- Show edit and delete buttons only if the user is an admin or superadmin -->
+                            {% if user.is_authenticated %}
+                                {% if user.is_staff or user.is_superuser %}
+                                    <div class="d-flex">
+                                        <a href="{% url 'category_edit' pk=category.pk %}" class="btn btn-warning btn-sm mr-2">Edit</a>
+                                        
+                                        <!-- Delete button only visible to the category owner, staff, or superuser -->
+                                        <form action="{% url 'category_delete' pk=category.pk %}" method="POST" style="display: inline;">
+                                            {% csrf_token %}
+                                            <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+                                        </form>
+                                    </div>
+                                {% endif %}
+                            {% endif %}
                         </div>
                     </li>
                 {% endfor %}
             </ul>
         {% endif %}
 
-        <a href="{% url 'category_create' %}" class="btn btn-success mt-3">Create a New Category</a>
+        <!-- Show the create button only if the user is an admin or superadmin -->
+        {% if user.is_authenticated %}
+            {% if user.is_staff or user.is_superuser %}
+                <a href="{% url 'category_create' %}" class="btn btn-success mt-3">Create a New Category</a>
+            {% endif %}
+        {% endif %}
     </div>
 {% endblock %}
