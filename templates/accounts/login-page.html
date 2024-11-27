@@ -17,28 +17,29 @@
                 </div>
             {% endif %}
 
-            <form method="POST">
+            <!-- Login Form -->
+            <form method="POST" class="text-center">
                 {% csrf_token %}
+
+                <!-- Username field with placeholder and required attribute -->
                 <div class="form-group">
                     <label for="id_username" class="form-label">Username</label>
-                    {{ form.username }}
-                </div>
-                <div class="form-group">
-                    <label for="id_password" class="form-label">Password</label>
-                    {{ form.password }}
-                </div>
-                
-                <!-- Remember Me Checkbox -->
-                <div class="form-group">
-                    <label for="remember_me">
-                        <input type="checkbox" name="remember_me" id="remember_me"> Remember Me
-                    </label>
+                    {{ form.username }} <!-- Using form widget from Django -->
                 </div>
 
-                <div class="form-group text-center mt-3">
-                    <button type="submit" class="btn btn-excel px-4 py-2">Login</button>
+                <!-- Password field with placeholder and required attribute -->
+                <div class="form-group">
+                    <label for="id_password" class="form-label">Password</label>
+                    {{ form.password }} <!-- Using form widget from Django -->
+                </div>
+
+                <!-- Login Button -->
+                <div class="form-group">
+                    <button type="submit" class="btn-excel mx-2 px-4">Login</button>
                 </div>
             </form>
+
+            <!-- Registration Link -->
             <p class="text-center mt-3">
                 Don't have an account? <a href="{% url 'register' %}" class="text-excel">Register here</a>.
             </p>

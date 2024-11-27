@@ -1,21 +1,19 @@
 {% extends 'base.html' %}
 
-{% load static %}  <!-- Add this line to load the static tag -->
+{% load static %}  <!-- Ensure the static tag is loaded -->
 
 {% block content %}
 <div class="container mt-4">
     <h1>{{ tip.title }}</h1>
 
-    <!-- Check if image_url exists, if not, show a placeholder or hide the image element -->
+    <!-- Check if image_url exists, if not, don't display the image element at all -->
     {% if tip.image_url %}
         <img src="{{ tip.image_url }}" alt="Tip Image" class="img-fluid" />
-    {% else %}
-        <!-- Optional: Display a placeholder image or nothing if no image is provided -->
-        <img src="{% static 'images/placeholder.jpg' %}" alt="No Image Available" class="img-fluid" />
     {% endif %}
 
     <p>{{ tip.content }}</p>
 
+    <!-- Categories Display -->
     <div class="mt-3">
         <strong>Categories:</strong>
         {% for category in tip.categories.all %}
@@ -23,6 +21,7 @@
         {% endfor %}
     </div>
 
+    <!-- Tags Display -->
     <div class="mt-3">
         <strong>Tags:</strong>
         {% for tag in tip.tags.all %}

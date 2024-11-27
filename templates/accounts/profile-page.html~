@@ -1,6 +1,5 @@
-{% extends "base.html" %}
-
-{% block title %}Profile Page | Excel Tips and Tricks{% endblock %}
+{
+{% load static %}
 
 {% block content %}
 <div class="container mt-5">
@@ -9,7 +8,9 @@
     <!-- Profile Picture Section -->
     <div class="mb-4">
         <h3>Profile Picture</h3>
-        {% if user_profile.profile_picture_url %}
+        {% if user_profile.profile_picture %}
+            <img src="{{ user_profile.profile_picture.url }}" alt="Profile Picture" class="img-thumbnail" style="width: 150px; height: auto;">
+        {% elif user_profile.profile_picture_url %}
             <img src="{{ user_profile.profile_picture_url }}" alt="Profile Picture" class="img-thumbnail" style="width: 150px; height: auto;">
         {% else %}
             <img src="{% static 'images/accounts/default_profile_picture.png' %}" alt="Default Profile Picture" class="img-thumbnail" style="width: 150px; height: auto;">

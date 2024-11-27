@@ -1,11 +1,9 @@
 from django.db import models
 from django.contrib.auth.models import User
-from excelTipsAndTricks.tips.models import Tip
-
 
 class Comment(models.Model):
     tip = models.ForeignKey(
-        Tip,
+        'tips.Tip',  # Use app_label.ModelName
         on_delete=models.CASCADE,
         related_name='comments',
     )
@@ -40,13 +38,13 @@ class LikeDislike(models.Model):
     ]
 
     user = models.ForeignKey(
-        to=User,
+        User,
         on_delete=models.CASCADE,
         related_name='like_dislikes',
     )
 
     tip = models.ForeignKey(
-        Tip,
+        'tips.Tip',  # Use app_label.ModelName
         on_delete=models.CASCADE,
         related_name='like_dislikes',
     )
@@ -56,9 +54,7 @@ class LikeDislike(models.Model):
         choices=ACTION_CHOICES,
     )
 
-    created_at = models.DateTimeField(
-        auto_now_add=True,
-    )
+    created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return f"{self.user.username} {self.action}d {self.tip.title}"

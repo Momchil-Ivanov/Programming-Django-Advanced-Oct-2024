@@ -1,7 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User
 from excelTipsAndTricks.categories.models import Category
-
+from excelTipsAndTricks.tags.models import Tag
 
 class Tip(models.Model):
     title = models.CharField(
@@ -35,6 +35,7 @@ class Tip(models.Model):
         related_name='tips',
     )
 
+    # Changed likes and dislikes to represent specific actions and improve consistency
     likes = models.ManyToManyField(
         User,
         related_name='liked_tips',
@@ -48,7 +49,7 @@ class Tip(models.Model):
     )
 
     tags = models.ManyToManyField(
-        'tags.Tag',
+        Tag,
         related_name='tips',
         blank=True,
     )

@@ -1,6 +1,6 @@
+# excelTipsAndTricks/accounts/models.py
 from django.db import models
 from django.contrib.auth.models import User
-
 
 class UserProfile(models.Model):
     user = models.OneToOneField(
@@ -9,14 +9,15 @@ class UserProfile(models.Model):
         related_name='profile',
     )
 
-    email = models.EmailField(
-        unique=True,
-        blank=False,
-    )
-
     bio = models.TextField(
         blank=True,
         null=True,
+    )
+
+    profile_picture = models.ImageField(
+        upload_to='profile_pictures/',  # Change this path as needed
+        blank=True,
+        null=True
     )
 
     profile_picture_url = models.URLField(
@@ -43,4 +44,6 @@ class UserProfile(models.Model):
 
     def get_profile_picture(self):
         # Return the profile picture URL or a placeholder if not provided
+        if self.profile_picture:
+            return self.profile_picture.url
         return self.profile_picture_url or '/static/images/accounts/default_profile_picture.jpg'

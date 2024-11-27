@@ -1,0 +1,39 @@
+/* Apply consistent height and padding to all buttons */
+.nav-link, .btn-excel, .btn-logout {
+    height: 38px; /* Ensure equal height */
+    padding: 0.375rem 0.75rem; /* Padding for uniform button size */
+    display: flex;
+    align-items: center;
+    justify-content: center; /* Ensure center alignment of text and icons */
+    font-size: 1rem;
+    line-height: 1.5;
+}
+
+/* Custom logout button style */
+.btn-logout {
+    background-color: #FF6F00; /* Orange background for warning */
+    color: white;
+    border: none;
+    font-weight: bold;
+}
+
+.btn-logout:hover {
+    background-color: #FF4500; /* Darker orange/red on hover for warning effect */
+    color: white;
+}
+
+.btn-logout i {
+    font-size: 1.2rem; /* Make the icon slightly bigger */
+}
+
+/* Excel green button style for other nav items */
+.nav-link.btn-excel, .btn-excel {
+    background-color: #107C41; /* Excel green background */
+    color: white;
+    border: none;
+}
+
+.nav-link.btn-excel:hover, .btn-excel:hover {
+    background-color: #FFC107; /* Yellow background on hover */
+    color: black; /* Change text to black for contrast when hovering */
+}

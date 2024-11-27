@@ -4,7 +4,7 @@ from django.shortcuts import redirect
 from django.urls import reverse_lazy
 from django.views.generic import TemplateView, FormView, UpdateView
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.contrib.auth import authenticate, login
+from django.contrib.auth import authenticate, login, update_session_auth_hash, logout
 from .forms import CustomUserCreationForm, ProfileUpdateForm, CustomPasswordChangeForm, CustomAuthenticationForm  # Import CustomAuthenticationForm
 
 
@@ -32,12 +32,14 @@ class CustomLoginView(LoginView):
 
     def form_valid(self, form):
         remember_me = self.request.POST.get('remember_me')  # Handle "remember me" checkbox
-        if not remember_me:
-            self.request.session.set_expiry(0)
-        else:
+        if remember_me:
+            # Set session to last longer (30 days)
             self.request.session.set_expiry(2592000)  # 30 days
-        return super().form_valid(form)
+        else:
+            # Otherwise, session expires when browser is closed
+            self.request.session.set_expiry(0)  # Expire on browser close
 
+        return super().form_valid(form)
 
 # Profile Page View
 class ProfilePageView(LoginRequiredMixin, TemplateView):
@@ -66,18 +68,22 @@ class ProfileUpdateView(LoginRequiredMixin, UpdateView):
         return self.request.user.profile
 
     def get_form_kwargs(self):
-        # Pass the current user's email to the form as initial data
         kwargs = super().get_form_kwargs()
         kwargs['initial'] = {'email': self.request.user.email}
         return kwargs
 
 
 # Password Change View
-class CustomPasswordChangeView(LoginRequiredMixin, PasswordChangeView):
+class CustomPasswordChangeView(PasswordChangeView):
     template_name = 'accounts/password-change.html'
     form_class = CustomPasswordChangeForm
     success_url = reverse_lazy('password_change_done')
 
+    def form_valid(self, form):
+        # Log the user out after the password is changed
+        logout(self.request)
+        messages.success(self.request, "Your password has been changed. Please log in again.")
+        return super().form_valid(form)
 
 # Profile Delete View
 class ProfileDeleteView(LoginRequiredMixin, TemplateView):

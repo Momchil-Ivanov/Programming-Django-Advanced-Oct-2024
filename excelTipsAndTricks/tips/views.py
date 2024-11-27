@@ -4,6 +4,7 @@ from django.urls import reverse_lazy
 from django.views.generic import ListView, CreateView, UpdateView, DetailView, DeleteView
 from .models import Tip
 from .forms import TipForm
+from ..common.models import LikeDislike
 from ..tags.models import Tag
 from django.contrib.auth.decorators import login_required
 
@@ -100,18 +101,33 @@ class TipDeleteView(DeleteView):
 @login_required
 def like_tip(request, pk):
     tip = get_object_or_404(Tip, pk=pk)
-    if request.user in tip.dislikes.all():
-        tip.dislikes.remove(request.user)
-    if request.user not in tip.likes.all():
-        tip.likes.add(request.user)
-    return redirect('tip_detail', pk=tip.pk)
 
+    # Check if the user has already liked the tip
+    like_dislike, created = LikeDislike.objects.get_or_create(user=request.user, tip=tip)
+
+    if like_dislike.action == LikeDislike.LIKE:
+        like_dislike.delete()  # Remove like if already liked
+    else:
+        # Remove dislike if present and add like
+        LikeDislike.objects.filter(user=request.user, tip=tip, action=LikeDislike.DISLIKE).delete()
+        like_dislike.action = LikeDislike.LIKE
+        like_dislike.save()
+
+    return redirect('tip_detail', pk=tip.pk)
 
 @login_required
 def dislike_tip(request, pk):
     tip = get_object_or_404(Tip, pk=pk)
-    if request.user in tip.likes.all():
-        tip.likes.remove(request.user)
-    if request.user not in tip.dislikes.all():
-        tip.dislikes.add(request.user)
+
+    # Check if the user has already disliked the tip
+    like_dislike, created = LikeDislike.objects.get_or_create(user=request.user, tip=tip)
+
+    if like_dislike.action == LikeDislike.DISLIKE:
+        like_dislike.delete()  # Remove dislike if already disliked
+    else:
+        # Remove like if present and add dislike
+        LikeDislike.objects.filter(user=request.user, tip=tip, action=LikeDislike.LIKE).delete()
+        like_dislike.action = LikeDislike.DISLIKE
+        like_dislike.save()
+
     return redirect('tip_detail', pk=tip.pk)

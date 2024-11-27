@@ -140,3 +140,10 @@ STATICFILES_DIRS = [
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 LOGIN_REDIRECT_URL = 'home'
 LOGOUT_REDIRECT_URL = 'home'
+# Media files settings
+MEDIA_URL = '/media/'  # URL path to access uploaded files
+MEDIA_ROOT = BASE_DIR / 'media'  # Absolute file system path to the media folder
+# Session settings for "Remember Me" functionality
+SESSION_ENGINE = 'django.contrib.sessions.backends.db'  # Default session engine
+SESSION_COOKIE_AGE = 2592000  # 30 days in seconds (default expiration)
+SESSION_EXPIRE_AT_BROWSER_CLOSE = True  # Keeps the session active after browser close unless explicitly set to expire

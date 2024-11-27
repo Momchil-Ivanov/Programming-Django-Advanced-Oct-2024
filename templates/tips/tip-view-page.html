@@ -1,18 +1,20 @@
+<!-- tip-view-page.html -->
 {% extends 'base.html' %}
 
-{% load static %}  <!-- Ensure the static tag is loaded -->
+{% load static %}
 
 {% block content %}
 <div class="container mt-4">
     <h1>{{ tip.title }}</h1>
 
-    <!-- Check if image_url exists, if not, don't display the image element at all -->
+    <!-- Display image if it exists -->
     {% if tip.image_url %}
         <img src="{{ tip.image_url }}" alt="Tip Image" class="img-fluid" />
     {% endif %}
 
     <p>{{ tip.content }}</p>
 
+    <!-- Display categories -->
     <div class="mt-3">
         <strong>Categories:</strong>
         {% for category in tip.categories.all %}
@@ -20,6 +22,7 @@
         {% endfor %}
     </div>
 
+    <!-- Display tags -->
     <div class="mt-3">
         <strong>Tags:</strong>
         {% for tag in tip.tags.all %}
@@ -27,21 +30,21 @@
         {% endfor %}
     </div>
 
-    <!-- Like and Dislike Buttons with Counts -->
+    <!-- Like and Dislike buttons -->
     <div class="mt-4 d-flex align-items-center">
-        <!-- Like Button Form -->
+        <!-- Like Button -->
         <form action="{% url 'like_tip' tip.id %}" method="post" class="mr-3">
             {% csrf_token %}
-            <button type="submit" class="btn btn-success">
+            <button type="submit" class="btn {% if user in tip.likes.all %}btn-success{% else %}btn-outline-success{% endif %}">
                 <i class="fas fa-thumbs-up"></i> Like
             </button>
         </form>
         <span class="mr-4">{{ tip.total_likes }} Likes</span>
 
-        <!-- Dislike Button Form -->
+        <!-- Dislike Button -->
         <form action="{% url 'dislike_tip' tip.id %}" method="post" class="mr-3">
             {% csrf_token %}
-            <button type="submit" class="btn btn-danger">
+            <button type="submit" class="btn {% if user in tip.dislikes.all %}btn-danger{% else %}btn-outline-danger{% endif %}">
                 <i class="fas fa-thumbs-down"></i> Dislike
             </button>
         </form>

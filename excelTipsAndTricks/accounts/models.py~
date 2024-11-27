@@ -9,11 +9,6 @@ class UserProfile(models.Model):
         related_name='profile',
     )
 
-    email = models.EmailField(
-        unique=False,
-        blank=False,
-    )
-
     bio = models.TextField(
         blank=True,
         null=True,

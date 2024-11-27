@@ -1,4 +1,4 @@
-v{% extends 'base.html' %}
+{% extends 'base.html' %}
 
 {% block title %}Login - Excel Tips and Tricks{% endblock %}
 
@@ -19,26 +19,24 @@ v{% extends 'base.html' %}
 
             <form method="POST">
                 {% csrf_token %}
+                
+                <!-- Username field with placeholder and required attribute -->
                 <div class="form-group">
                     <label for="id_username" class="form-label">Username</label>
-                    {{ form.username }}
-                </div>
-                <div class="form-group">
-                    <label for="id_password" class="form-label">Password</label>
-                    {{ form.password }}
+                    {{ form.username }} <!-- No need to add class here if not using widget_tweaks -->
                 </div>
                 
-                <!-- Remember Me Checkbox -->
+                <!-- Password field with placeholder and required attribute -->
                 <div class="form-group">
-                    <label for="remember_me">
-                        <input type="checkbox" name="remember_me" id="remember_me"> Remember Me
-                    </label>
+                    <label for="id_password" class="form-label">Password</label>
+                    {{ form.password }} <!-- No need to add class here if not using widget_tweaks -->
                 </div>
 
-                <div class="form-group text-center mt-3">
-                    <button type="submit" class="btn btn-excel px-4 py-2">Login</button>
-                </div>
+                <form action="{% url 'login' %}" method="get" style="display: inline;">
+                    <button type="submit" class="btn-excel mx-2 px-4">Login</button>
+                </form>
             </form>
+
             <p class="text-center mt-3">
                 Don't have an account? <a href="{% url 'register' %}" class="text-excel">Register here</a>.
             </p>

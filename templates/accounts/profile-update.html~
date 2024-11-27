@@ -8,7 +8,7 @@
     <h2 class="mb-4">Update Your Profile</h2>
 
     <!-- Profile Update Form -->
-    <form method="POST" class="needs-validation">
+    <form method="POST" enctype="multipart/form-data" class="needs-validation">
         {% csrf_token %}
 
         <!-- Bio -->
@@ -17,9 +17,19 @@
             {{ form.bio|add_class:"form-control" }}
         </div>
 
-        <!-- Profile Picture (External URL) -->
+        <!-- Profile Picture Upload (File Upload) -->
         <div class="form-group">
-            <label for="id_profile_picture_url">Profile Picture URL</label>
+            <label for="id_profile_picture">Profile Picture (Upload Image)</label>
+            {{ form.profile_picture|add_class:"form-control" }}
+            {% if user_profile.profile_picture %}
+                <p>Current Profile Picture:</p>
+                <img src="{{ user_profile.profile_picture.url }}" alt="Profile Picture" class="img-thumbnail mt-2" style="width: 100px; height: auto;">
+            {% endif %}
+        </div>
+
+        <!-- Profile Picture URL (External URL Option) -->
+        <div class="form-group">
+            <label for="id_profile_picture_url">Profile Picture URL (External)</label>
             {{ form.profile_picture_url|add_class:"form-control" }}
             {% if user_profile.profile_picture_url %}
                 <p>Current External Image URL: 
@@ -44,6 +54,16 @@
         <div class="form-group">
             <label for="id_email">Email</label>
             {{ form.email|add_class:"form-control" }}
+            <!-- Display email-specific errors -->
+            {% if form.email.errors %}
+                <div class="alert alert-danger mt-3">
+                    <ul>
+                        {% for error in form.email.errors %}
+                            <li>{{ error }}</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            {% endif %}
         </div>
 
         <!-- Submit and Cancel Buttons -->
