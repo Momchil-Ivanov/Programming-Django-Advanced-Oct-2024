@@ -1,15 +1,13 @@
 from django.contrib import admin
-from .models import Category
-
+from .models import Category  # Import Category model
 
 @admin.register(Category)
 class CategoryAdmin(admin.ModelAdmin):
-    list_display = (
-        'name',
-        'description',
-    )
+    list_display = ('name', 'description',)
+    search_fields = ('name', 'description',)  # You can still search by category name and description
 
-    search_fields = ('name',)
+    # Exclude the 'tags' field completely from the admin form
+    exclude = ('tags',)
 
     def image_url(self, obj):
         return f'<img src="{obj.image_url}" style="width: 50px; height: 50px;" />'
@@ -18,23 +16,16 @@ class CategoryAdmin(admin.ModelAdmin):
 
     def get_queryset(self, request):
         queryset = super().get_queryset(request)
-
-        # If the user is a staff member, they can see all categories
         if request.user.is_staff:
             return queryset
-
-        return queryset  # You can add custom filtering logic if needed for non-staff users.
+        return queryset
 
     def has_change_permission(self, request, obj=None):
-        # Allow staff users to change any category
         if request.user.is_staff:
             return True
-        # For normal users, deny edit permissions
         return False
 
     def has_delete_permission(self, request, obj=None):
-        # Allow staff users to delete any category
         if request.user.is_staff:
             return True
-        # For normal users, deny delete permissions
         return False

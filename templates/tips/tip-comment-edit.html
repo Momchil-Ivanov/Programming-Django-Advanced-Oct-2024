@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+
+{% block title %}Edit Comment{% endblock %}
+
+{% block content %}
+    <div class="container mt-5">
+        <h2>Edit Your Comment</h2>
+
+        <form method="POST">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <button type="submit" class="btn btn-primary">Update Comment</button>
+        </form>
+
+        <a href="{% url 'tip_detail' pk=form.instance.tip.pk %}" class="btn btn-secondary mt-3">Cancel</a>
+    </div>
+{% endblock %}

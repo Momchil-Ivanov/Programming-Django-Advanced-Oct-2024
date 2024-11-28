@@ -36,6 +36,15 @@
             <p>Current Profile Picture:</p>
             <img src="{{ user_profile.profile_picture.url }}" alt="Profile Picture" class="img-thumbnail mt-2" style="width: 100px; height: auto;">
             {% endif %}
+            {% if form.profile_picture.errors %}
+            <div class="alert alert-danger mt-3">
+                <ul>
+                    {% for error in form.profile_picture.errors %}
+                    <li>{{ error }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+            {% endif %}
         </div>
 
         <!-- Profile Picture URL (External URL Option) -->
@@ -45,6 +54,15 @@
             {% if user_profile.profile_picture_url %}
             <p>Current External Image URL:</p>
             <img src="{{ user_profile.profile_picture_url }}" alt="External Profile Picture" class="img-thumbnail mt-2" style="width: 100px; height: auto;">
+            {% endif %}
+            {% if form.profile_picture_url.errors %}
+            <div class="alert alert-danger mt-3">
+                <ul>
+                    {% for error in form.profile_picture_url.errors %}
+                    <li>{{ error }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
             {% endif %}
         </div>
 

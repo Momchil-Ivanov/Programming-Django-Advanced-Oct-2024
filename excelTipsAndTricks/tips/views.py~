@@ -1,21 +1,22 @@
-from django.shortcuts import get_object_or_404, redirect
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse_lazy
 from django.views.decorators.http import require_POST
 from django.views.generic import ListView, CreateView, UpdateView, DetailView, DeleteView
 from .models import Tip
 from .forms import TipForm
 from ..common.forms import CommentForm
+from ..common.models import Comment
 from ..tags.models import Tag
 from django.contrib.auth.decorators import login_required
+from django.contrib import messages
 
-class AllTipsView(ListView):
+class AllTipsView(LoginRequiredMixin, ListView):
     model = Tip
     template_name = 'tips/tip-list-page.html'
     context_object_name = 'tips'
 
-    def get_queryset(self):
-        # Fetch all tips for public viewing (no filtering)
-        return Tip.objects.all()
+    login_url = '/login/'  # Redirect unauthenticated users to login
 
 
 class CreateTipView(CreateView):
@@ -138,3 +139,31 @@ def add_comment(request, pk):
     else:
         messages.error(request, 'Failed to add comment. Please try again.')
     return redirect('tip_detail', pk=pk)
+
+@login_required
+def edit_comment(request, pk):
+    comment = get_object_or_404(Comment, pk=pk)
+    if comment.author == request.user or request.user.is_superuser:
+        if request.method == 'POST':
+            form = CommentForm(request.POST, instance=comment)
+            if form.is_valid():
+                form.save()
+                messages.success(request, 'Your comment has been updated.')
+                return redirect('tip_detail', pk=comment.tip.pk)
+        else:
+            form = CommentForm(instance=comment)
+        return render(request, 'tips/tip-comment-edit.html', {'form': form, 'comment': comment})
+    else:
+        messages.error(request, 'You are not authorized to edit this comment.')
+        return redirect('tip_detail', pk=comment.tip.pk)
+
+
+@login_required
+def delete_comment(request, pk):
+    comment = get_object_or_404(Comment, pk=pk)
+    if comment.author == request.user or request.user.is_superuser:
+        comment.delete()
+        messages.success(request, 'Your comment has been deleted.')
+    else:
+        messages.error(request, 'You are not authorized to delete this comment.')
+    return redirect('tip_detail', pk=comment.tip.pk)

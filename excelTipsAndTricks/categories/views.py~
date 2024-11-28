@@ -1,3 +1,4 @@
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import get_object_or_404, redirect
 from django.views.generic import ListView, CreateView, UpdateView, DeleteView, DetailView
 from django.urls import reverse_lazy
@@ -20,29 +21,29 @@ class CategoryListView(ListView):
 
 
 # Create new category
-class CategoryCreateView(CreateView):
+class CategoryCreateView(LoginRequiredMixin, CreateView):
     model = Category
     form_class = CategoryForm
     template_name = 'categories/category-add-page.html'
     success_url = reverse_lazy('view_category')  # Redirect to the category list page after creation
 
+    # Customize the redirect URL for non-logged-in users
+    login_url = '/login/'  # Redirect to login if not logged in
 
-# Edit an existing category
-class CategoryUpdateView(UpdateView):
+class CategoryUpdateView(LoginRequiredMixin, UpdateView):
     model = Category
     form_class = CategoryForm
     template_name = 'categories/category-edit-page.html'
     success_url = reverse_lazy('view_category')  # Redirect to the category list page after editing
 
+    login_url = '/login/'  # Redirect to login if not logged in
 
-class CategoryDeleteView(DeleteView):
+class CategoryDeleteView(LoginRequiredMixin, DeleteView):
     model = Category
     template_name = 'categories/category-delete-page.html'
     success_url = reverse_lazy('view_category')  # Redirect to the category list page after deletion
 
-    def post(self, request, *args, **kwargs):
-        # Add any custom logic here if needed
-        return super().post(request, *args, **kwargs)
+    login_url = '/login/'  # Redirect to login if not logged in
 
 class CategoryDetailView(DetailView):
     model = Category

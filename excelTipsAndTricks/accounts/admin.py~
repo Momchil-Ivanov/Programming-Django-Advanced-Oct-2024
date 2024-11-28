@@ -1,30 +1,64 @@
 from django.contrib import admin
+from django.contrib.auth.admin import UserAdmin
 from django.contrib.auth.models import User
 from .models import UserProfile
 
-@admin.register(UserProfile)
-class UserProfileAdmin(admin.ModelAdmin):
-    list_display = ('user', 'bio', 'website', 'age', 'profile_picture_url')
-    search_fields = ('user__username', 'bio', 'website')
-    ordering = ('user__username',)  # Order by username
-    list_filter = ('is_approved', 'age')
 
-
-# Custom Admin for User Model (to manage user roles easily)
-@admin.register(User)
-class UserAdmin(admin.ModelAdmin):
+# Customize the default UserAdmin
+class CustomUserAdmin(UserAdmin):
+    # List Display Configuration
     list_display = ('username', 'email', 'is_staff', 'is_superuser')
     list_filter = ('is_staff', 'is_superuser')
     search_fields = ('username', 'email')
 
+    # Custom Actions
     actions = ['make_staff', 'make_superuser']
 
     def make_staff(self, request, queryset):
         queryset.update(is_staff=True)
         self.message_user(request, "Selected users have been made staff.")
+
     make_staff.short_description = "Make selected users staff"
 
     def make_superuser(self, request, queryset):
         queryset.update(is_staff=True, is_superuser=True)
         self.message_user(request, "Selected users have been made superusers.")
+
     make_superuser.short_description = "Make selected users superusers"
+
+    # Fieldsets Customization
+    fieldsets = (
+        (None, {
+            'fields': ('username', 'email', 'password1', 'password2')
+        }),
+        ('Permissions', {
+            'fields': ('is_staff', 'is_superuser', 'groups', 'user_permissions')
+        }),
+        ('Important Dates', {
+            'fields': ('last_login', 'date_joined')
+        }),
+    )
+
+
+# Register the custom UserAdmin (no need to re-register the User model)
+admin.site.unregister(User)
+admin.site.register(User, CustomUserAdmin)
+
+
+# Register UserProfile model separately
+@admin.register(UserProfile)
+class UserProfileAdmin(admin.ModelAdmin):
+    list_display = ('user', 'bio', 'website', 'age', 'profile_picture_url')
+    search_fields = ('user__username', 'bio', 'website')
+    ordering = ('user__username',)
+    list_filter = ('is_approved', 'age')
+
+    # Customizing the fieldsets for UserProfile
+    fieldsets = (
+        (None, {
+            'fields': ('user', 'bio', 'website', 'age', 'profile_picture_url')
+        }),
+        ('Additional Info', {
+            'fields': ('is_approved',)
+        }),
+    )

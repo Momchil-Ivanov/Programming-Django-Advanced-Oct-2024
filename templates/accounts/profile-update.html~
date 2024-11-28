@@ -11,6 +11,17 @@
     <form method="POST" enctype="multipart/form-data" class="needs-validation">
         {% csrf_token %}
 
+        <!-- Display Non-Field-Specific Errors -->
+        {% if form.non_field_errors %}
+        <div class="alert alert-danger">
+            <ul>
+                {% for error in form.non_field_errors %}
+                <li>{{ error }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+        {% endif %}
+
         <!-- Bio -->
         <div class="form-group">
             <label for="id_bio">Bio</label>
@@ -22,8 +33,17 @@
             <label for="id_profile_picture">Profile Picture (Upload Image)</label>
             {{ form.profile_picture|add_class:"form-control" }}
             {% if user_profile.profile_picture %}
-                <p>Current Profile Picture:</p>
-                <img src="{{ user_profile.profile_picture.url }}" alt="Profile Picture" class="img-thumbnail mt-2" style="width: 100px; height: auto;">
+            <p>Current Profile Picture:</p>
+            <img src="{{ user_profile.profile_picture.url }}" alt="Profile Picture" class="img-thumbnail mt-2" style="width: 100px; height: auto;">
+            {% endif %}
+            {% if form.profile_picture.errors %}
+            <div class="alert alert-danger mt-3">
+                <ul>
+                    {% for error in form.profile_picture.errors %}
+                    <li>{{ error }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
             {% endif %}
         </div>
 
@@ -32,11 +52,26 @@
             <label for="id_profile_picture_url">Profile Picture URL (External)</label>
             {{ form.profile_picture_url|add_class:"form-control" }}
             {% if user_profile.profile_picture_url %}
-                <p>Current External Image URL: 
-                    <img src="{{ user_profile.profile_picture_url }}" alt="External Profile Picture" class="img-thumbnail mt-2" style="width: 100px; height: auto;">
-                </p>
+            <p>Current External Image URL:</p>
+            <img src="{{ user_profile.profile_picture_url }}" alt="External Profile Picture" class="img-thumbnail mt-2" style="width: 100px; height: auto;">
+            {% endif %}
+            {% if form.profile_picture_url.errors %}
+            <div class="alert alert-danger mt-3">
+                <ul>
+                    {% for error in form.profile_picture_url.errors %}
+                    <li>{{ error }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
             {% endif %}
         </div>
+
+        <!-- Profile Picture Validation Error -->
+        {% if form.profile_picture.value and form.profile_picture_url.value %}
+        <div class="alert alert-danger mt-3">
+            <p>You cannot upload both a profile picture via file upload and provide a URL at the same time. Please choose one method.</p>
+        </div>
+        {% endif %}
 
         <!-- Website -->
         <div class="form-group">
@@ -54,15 +89,14 @@
         <div class="form-group">
             <label for="id_email">Email</label>
             {{ form.email|add_class:"form-control" }}
-            <!-- Display email-specific errors -->
             {% if form.email.errors %}
-                <div class="alert alert-danger mt-3">
-                    <ul>
-                        {% for error in form.email.errors %}
-                            <li>{{ error }}</li>
-                        {% endfor %}
-                    </ul>
-                </div>
+            <div class="alert alert-danger mt-3">
+                <ul>
+                    {% for error in form.email.errors %}
+                    <li>{{ error }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
             {% endif %}
         </div>
 

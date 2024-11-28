@@ -8,7 +8,7 @@
         <div class="col-md-6">
             <h2 class="text-center mb-4">Login to Your Account</h2>
 
-            <!-- Display error message if authentication fails -->
+            <!-- Display error or success message if present -->
             {% if messages %}
                 <div class="alert alert-danger">
                     {% for message in messages %}
@@ -17,24 +17,20 @@
                 </div>
             {% endif %}
 
-            <form method="POST">
+            <!-- Login Form -->
+            <form method="POST" class="text-center">
                 {% csrf_token %}
-                
-                <!-- Username field with placeholder and required attribute -->
                 <div class="form-group">
                     <label for="id_username" class="form-label">Username</label>
-                    {{ form.username }} <!-- No need to add class here if not using widget_tweaks -->
+                    {{ form.username }} 
                 </div>
-                
-                <!-- Password field with placeholder and required attribute -->
                 <div class="form-group">
                     <label for="id_password" class="form-label">Password</label>
-                    {{ form.password }} <!-- No need to add class here if not using widget_tweaks -->
+                    {{ form.password }} 
                 </div>
-
-                <form action="{% url 'login' %}" method="get" style="display: inline;">
+                <div class="form-group">
                     <button type="submit" class="btn-excel mx-2 px-4">Login</button>
-                </form>
+                </div>
             </form>
 
             <p class="text-center mt-3">

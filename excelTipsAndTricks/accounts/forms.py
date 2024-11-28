@@ -37,7 +37,7 @@ class ProfileUpdateForm(forms.ModelForm):
 
     class Meta:
         model = UserProfile
-        fields = ['bio', 'profile_picture', 'profile_picture_url', 'website', 'age']
+        fields = ['email', 'bio', 'profile_picture', 'profile_picture_url', 'website', 'age']
         widgets = {
             'profile_picture_url': forms.URLInput(attrs={'placeholder': 'Enter URL for profile picture'}),
             'bio': forms.Textarea(attrs={'rows': 4, 'placeholder': 'Tell us about yourself...'}),
@@ -45,13 +45,25 @@ class ProfileUpdateForm(forms.ModelForm):
             'age': forms.NumberInput(attrs={'placeholder': 'Your age'}),
         }
 
-    def clean_email(self):
-        email = self.cleaned_data.get('email')
-        if email:
-            user = self.instance.user
-            if User.objects.filter(email=email).exclude(id=user.id).exists():
-                raise forms.ValidationError("This email address is already in use by another account.")
-        return email
+    def __init__(self, *args, **kwargs):
+        # Ensure the form gets the current user's email address
+        user = kwargs.get('instance').user  # Assuming the UserProfile model has a OneToOne relationship with the User model
+        super().__init__(*args, **kwargs)
+        self.fields['email'].initial = user.email  # Set the initial email value
+
+    def clean(self):
+        cleaned_data = super().clean()
+
+        profile_picture = cleaned_data.get('profile_picture')
+        profile_picture_url = cleaned_data.get('profile_picture_url')
+
+        # Ensure that both fields are not filled simultaneously
+        if profile_picture and profile_picture_url:
+            raise forms.ValidationError(
+                "You cannot upload both a profile picture via file upload and provide a URL at the same time. Please choose one method."
+            )
+
+        return cleaned_data
 
     def save(self, commit=True):
         user_profile = super().save(commit=False)
@@ -61,24 +73,6 @@ class ProfileUpdateForm(forms.ModelForm):
         if commit:
             user_profile.save()
         return user_profile
-
-    def clean(self):
-        cleaned_data = super().clean()
-        profile_picture = cleaned_data.get('profile_picture')
-        profile_picture_url = cleaned_data.get('profile_picture_url')
-
-        if profile_picture and profile_picture_url:
-            raise forms.ValidationError(
-                "Please provide only one profile picture: either upload an image or provide an external URL."
-            )
-
-        if not profile_picture and not profile_picture_url:
-            raise forms.ValidationError(
-                "Please provide at least one profile picture: either upload an image or provide an external URL."
-            )
-
-        return cleaned_data
-
 
 class CustomPasswordChangeForm(PasswordChangeForm):
     new_password1 = forms.CharField(
@@ -102,7 +96,6 @@ class CustomPasswordChangeForm(PasswordChangeForm):
         new_password1 = self.cleaned_data.get('new_password1')
         old_password = self.cleaned_data.get('old_password')
 
-        # Check if new password is the same as the old password
         if new_password1 == old_password:
             raise forms.ValidationError("The new password cannot be the same as the old password.")
         return new_password1
@@ -111,7 +104,6 @@ class CustomPasswordChangeForm(PasswordChangeForm):
         new_password2 = self.cleaned_data.get('new_password2')
         new_password1 = self.cleaned_data.get('new_password1')
 
-        # Check if both new passwords match
         if new_password1 != new_password2:
             raise forms.ValidationError("The two password fields didn’t match.")
         return new_password2

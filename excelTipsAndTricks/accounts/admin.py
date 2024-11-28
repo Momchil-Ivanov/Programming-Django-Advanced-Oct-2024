@@ -3,8 +3,27 @@ from django.contrib.auth.admin import UserAdmin
 from django.contrib.auth.models import User
 from .models import UserProfile
 
-# Customize the default UserAdmin
 class CustomUserAdmin(UserAdmin):
+    # Define the fields for user creation
+    add_fieldsets = (
+        (None, {
+            'fields': ('username', 'email', 'password1', 'password2')
+        }),
+        ('Permissions', {
+            'fields': ('is_staff', 'is_superuser', 'groups', 'user_permissions')
+        }),
+    )
+
+    # Define the fields for editing an existing user
+    fieldsets = (
+        (None, {
+            'fields': ('username', 'email', 'password')
+        }),
+        ('Permissions', {
+            'fields': ('is_staff', 'is_superuser', 'groups', 'user_permissions')
+        }),
+    )
+
     list_display = ('username', 'email', 'is_staff', 'is_superuser')
     list_filter = ('is_staff', 'is_superuser')
     search_fields = ('username', 'email')
@@ -24,7 +43,6 @@ class CustomUserAdmin(UserAdmin):
 # Register the custom UserAdmin (no need to re-register the User model)
 admin.site.unregister(User)
 admin.site.register(User, CustomUserAdmin)
-
 
 # Register UserProfile model separately
 @admin.register(UserProfile)

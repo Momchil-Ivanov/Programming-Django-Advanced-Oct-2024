@@ -41,21 +41,21 @@
     <!-- Like and Dislike buttons -->
     <div class="mt-4 d-flex align-items-center">
         <!-- Like Button -->
-<form action="{% url 'like_tip' tip.id %}" method="post" class="me-3">
-    {% csrf_token %}
-    <button type="submit" class="btn {% if user in tip.likes.all %}btn-success{% else %}btn-outline-success{% endif %}">
-        <i class="fas fa-thumbs-up"></i> Like
-    </button>
-</form>
-<span class="me-4">{{ tip.total_likes }} Likes</span>
-
-<form action="{% url 'dislike_tip' tip.id %}" method="post" class="me-3">
-    {% csrf_token %}
-    <button type="submit" class="btn {% if user in tip.dislikes.all %}btn-danger{% else %}btn-outline-danger{% endif %}">
-        <i class="fas fa-thumbs-down"></i> Dislike
-    </button>
-</form>
-<span>{{ tip.total_dislikes }} Dislikes</span>
+        <form action="{% url 'like_tip' tip.id %}" method="post" class="me-3">
+            {% csrf_token %}
+            <button type="submit" class="btn {% if user in tip.likes.all %}btn-success{% else %}btn-outline-success{% endif %}">
+                <i class="fas fa-thumbs-up"></i> Like
+            </button>
+        </form>
+        <span class="me-4">{{ tip.total_likes }} Likes</span>
+        
+        <form action="{% url 'dislike_tip' tip.id %}" method="post" class="me-3">
+            {% csrf_token %}
+            <button type="submit" class="btn {% if user in tip.dislikes.all %}btn-danger{% else %}btn-outline-danger{% endif %}">
+                <i class="fas fa-thumbs-down"></i> Dislike
+            </button>
+        </form>
+        <span>{{ tip.total_dislikes }} Dislikes</span>
     </div>
 
     <!-- Comments Section -->

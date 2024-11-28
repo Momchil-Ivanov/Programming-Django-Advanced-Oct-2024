@@ -139,7 +139,7 @@ STATICFILES_DIRS = [
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 LOGIN_REDIRECT_URL = 'home'
-LOGOUT_REDIRECT_URL = 'home'
+LOGOUT_REDIRECT_URL = 'logout'
 # Media files settings
 MEDIA_URL = '/media/'  # URL path to access uploaded files
 MEDIA_ROOT = BASE_DIR / 'media'  # Absolute file system path to the media folder

@@ -9,16 +9,15 @@
 
     <!-- Bootstrap CSS via CDN -->
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Font Awesome (6.0.0-beta3) CDN -->
+    <!-- Font Awesome CDN -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
-    <!-- Optionally, include a custom CSS file -->
+    <!-- Custom CSS -->
     <link rel="stylesheet" href="{% static 'css/home.css' %}">
 
     {% block extra_head %}{% endblock %}
 </head>
 <body class="d-flex flex-column min-vh-100">
-
-    <!-- Header and Navigation -->
+    <!-- Header -->
     <header class="bg-success text-white text-center py-4">
         <h1 class="display-4">{% block header_title %}Welcome to Excel Tips and Tricks{% endblock %}</h1>
         <nav>
@@ -29,24 +28,20 @@
                 <li class="nav-item">
                     <a class="nav-link btn-excel mx-2 px-4" href="{% url 'about' %}">About</a>
                 </li>
-                <li class="nav-item">
-                    <a class="nav-link btn-excel mx-2 px-4" href="{% url 'view_category' %}">Categories</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link btn-excel mx-2 px-4" href="{% url 'all_tips' %}">Tips</a>
-                </li>
-                
                 {% if user.is_authenticated %}
-                    <!-- Profile Link -->
+                    <li class="nav-item">
+                        <a class="nav-link btn-excel mx-2 px-4" href="{% url 'view_category' %}">Categories</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link btn-excel mx-2 px-4" href="{% url 'all_tips' %}">Tips</a>
+                    </li>
                     <li class="nav-item">
                         <a href="{% url 'profile' %}" class="nav-link btn-excel mx-2 px-4">Profile</a>
                     </li>
-
-                    <!-- Logout Button Styled with an Orange/Warning Theme -->
                     <li class="nav-item">
                         <form action="{% url 'logout' %}" method="POST" style="display: inline;">
                             {% csrf_token %}
-                            <button type="submit" class="btn-logout mx-2 px-4 text-white" style="height: 38px; padding: 0.375rem 0.75rem; font-size: 1rem; line-height: 1.5; display: flex; align-items: center; justify-content: center;">
+                            <button type="submit" class="btn-logout mx-2 px-4 text-white">
                                 Logout <i class="fas fa-sign-out-alt ml-2"></i>
                             </button>
                         </form>
@@ -58,28 +53,8 @@
                 {% endif %}
             </ul>
         </nav>
-
-        <!-- Search Bar for Tags -->
-        <div class="container mt-4">
-            <h2>Search Tags</h2>
-            <form method="GET" action="{% url 'search_tags' %}">
-                <input type="text" name="query" placeholder="Search for tags..." class="form-control" />
-                <button type="submit" class="btn btn-primary mt-2">Search</button>
-            </form>
-        </div>
     </header>
-
-    <!-- Display Messages, but not on the login page -->
-    {% if messages %}
-        {% if request.path != '/login/' %}
-            <div class="messages">
-                {% for message in messages %}
-                    <p>{{ message }}</p>
-                {% endfor %}
-            </div>
-        {% endif %}
-    {% endif %}
-
+    
     {% block content %}{% endblock %}
 
     <!-- Footer -->
@@ -87,7 +62,7 @@
         <p>&copy; 2024 Excel Tips and Tricks</p>
     </footer>
 
-    <!-- Bootstrap JS and dependencies -->
+    <!-- Bootstrap JS -->
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.3/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>

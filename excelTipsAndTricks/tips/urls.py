@@ -11,4 +11,6 @@ urlpatterns = [
     path('like-tip/<int:pk>/', views.like_tip, name='like_tip'),
     path('dislike-tip/<int:pk>/', views.dislike_tip, name='dislike_tip'),
     path('<int:pk>/add-comment/', add_comment, name='add_comment'),
+    path('comment/edit/<int:pk>/', views.edit_comment, name='edit_comment'),  # Edit comment URL
+    path('comment/delete/<int:pk>/', views.delete_comment, name='delete_comment'),  # Delete comment URL
 ]

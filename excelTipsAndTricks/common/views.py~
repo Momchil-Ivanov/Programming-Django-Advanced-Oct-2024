@@ -1,0 +1,20 @@
+from django.contrib import messages
+from django.shortcuts import render
+from django.views.generic import TemplateView
+
+
+# Class-based view for the Home page
+class HomePageView(TemplateView):
+    template_name = 'common/home.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        # Debugging: Print messages to the console
+        print(messages.get_messages(self.request))
+
+        return context
+
+
+class AboutPageView(TemplateView):
+    template_name = 'common/about.html'
