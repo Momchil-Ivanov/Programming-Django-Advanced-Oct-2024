@@ -69,6 +69,17 @@
         </div>
     </header>
 
+    <!-- Display Messages, but not on the login page -->
+    {% if messages %}
+        {% if request.path != '/login/' %}
+            <div class="messages">
+                {% for message in messages %}
+                    <p>{{ message }}</p>
+                {% endfor %}
+            </div>
+        {% endif %}
+    {% endif %}
+
     {% block content %}{% endblock %}
 
     <!-- Footer -->

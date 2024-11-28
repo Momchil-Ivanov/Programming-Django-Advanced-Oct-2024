@@ -1,5 +1,6 @@
 from django.urls import path
 from . import views
+from .views import add_comment
 
 urlpatterns = [
     path('all-tips/', views.AllTipsView.as_view(), name='all_tips'),
@@ -9,4 +10,5 @@ urlpatterns = [
     path('delete-tip/<int:pk>/', views.TipDeleteView.as_view(), name='delete_tip'),
     path('like-tip/<int:pk>/', views.like_tip, name='like_tip'),
     path('dislike-tip/<int:pk>/', views.dislike_tip, name='dislike_tip'),
+    path('<int:pk>/add-comment/', add_comment, name='add_comment'),
 ]

@@ -42,12 +42,12 @@
                         <a href="{% url 'profile' %}" class="nav-link btn-excel mx-2 px-4">Profile</a>
                     </li>
 
-                    <!-- Logout Button Styled Like the Others -->
+                    <!-- Logout Button Styled with an Orange/Warning Theme -->
                     <li class="nav-item">
                         <form action="{% url 'logout' %}" method="POST" style="display: inline;">
                             {% csrf_token %}
-                            <button type="submit" class="btn-excel mx-2 px-4 text-white" style="height: 38px; padding: 0.375rem 0.75rem; font-size: 1rem; line-height: 1.5; display: flex; align-items: center; justify-content: center;">
-                                Logout
+                            <button type="submit" class="btn-logout mx-2 px-4 text-white" style="height: 38px; padding: 0.375rem 0.75rem; font-size: 1rem; line-height: 1.5; display: flex; align-items: center; justify-content: center;">
+                                Logout <i class="fas fa-sign-out-alt ml-2"></i>
                             </button>
                         </form>
                     </li>

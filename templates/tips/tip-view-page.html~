@@ -1,53 +1,116 @@
+<!-- tip-view-page.html -->
 {% extends 'base.html' %}
 
-{% load static %}  <!-- Ensure the static tag is loaded -->
+{% load static %}
 
 {% block content %}
 <div class="container mt-4">
     <h1>{{ tip.title }}</h1>
 
-    <!-- Check if image_url exists, if not, don't display the image element at all -->
+    <!-- Display image if it exists -->
     {% if tip.image_url %}
-        <img src="{{ tip.image_url }}" alt="Tip Image" class="img-fluid" />
+        <img src="{{ tip.image_url }}" alt="Image related to {{ tip.title }}" class="img-fluid mb-3" />
     {% endif %}
 
     <p>{{ tip.content }}</p>
 
-    <!-- Categories Display -->
+    <!-- Display categories -->
     <div class="mt-3">
         <strong>Categories:</strong>
-        {% for category in tip.categories.all %}
-            <span class="badge badge-primary">{{ category.name }}</span>
-        {% endfor %}
+        {% if tip.categories.exists %}
+            {% for category in tip.categories.all %}
+                <span class="badge bg-primary">{{ category.name }}</span>
+            {% endfor %}
+        {% else %}
+            <p class="text-muted">No categories assigned to this tip.</p>
+        {% endif %}
     </div>
 
-    <!-- Tags Display -->
+    <!-- Display tags -->
     <div class="mt-3">
         <strong>Tags:</strong>
-        {% for tag in tip.tags.all %}
-            <span class="badge badge-secondary">{{ tag.name }}</span>
-        {% endfor %}
+        {% if tip.tags.exists %}
+            {% for tag in tip.tags.all %}
+                <span class="badge bg-secondary">{{ tag.name }}</span>
+            {% endfor %}
+        {% else %}
+            <p class="text-muted">No tags assigned to this tip.</p>
+        {% endif %}
     </div>
 
-    <!-- Like and Dislike Buttons with Counts -->
+    <!-- Like and Dislike buttons -->
     <div class="mt-4 d-flex align-items-center">
-        <!-- Like Button Form -->
-        <form action="{% url 'like_tip' tip.id %}" method="post" class="mr-3">
-            {% csrf_token %}
-            <button type="submit" class="btn btn-success">
-                <i class="fas fa-thumbs-up"></i> Like
-            </button>
-        </form>
-        <span class="mr-4">{{ tip.total_likes }} Likes</span>
+        <!-- Like Button -->
+<form action="{% url 'like_tip' tip.id %}" method="post" class="me-3">
+    {% csrf_token %}
+    <button type="submit" class="btn {% if user in tip.likes.all %}btn-success{% else %}btn-outline-success{% endif %}">
+        <i class="fas fa-thumbs-up"></i> Like
+    </button>
+</form>
+<span class="me-4">{{ tip.total_likes }} Likes</span>
 
-        <!-- Dislike Button Form -->
-        <form action="{% url 'dislike_tip' tip.id %}" method="post" class="mr-3">
-            {% csrf_token %}
-            <button type="submit" class="btn btn-danger">
-                <i class="fas fa-thumbs-down"></i> Dislike
-            </button>
-        </form>
-        <span>{{ tip.total_dislikes }} Dislikes</span>
+<form action="{% url 'dislike_tip' tip.id %}" method="post" class="me-3">
+    {% csrf_token %}
+    <button type="submit" class="btn {% if user in tip.dislikes.all %}btn-danger{% else %}btn-outline-danger{% endif %}">
+        <i class="fas fa-thumbs-down"></i> Dislike
+    </button>
+</form>
+<span>{{ tip.total_dislikes }} Dislikes</span>
+    </div>
+
+    <!-- Comments Section -->
+    <div class="mt-5">
+        <h2>Comments</h2>
+        <div id="comments">
+            {% for comment in comments %}
+                <div class="comment border rounded p-3 mb-3">
+                    <strong>{{ comment.author.username }}</strong>
+                    <p>{{ comment.content }}</p>
+                    <small class="text-muted">Posted on {{ comment.created_at|date:"Y-m-d H:i" }}</small>
+                </div>
+            {% empty %}
+                <p>No comments yet. Be the first to comment!</p>
+            {% endfor %}
+        </div>
+
+        <!-- Pagination for Comments -->
+        {% if comments.has_other_pages %}
+            <nav class="mt-4">
+                <ul class="pagination">
+                    {% if comments.has_previous %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ comments.previous_page_number }}">Previous</a>
+                        </li>
+                    {% endif %}
+                    {% for num in comments.paginator.page_range %}
+                        <li class="page-item {% if comments.number == num %}active{% endif %}">
+                            <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+                        </li>
+                    {% endfor %}
+                    {% if comments.has_next %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ comments.next_page_number }}">Next</a>
+                        </li>
+                    {% endif %}
+                </ul>
+            </nav>
+        {% endif %}
+
+        <!-- Add Comment Form -->
+        {% if user.is_authenticated %}
+            <form method="post" action="{% url 'add_comment' tip.id %}" class="mt-4">
+                {% csrf_token %}
+                <div class="form-group">
+                    {{ comment_form.content.label_tag }}
+                    {{ comment_form.content }}
+                </div>
+                <button type="submit" class="btn btn-primary">Add Comment</button>
+            </form>
+        {% else %}
+            <p class="mt-4">
+                <a href="{% url 'login' %}">Log in</a> to add a comment.
+            </p>
+        {% endif %}
     </div>
 </div>
 {% endblock %}

@@ -1,10 +1,10 @@
-from django.core.exceptions import PermissionDenied
 from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse_lazy
+from django.views.decorators.http import require_POST
 from django.views.generic import ListView, CreateView, UpdateView, DetailView, DeleteView
 from .models import Tip
 from .forms import TipForm
-from ..common.models import LikeDislike
+from ..common.forms import CommentForm
 from ..tags.models import Tag
 from django.contrib.auth.decorators import login_required
 
@@ -74,13 +74,12 @@ class TipDetailView(DetailView):
     template_name = 'tips/tip-view-page.html'
     context_object_name = 'tip'
 
-    def get_object(self, queryset=None):
-        # Allow all authenticated users to view the tip
-        obj = super().get_object(queryset)
-        if obj.author != self.request.user and not self.request.user.is_superuser:
-            # Only the author or superuser can edit/delete, but viewing is open
-            pass
-        return obj
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        tip = self.get_object()
+        context['comments'] = tip.comments.order_by('-created_at')  # Fetch comments for this tip
+        context['comment_form'] = CommentForm()  # Add the comment form to the context
+        return context
 
 
 class TipDeleteView(DeleteView):
@@ -101,26 +100,41 @@ class TipDeleteView(DeleteView):
 @login_required
 def like_tip(request, pk):
     tip = get_object_or_404(Tip, pk=pk)
-    like_dislike, created = LikeDislike.objects.get_or_create(user=request.user, tip=tip)
-    if like_dislike.action == LikeDislike.LIKE:
-        like_dislike.delete()  # Remove like
+    if request.user in tip.dislikes.all():
+        tip.dislikes.remove(request.user)
+    if request.user not in tip.likes.all():
+        tip.likes.add(request.user)
+        messages.success(request, 'You liked this tip.')
     else:
-        # Remove dislike if present and add like
-        LikeDislike.objects.filter(user=request.user, tip=tip, action=LikeDislike.DISLIKE).delete()
-        like_dislike.action = LikeDislike.LIKE
-        like_dislike.save()
-    return redirect('tip_detail', pk=tip.pk)
+        tip.likes.remove(request.user)
+        messages.info(request, 'You removed your like.')
+    return redirect('tip_detail', pk=pk)
 
 
 @login_required
 def dislike_tip(request, pk):
     tip = get_object_or_404(Tip, pk=pk)
-    like_dislike, created = LikeDislike.objects.get_or_create(user=request.user, tip=tip)
-    if like_dislike.action == LikeDislike.DISLIKE:
-        like_dislike.delete()  # Remove dislike
+    if request.user in tip.likes.all():
+        tip.likes.remove(request.user)
+    if request.user not in tip.dislikes.all():
+        tip.dislikes.add(request.user)
+        messages.success(request, 'You disliked this tip.')
     else:
-        # Remove like if present and add dislike
-        LikeDislike.objects.filter(user=request.user, tip=tip, action=LikeDislike.LIKE).delete()
-        like_dislike.action = LikeDislike.DISLIKE
-        like_dislike.save()
-    return redirect('tip_detail', pk=tip.pk)
+        tip.dislikes.remove(request.user)
+        messages.info(request, 'You removed your dislike.')
+    return redirect('tip_detail', pk=pk)
+
+@login_required
+@require_POST
+def add_comment(request, pk):
+    tip = get_object_or_404(Tip, pk=pk)
+    form = CommentForm(request.POST)
+    if form.is_valid():
+        comment = form.save(commit=False)
+        comment.tip = tip
+        comment.author = request.user
+        comment.save()
+        messages.success(request, 'Your comment has been added.')
+    else:
+        messages.error(request, 'Failed to add comment. Please try again.')
+    return redirect('tip_detail', pk=pk)
