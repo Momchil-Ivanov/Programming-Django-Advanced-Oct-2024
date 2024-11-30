@@ -55,6 +55,17 @@
         </nav>
     </header>
     
+    <!-- Display success and error messages -->
+    {% if messages %}
+        <div class="container mt-4 d-flex justify-content-center">
+            <div class="alert alert-info text-center" style="width: 80%;">  <!-- You can adjust the width as needed -->
+                {% for message in messages %}
+                    <p>{{ message }}</p>
+                {% endfor %}
+            </div>
+        </div>
+    {% endif %}
+
     {% block content %}{% endblock %}
 
     <!-- Footer -->

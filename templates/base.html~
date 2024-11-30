@@ -39,12 +39,12 @@
                         <a href="{% url 'profile' %}" class="nav-link btn-excel mx-2 px-4">Profile</a>
                     </li>
                     <li class="nav-item">
-                <form action="{% url 'logout' %}" method="POST" style="display: inline;">
-                    {% csrf_token %}
-                    <button type="submit" class="btn-logout mx-2 px-4 text-white">
-                        Logout <i class="fas fa-sign-out-alt ml-2"></i>
-                    </button>
-                </form>
+                        <form action="{% url 'logout' %}" method="POST" style="display: inline;">
+                            {% csrf_token %}
+                            <button type="submit" class="btn-logout mx-2 px-4 text-white">
+                                Logout <i class="fas fa-sign-out-alt ml-2"></i>
+                            </button>
+                        </form>
                     </li>
                 {% else %}
                     <li class="nav-item">
@@ -55,6 +55,17 @@
         </nav>
     </header>
     
+    <!-- Display success and error messages -->
+{% if messages %}
+    <div class="container mt-4 d-flex justify-content-center">
+        <div class="alert alert-info text-center" style="width: 80%;">  <!-- You can adjust the width as needed -->
+            {% for message in messages %}
+                <p>{{ message }}</p>
+            {% endfor %}
+        </div>
+    </div>
+{% endif %}
+
     {% block content %}{% endblock %}
 
     <!-- Footer -->

@@ -8,15 +8,7 @@
         <div class="col-md-6">
             <h2 class="text-center mb-4">Login to Your Account</h2>
 
-            <!-- Display error or success message if present -->
-            {% if messages %}
-                <div class="alert alert-danger">
-                    {% for message in messages %}
-                        <p>{{ message }}</p>
-                    {% endfor %}
-                </div>
-            {% endif %}
-
+            
             <!-- Login Form -->
             <form method="POST" class="text-center">
                 {% csrf_token %}

@@ -1,8 +1,8 @@
 from django.contrib.auth import login, logout, authenticate
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
+from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth.models import User
-from django.contrib.auth.views import PasswordChangeView, LogoutView
+from django.contrib.auth.views import PasswordChangeView, LoginView
 from django.urls import reverse_lazy
 from django.utils.decorators import method_decorator
 from django.views import View
@@ -47,24 +47,32 @@ class RegisterView(FormView):
 class CustomLoginView(FormView):
     template_name = 'accounts/login-page.html'
     form_class = AuthenticationForm
-    success_url = reverse_lazy('home')  # Ensure this points to the home page
+    success_url = reverse_lazy('home')
 
     def form_valid(self, form):
         user = form.get_user()
         login(self.request, user)
 
-        # Show success message only after login, and redirect to home page
-        messages.success(self.request, 'You are now logged in.')
+        # Add success message and clear used messages
+        if not messages.get_messages(self.request):
+            messages.success(self.request, 'You are now logged in.')
+
+        # Clear used messages to prevent duplicates
+        for message in messages.get_messages(self.request):
+            message.used = True
+
         return super().form_valid(form)
 
     def form_invalid(self, form):
         # Handle invalid form submission (incorrect username/password)
-        messages.error(self.request, 'Invalid username or password.')
-        return super().form_invalid(form)
+        if not messages.get_messages(self.request):
+            messages.error(self.request, 'Invalid username or password.')
 
-    def get_success_url(self):
-        # Redirect to the home page after a successful login
-        return self.success_url
+        # Clear used messages to prevent duplicates
+        for message in messages.get_messages(self.request):
+            message.used = True
+
+        return super().form_invalid(form)
 
 
 class CustomLogoutView(View):

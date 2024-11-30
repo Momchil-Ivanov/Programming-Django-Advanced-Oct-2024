@@ -1,4 +1,5 @@
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.http import HttpResponseForbidden
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse_lazy
 from django.views.decorators.http import require_POST
@@ -125,6 +126,7 @@ def dislike_tip(request, pk):
         messages.info(request, 'You removed your dislike.')
     return redirect('tip_detail', pk=pk)
 
+
 @login_required
 @require_POST
 def add_comment(request, pk):
@@ -138,12 +140,27 @@ def add_comment(request, pk):
         messages.success(request, 'Your comment has been added.')
     else:
         messages.error(request, 'Failed to add comment. Please try again.')
-    return redirect('tip_detail', pk=pk)
+    return redirect('tip_detail', pk=tip.pk)  # Redirecting to the tip page
+
+
+@login_required
+def delete_comment(request, pk):
+    comment = get_object_or_404(Comment, pk=pk)
+    if request.user != comment.author and not request.user.is_superuser and not request.user.is_staff:
+        return HttpResponseForbidden("You are not authorized to delete this comment.")
+
+    tip = comment.tip  # Keep track of the tip before deleting
+    comment.delete()
+    messages.success(request, 'The comment has been deleted.')
+    return redirect('tip_detail', pk=tip.pk)  # Redirect to the tip page
+
 
 @login_required
 def edit_comment(request, pk):
     comment = get_object_or_404(Comment, pk=pk)
-    if comment.author == request.user or request.user.is_superuser:
+
+    # Ensure that the user is the author, superuser, or staff to edit the comment
+    if request.user == comment.author or request.user.is_superuser or request.user.is_staff:
         if request.method == 'POST':
             form = CommentForm(request.POST, instance=comment)
             if form.is_valid():
@@ -152,51 +169,8 @@ def edit_comment(request, pk):
                 return redirect('tip_detail', pk=comment.tip.pk)
         else:
             form = CommentForm(instance=comment)
-        return render(request, 'tips/tip-comment-edit.html', {'form': form, 'comment': comment})
+
+        return render(request, 'tips/tip-comment-edit.html', {'form': form})
     else:
         messages.error(request, 'You are not authorized to edit this comment.')
         return redirect('tip_detail', pk=comment.tip.pk)
-
-
-@login_required
-def delete_comment(request, pk):
-    comment = get_object_or_404(Comment, pk=pk)
-    if comment.author == request.user or request.user.is_superuser:
-        comment.delete()
-        messages.success(request, 'Your comment has been deleted.')
-    else:
-        messages.error(request, 'You are not authorized to delete this comment.')
-    return redirect('tip_detail', pk=comment.tip.pk)
-
-@login_required
-def edit_comment(request, pk):
-    comment = get_object_or_404(Comment, pk=pk)
-
-    # Ensure the user is the author or an admin
-    if request.user != comment.author and not request.user.is_superuser:
-        messages.error(request, "You do not have permission to edit this comment.")
-        return redirect('tip_detail', pk=comment.tip.pk)
-
-    if request.method == 'POST':
-        form = CommentForm(request.POST, instance=comment)
-        if form.is_valid():
-            form.save()
-            messages.success(request, "Your comment has been updated.")
-            return redirect('tip_detail', pk=comment.tip.pk)
-    else:
-        form = CommentForm(instance=comment)
-
-    return render(request, 'tips/tip-comment-edit.html', {'form': form})
-
-@login_required
-def delete_comment(request, pk):
-    comment = get_object_or_404(Comment, pk=pk)
-
-    # Ensure the user is the author or an admin
-    if request.user != comment.author and not request.user.is_superuser:
-        messages.error(request, "You do not have permission to delete this comment.")
-        return redirect('tip_detail', pk=comment.tip.pk)
-
-    comment.delete()
-    messages.success(request, "Your comment has been deleted.")
-    return redirect('tip_detail', pk=comment.tip.pk)
