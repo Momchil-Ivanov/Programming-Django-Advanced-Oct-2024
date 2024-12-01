@@ -1,7 +1,6 @@
 from django import forms
 from .models import Category
 
-
 class CategoryForm(forms.ModelForm):
     class Meta:
         model = Category
@@ -14,5 +13,6 @@ class CategoryForm(forms.ModelForm):
 
         # Check if a category with the same name already exists and it is not the current category
         if Category.objects.filter(name=name).exclude(id=category.id).exists():
-            raise forms.ValidationError("A category with this name already exists.")
+            raise forms.ValidationError("A category with this name already exists. Please choose a different name.")
+
         return name

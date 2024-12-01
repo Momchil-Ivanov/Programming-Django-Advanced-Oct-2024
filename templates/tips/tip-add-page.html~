@@ -2,77 +2,73 @@
 
 {% block content %}
 <div class="container mt-4">
-    <h2>Add a New Tip</h2>
+    <h2>Edit Tip: {{ tip.title }}</h2>
+
+    {% if messages %}
+        <div class="alert-container">
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }}" role="alert">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
     <form method="post">
         {% csrf_token %}
-        
+
         <!-- Title -->
         <div class="form-group">
             <label for="id_title">Title</label>
-            <input type="text" id="id_title" name="title" class="form-control" placeholder="Enter title" required />
+            <input type="text" id="id_title" name="title" class="form-control {% if form.title.errors %}is-invalid{% endif %}" value="{{ tip.title }}" required />
+            {% if form.title.errors %}
+                <div class="invalid-feedback">
+                    {% for error in form.title.errors %}
+                        <p>{{ error }}</p>
+                    {% endfor %}
+                </div>
+            {% endif %}
         </div>
-        
+
         <!-- Content -->
         <div class="form-group">
             <label for="id_content">Content</label>
-            <textarea id="id_content" name="content" class="form-control" rows="5" placeholder="Enter tip content" required></textarea>
+            <textarea id="id_content" name="content" class="form-control {% if form.content.errors %}is-invalid{% endif %}" rows="5" required>{{ form.content.value }}</textarea>
+            {% if form.content.errors %}
+                <div class="invalid-feedback">
+                    {% for error in form.content.errors %}
+                        <p>{{ error }}</p>
+                    {% endfor %}
+                </div>
+            {% endif %}
         </div>
 
         <!-- Categories -->
         <div class="form-group">
             <label for="id_categories">Categories</label>
-            {{ form.categories }}
+            <div>
+                {% for category in categories %}
+                    <label class="mr-2">
+                        <input type="checkbox" name="categories" value="{{ category.id }}" {% if category in form.categories.value %}checked{% endif %} />
+                        {{ category.name }}
+                    </label>
+                {% endfor %}
+            </div>
         </div>
 
-        <!-- Tags -->
         <div class="form-group">
-            <label for="id_tags">Tags</label>
-            <input type="text" id="id_tags" name="tags" class="form-control" placeholder="Add tags separated by commas" />
+            <label for="id_tags">Tags (comma separated)</label>
+            <input type="text" id="id_tags" name="tags" class="form-control {% if form.tags.errors %}is-invalid{% endif %}" value="{{ form.tags.value }}" />
+            {% if form.tags.errors %}
+                <div class="invalid-feedback">
+                    {% for error in form.tags.errors %}
+                        <p>{{ error }}</p>
+                    {% endfor %}
+                </div>
+            {% endif %}
         </div>
 
-        <!-- Tag Management -->
-        <div id="tag-list" class="mt-2">
-            <!-- Tags will be displayed here dynamically -->
-        </div>
-        <div class="mt-2">
-            <button type="button" id="add-tag-btn" class="btn btn-secondary">Add Tag</button>
-        </div>
-
-        <button type="submit" class="btn btn-success mt-3">Submit</button>
+        <button type="submit" class="btn btn-primary">Update Tip</button>
     </form>
 </div>
-
-{% block extra_js %}
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script>
-    $(document).ready(function() {
-        // Handle Add Tag Button Click
-        $('#add-tag-btn').click(function() {
-            const tagInput = $('#id_tags');
-            const tagValue = tagInput.val().trim();
-
-            if (tagValue) {
-                $('#tag-list').append(`<span class="badge badge-primary mx-1" data-tag="${tagValue}">
-                    ${tagValue} <button type="button" class="btn-close btn-sm remove-tag" aria-label="Remove"></button>
-                </span>`);
-                tagInput.val('');
-            }
-        });
-
-        // Handle Remove Tag Button Click
-        $('#tag-list').on('click', '.remove-tag', function() {
-            $(this).parent().remove();
-        });
-
-        // Collect Tags on Form Submit
-        $('form').submit(function() {
-            const tags = [];
-            $('#tag-list span').each(function() {
-                tags.push($(this).data('tag'));
-            });
-            $('#id_tags').val(tags.join(', ')); // Set the hidden input with the tags
-        });
-    });
-</script>
-{% endblock %}
 {% endblock %}

@@ -1,15 +1,40 @@
 {% extends 'base.html' %}
 
-{% block title %}Edit Category - Excel Tips and Tricks{% endblock %}
+{% block title %}Edit Tip - Excel Tips and Tricks{% endblock %}
 
 {% block content %}
     <div class="container my-4">
-        <h2>Edit Category</h2>
+        <h2>Edit Tip</h2>
 
+        <!-- Check for errors in the form -->
+        {% if form.errors %}
+            <div class="alert alert-danger">
+                <strong>Error!</strong> Please fix the errors below.
+                <ul>
+                    {% for field in form %}
+                        {% for error in field.errors %}
+                            <li>{{ error }}</li>
+                        {% endfor %}
+                    {% endfor %}
+                </ul>
+            </div>
+        {% endif %}
+
+        <!-- Form fields -->
         <form method="post">
             {% csrf_token %}
-            {{ form.as_p }}
-            <button type="submit" class="btn btn-primary">Update Category</button>
+            {% for field in form %}
+                <div class="form-group">
+                    <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                    {{ field }}
+                    <div class="invalid-feedback">
+                        {% for error in field.errors %}
+                            <p>{{ error }}</p>
+                        {% endfor %}
+                    </div>
+                </div>
+            {% endfor %}
+            <button type="submit" class="btn btn-primary">Save Changes</button>
         </form>
     </div>
 {% endblock %}

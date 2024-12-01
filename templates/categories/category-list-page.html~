@@ -6,6 +6,13 @@
     <div class="container my-4">
         <h2>Categories</h2>
 
+        <!-- Show the create button only if the user is authenticated and is an admin or superuser -->
+        {% if user.is_authenticated %}
+            {% if user.is_staff or user.is_superuser %}
+                <a href="{% url 'category_create' %}" class="btn btn-success mt-3">Create a New Category</a>
+            {% endif %}
+        {% endif %}
+
         {% if no_categories_message %}
             <p>{{ no_categories_message }}</p>
         {% elif categories %}
@@ -18,16 +25,21 @@
                         </a><br>
                         Description: {{ category.description }}
                         <div class="d-flex flex-column align-items-start mt-2">
-                            <img src="{{ category.image_url }}" alt="{{ category.name }}" class="img-fluid mb-2" width="150">
-                            
-                            <!-- Show edit and delete buttons only if the user is an admin or superadmin -->
+                            {% if category.image_url %}
+                                <img src="{{ category.image_url }}" alt="{{ category.name }}" class="img-fluid mb-2" width="150">
+                            {% else %}
+                                <p>No image available</p>
+                            {% endif %}
+
+                            <!-- Show edit and delete buttons only if the user is authenticated, staff, or superuser -->
                             {% if user.is_authenticated %}
                                 {% if user.is_staff or user.is_superuser %}
-                                    <div class="d-flex">
+                                    <div class="d-flex mt-2">
+                                        <!-- Edit button -->
                                         <a href="{% url 'category_edit' pk=category.pk %}" class="btn btn-warning btn-sm mr-2">Edit</a>
                                         
-                                        <!-- Delete button only visible to the category owner, staff, or superuser -->
-                                        <form action="{% url 'category_delete' pk=category.pk %}" method="POST" style="display: inline;">
+                                        <!-- Delete button -->
+                                        <form action="{% url 'category_delete' pk=category.pk %}" method="GET" style="display: inline;">
                                             {% csrf_token %}
                                             <button type="submit" class="btn btn-danger btn-sm">Delete</button>
                                         </form>
@@ -38,13 +50,26 @@
                     </li>
                 {% endfor %}
             </ul>
-        {% endif %}
 
-        <!-- Show the create button only if the user is an admin or superadmin -->
-        {% if user.is_authenticated %}
-            {% if user.is_staff or user.is_superuser %}
-                <a href="{% url 'category_create' %}" class="btn btn-success mt-3">Create a New Category</a>
-            {% endif %}
+            <!-- Pagination controls -->
+            <div class="pagination mt-3">
+                <nav>
+                    <ul class="pagination">
+                        {% for page_num in custom_page_range %}
+                            {% if page_num == page_obj.number %}
+                                <!-- Current page: highlighted and unclickable -->
+                                <li class="page-item active" aria-current="page">
+                                    <span class="page-link">{{ page_num }}</span>
+                                </li>
+                            {% else %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ page_num }}">{{ page_num }}</a>
+                                </li>
+                            {% endif %}
+                        {% endfor %}
+                    </ul>
+                </nav>
+            </div>
         {% endif %}
     </div>
 {% endblock %}

@@ -6,6 +6,13 @@
     <div class="container my-4">
         <h2>Categories</h2>
 
+        <!-- Show the create button only if the user is authenticated and is an admin or superuser -->
+        {% if user.is_authenticated %}
+            {% if user.is_staff or user.is_superuser %}
+                <a href="{% url 'category_create' %}" class="btn btn-success mt-3">Create a New Category</a>
+            {% endif %}
+        {% endif %}
+
         {% if no_categories_message %}
             <p>{{ no_categories_message }}</p>
         {% elif categories %}
@@ -32,7 +39,7 @@
                                         <a href="{% url 'category_edit' pk=category.pk %}" class="btn btn-warning btn-sm mr-2">Edit</a>
                                         
                                         <!-- Delete button -->
-                                        <form action="{% url 'category_delete' pk=category.pk %}" method="POST" style="display: inline;">
+                                        <form action="{% url 'category_delete' pk=category.pk %}" method="GET" style="display: inline;">
                                             {% csrf_token %}
                                             <button type="submit" class="btn btn-danger btn-sm">Delete</button>
                                         </form>
@@ -43,13 +50,54 @@
                     </li>
                 {% endfor %}
             </ul>
-        {% endif %}
 
-        <!-- Show the create button only if the user is authenticated and is an admin or superuser -->
-        {% if user.is_authenticated %}
-            {% if user.is_staff or user.is_superuser %}
-                <a href="{% url 'category_create' %}" class="btn btn-success mt-3">Create a New Category</a>
-            {% endif %}
+            <!-- Pagination controls -->
+            <div class="pagination mt-3">
+                <nav>
+                    <ul class="pagination">
+                        <!-- First and Previous links -->
+                        {% if page_obj.has_previous %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page=1" aria-label="First">
+                                    <span aria-hidden="true">&laquo;&laquo;</span> First
+                                </a>
+                            </li>
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ page_obj.previous_page_number }}" aria-label="Previous">
+                                    <span aria-hidden="true">&laquo;</span> Previous
+                                </a>
+                            </li>
+                        {% endif %}
+
+                        <!-- Custom page range links -->
+                        {% for page_num in custom_page_range %}
+                            {% if page_num == page_obj.number %}
+                                <li class="page-item active" aria-current="page">
+                                    <span class="page-link">{{ page_num }}</span>
+                                </li>
+                            {% else %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ page_num }}">{{ page_num }}</a>
+                                </li>
+                            {% endif %}
+                        {% endfor %}
+
+                        <!-- Next and Last links -->
+                        {% if page_obj.has_next %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ page_obj.next_page_number }}" aria-label="Next">
+                                    Next <span aria-hidden="true">&raquo;</span>
+                                </a>
+                            </li>
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}" aria-label="Last">
+                                    Last <span aria-hidden="true">&raquo;&raquo;</span>
+                                </a>
+                            </li>
+                        {% endif %}
+                    </ul>
+                </nav>
+            </div>
         {% endif %}
     </div>
 {% endblock %}

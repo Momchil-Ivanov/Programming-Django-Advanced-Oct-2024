@@ -16,8 +16,20 @@ class AllTipsView(LoginRequiredMixin, ListView):
     model = Tip
     template_name = 'tips/tip-list-page.html'
     context_object_name = 'tips'
+    paginate_by = 5  # Show 5 tips per page
 
     login_url = '/login/'  # Redirect unauthenticated users to login
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        page_obj = context['page_obj']
+
+        # Adjust indices to show 5 pages before and after
+        start_index = max(1, page_obj.number - 5)  # At least 5 pages before the current page
+        end_index = min(page_obj.paginator.num_pages + 1, page_obj.number + 6)
+
+        context['custom_page_range'] = range(start_index, end_index)
+        return context
 
 
 class CreateTipView(CreateView):
@@ -86,17 +98,21 @@ class TipDetailView(DetailView):
 
 class TipDeleteView(DeleteView):
     model = Tip
-    template_name = 'tips/tip-delete-page.html'
+    template_name = 'tips/tip-delete-page.html'  # The confirmation page template
     context_object_name = 'tip'
-    success_url = reverse_lazy('all_tips')  # Redirect to All Tips after deletion
+    success_url = reverse_lazy('all_tips')  # Redirect after deletion
 
     def get_queryset(self):
-        # Ensure only the author or superuser can delete the tip
+        # Ensures only the tip's author can delete the tip
         return Tip.objects.filter(author=self.request.user)
 
-    def form_valid(self, form):
-        # You can perform additional checks before deletion if needed
-        return super().form_valid(form)
+    def get(self, request, *args, **kwargs):
+        # When GET request is made, show the confirmation page
+        return super().get(request, *args, **kwargs)
+
+    def post(self, request, *args, **kwargs):
+        # Handle the deletion when the user confirms it (POST)
+        return super().post(request, *args, **kwargs)
 
 
 @login_required
@@ -140,7 +156,7 @@ def add_comment(request, pk):
         messages.success(request, 'Your comment has been added.')
     else:
         messages.error(request, 'Failed to add comment. Please try again.')
-    return redirect('tip-view-page', pk=tip.pk)  # Redirecting to the tip page
+    return redirect('tip_detail', pk=tip.pk)  # Redirecting to the tip page
 
 
 @login_required
@@ -152,7 +168,7 @@ def delete_comment(request, pk):
     tip = comment.tip  # Keep track of the tip before deleting
     comment.delete()
     messages.success(request, 'The comment has been deleted.')
-    return redirect('tip-view-page', pk=tip.pk)  # Redirect to the tip page
+    return redirect('tip_detail', pk=tip.pk)  # Redirect to the tip page
 
 
 @login_required
