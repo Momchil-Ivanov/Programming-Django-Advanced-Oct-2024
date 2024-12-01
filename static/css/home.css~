@@ -2,11 +2,14 @@
 .nav-link, .btn-excel, .btn-logout {
     height: 38px; /* Ensure equal height */
     padding: 0.375rem 0.75rem; /* Padding for uniform button size */
-    display: flex;
-    align-items: center;
-    justify-content: center; /* Ensure center alignment of text and icons */
     font-size: 1rem;
     line-height: 1.5;
+}
+
+/* Custom button style for buttons inside forms (login form) */
+form .btn-excel {
+    display: inline-block; /* Removes flexbox behavior */
+    text-align: center; /* Ensures the text is centered */
 }
 
 /* Custom logout button style */
@@ -37,3 +40,4 @@
     background-color: #FFC107; /* Yellow background on hover */
     color: black; /* Change text to black for contrast when hovering */
 }
+

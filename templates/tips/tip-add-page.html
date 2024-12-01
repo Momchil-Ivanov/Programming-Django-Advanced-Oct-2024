@@ -1,18 +1,11 @@
 {% extends 'base.html' %}
+{% load static %}
 
 {% block content %}
+<link rel="stylesheet" href="{% static 'css/styles.css' %}">
+
 <div class="container mt-4">
     <h2>Add a New Tip</h2>
-
-    {% if messages %}
-        <div class="alert-container">
-            {% for message in messages %}
-                <div class="alert alert-{{ message.tags }}" role="alert">
-                    {{ message }}
-                </div>
-            {% endfor %}
-        </div>
-    {% endif %}
 
     <form method="post">
         {% csrf_token %}
@@ -56,10 +49,12 @@
             {% endif %}
         </div>
 
-        <!-- Categories -->
+        <!-- Categories (Dynamic selection) -->
         <div class="form-group">
             <label for="id_categories">Categories</label>
-            {{ form.categories }}
+            <select id="id_categories" name="categories" class="form-control select2-multiple" multiple="multiple">
+                <!-- Categories will be dynamically loaded and displayed here -->
+            </select>
             {% if form.categories.errors %}
                 <div class="invalid-feedback">
                     {% for error in form.categories.errors %}
@@ -90,32 +85,38 @@
 
 {% block extra_js %}
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/select2@4.0.13/dist/js/select2.min.js"></script>
 
 <script>
     $(document).ready(function() {
-        // Handle Add Tag Button Click
-        $('#add-tag-btn').click(function() {
-            const tagInput = $('#id_tags');
-            const tagValue = tagInput.val().trim();
-
-            if (tagValue) {
-                $('#tag-list').append(`<span class="badge badge-primary mx-1" data-tag="${tagValue}">${tagValue} <button type="button" class="btn-close btn-sm remove-tag" aria-label="Remove"></button></span>`);
-                tagInput.val('');
+        // Initialize Select2 with AJAX for dynamic category search
+        $('#id_categories').select2({
+            placeholder: 'Search for categories',
+            minimumInputLength: 1,  // Trigger search after typing 1 character
+            ajax: {
+                url: '{% url "category_search" %}',  // Django view URL for category search
+                dataType: 'json',
+                delay: 250,  // Wait 250ms after typing before sending request
+                processResults: function(data) {
+                    return {
+                        results: data.categories.map(function(category) {
+                            return {
+                                id: category.id,  // The ID for selection
+                                text: category.name  // The name that will be displayed
+                            };
+                        })
+                    };
+                }
             }
         });
 
-        // Handle Remove Tag Button Click
-        $('#tag-list').on('click', '.remove-tag', function() {
-            $(this).parent().remove();
-        });
-
-        // Collect Tags on Form Submit
+        // Collect selected categories before form submission
         $('form').submit(function() {
-            const tags = [];
-            $('#tag-list span').each(function() {
-                tags.push($(this).data('tag'));
+            const selectedCategories = [];
+            $('#id_categories').val().forEach(function(categoryId) {
+                selectedCategories.push(categoryId);
             });
-            $('#id_tags').val(tags.join(', ')); // Set the hidden input with the tags
+            $('#id_categories').val(selectedCategories).trigger('change');  // Update the hidden categories field
         });
     });
 </script>

@@ -80,14 +80,16 @@ class CategoryDeleteView(LoginRequiredMixin, DeleteView):
     success_url = reverse_lazy('view_category')
 
     def get_object(self, queryset=None):
+        # Ensure we are deleting the correct category
         return get_object_or_404(Category, pk=self.kwargs['pk'])
 
     def get(self, request, *args, **kwargs):
-        # Show the confirmation page
+        # This should show the confirmation page before performing the delete
         category = self.get_object()
         return self.render_to_response({'object': category})
 
     def post(self, request, *args, **kwargs):
+        # Perform the deletion after confirmation
         category = self.get_object()
         messages.success(self.request, f'Category "{category.name}" has been successfully deleted.')
         return super().post(request, *args, **kwargs)

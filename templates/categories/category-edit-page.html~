@@ -4,34 +4,29 @@
 
 {% block content %}
     <div class="container my-4">
-        <h2>Edit Tip</h2>
-
-        <!-- Check for errors in the form -->
-        {% if form.errors %}
-            <div class="alert alert-danger">
-                <strong>Error!</strong> Please fix the errors below.
-                <ul>
-                    {% for field in form %}
-                        {% for error in field.errors %}
-                            <li>{{ error }}</li>
-                        {% endfor %}
-                    {% endfor %}
-                </ul>
-            </div>
-        {% endif %}
-
+        <h2>Edit Category</h2>
         <!-- Form fields -->
         <form method="post">
             {% csrf_token %}
             {% for field in form %}
                 <div class="form-group">
                     <label for="{{ field.id_for_label }}">{{ field.label }}</label>
-                    {{ field }}
-                    <div class="invalid-feedback">
-                        {% for error in field.errors %}
-                            <p>{{ error }}</p>
-                        {% endfor %}
-                    </div>
+                    {% if field.name == 'description' %}
+                        <!-- For description, use a textarea with a larger size -->
+                        <textarea name="{{ field.name }}" id="{{ field.id_for_label }}"
+                                  class="form-control {% if field.errors %}is-invalid{% endif %}" rows="4">{{ field.value|default:'' }}</textarea>
+                    {% else %}
+                        <!-- For other fields, manually add form-control class -->
+                        <input type="{{ field.type }}" name="{{ field.name }}" id="{{ field.id_for_label }}"
+                               class="form-control {% if field.errors %}is-invalid{% endif %}" value="{{ field.value|default:'' }}">
+                    {% endif %}
+                    {% if field.errors %}
+                        <div class="invalid-feedback">
+                            {% for error in field.errors %}
+                                <p>{{ error }}</p>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
                 </div>
             {% endfor %}
             <button type="submit" class="btn btn-primary">Save Changes</button>

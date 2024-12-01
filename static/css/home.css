@@ -40,3 +40,14 @@ form .btn-excel {
     background-color: #FFC107; /* Yellow background on hover */
     color: black; /* Change text to black for contrast when hovering */
 }
+
+/* Custom green outline for the search input field */
+.green-outline {
+    border: 2px solid #28a745;  /* Green border */
+    border-radius: 4px;          /* Rounded corners */
+}
+
+.green-outline:focus {
+    border-color: #218838;       /* Darker green when focused */
+    box-shadow: 0 0 0 0.2rem rgba(40, 167, 69, 0.25); /* Optional focus shadow */
+}

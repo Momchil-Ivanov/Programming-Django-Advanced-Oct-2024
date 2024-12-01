@@ -1,11 +1,12 @@
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.http import HttpResponseForbidden
+from django.http import HttpResponseForbidden, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse_lazy
 from django.views.decorators.http import require_POST
 from django.views.generic import ListView, CreateView, UpdateView, DetailView, DeleteView
 from .models import Tip
 from .forms import TipForm
+from ..categories.models import Category
 from ..common.forms import CommentForm
 from ..common.models import Comment
 from ..tags.models import Tag
@@ -19,6 +20,10 @@ class AllTipsView(LoginRequiredMixin, ListView):
     paginate_by = 5  # Show 5 tips per page
 
     login_url = '/login/'  # Redirect unauthenticated users to login
+
+    def get_queryset(self):
+        # Sort the tips alphabetically by title
+        return Tip.objects.all().order_by('title')
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -39,8 +44,8 @@ class CreateTipView(CreateView):
     success_url = reverse_lazy('all_tips')
 
     def form_valid(self, form):
-        form.instance.author = self.request.user
-        response = super().form_valid(form)
+        form.instance.author = self.request.user  # Assign the current user as the author
+        response = super().form_valid(form)  # Call the parent form_valid method to save the tip
 
         # Process tags
         tags_input = self.request.POST.get('tags')
@@ -54,6 +59,13 @@ class CreateTipView(CreateView):
 
         return response
 
+    def form_invalid(self, form):
+
+        # Display the error message to the user
+        messages.error(self.request, "There was an error with your form submission. Please fix the issues.")
+
+        # Return the response with the form
+        return self.render_to_response({'form': form})
 
 class EditTipView(UpdateView):
     model = Tip
@@ -82,6 +94,11 @@ class EditTipView(UpdateView):
 
         return response
 
+    def form_invalid(self, form):
+        # Add custom error message when the form is invalid
+        messages.error(self.request, "There was an error with your form submission. Please fix the issues.")
+        # Ensure that the form's current data, including the incorrect title, is passed back
+        return self.render_to_response(self.get_context_data(form=form))
 
 class TipDetailView(DetailView):
     model = Tip
@@ -190,3 +207,11 @@ def edit_comment(request, pk):
     else:
         messages.error(request, 'You are not authorized to edit this comment.')
         return redirect('tip_detail', pk=comment.tip.pk)
+
+def category_search(request):
+    if 'q' in request.GET:
+        query = request.GET.get('q')
+        categories = Category.objects.filter(name__icontains=query)
+        results = [{"id": category.id, "name": category.name} for category in categories]
+        return JsonResponse({'categories': results})
+    return JsonResponse({'categories': []})

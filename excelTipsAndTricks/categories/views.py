@@ -51,7 +51,6 @@ class CategoryCreateView(LoginRequiredMixin, CreateView):
 
     def form_invalid(self, form):
         # Add debug print to log errors
-        print(form.errors)  # Debugging step to see form errors in the console
         messages.error(self.request, "There was an error with your form submission. Please fix the issues.")
         return self.render_to_response({'form': form})
 
@@ -67,7 +66,6 @@ class CategoryUpdateView(LoginRequiredMixin, UpdateView):
 
     def form_invalid(self, form):
         # Add debug print to log errors
-        print(form.errors)  # Debugging step to see form errors in the console
         messages.error(self.request, "There was an error with your form submission. Please fix the issues.")
         return self.render_to_response({'form': form})
 

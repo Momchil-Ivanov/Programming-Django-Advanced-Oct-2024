@@ -1,0 +1,34 @@
+/* Ensure Select2 field width remains consistent */
+#id_categories {
+    width: 100% !important; /* Force the width to be 100% of its container */
+}
+
+/* Adjust the input field inside Select2 to not shrink */
+.select2-container--default .select2-search--inline .select2-search__field {
+    width: 100% !important; /* Ensure the search field stretches to 100% width */
+}
+
+/* Make the clickable category options bigger and ensure the whole line is clickable */
+.select2-results__option {
+    padding: 12px 20px !important; /* Increase the padding for better clickability */
+    cursor: pointer;  /* Ensure the cursor indicates that the entire line is clickable */
+    width: 100% !important; /* Make each category option fill the width */
+    border: 2px solid green !important; /* Add green border by default */
+    background-color: #f9f9f9; /* Optional: set a neutral background color */
+}
+
+/* Add a green outline for the clickable category options on hover or focus */
+.select2-results__option:hover, .select2-results__option:focus {
+    background-color: #e1f7d5 !important; /* Optional: Highlight on hover */
+    border: 2px solid green !important; /* Maintain the green border on hover/focus */
+}
+
+/* Adjust width for the category names to make them more clickable */
+.select2-results__option {
+    width: 100% !important; /* Make each category option fill the width */
+}
+
+/* Move the "Tags" text lower */
+.form-group label[for="id_tags"] {
+    margin-top: 20px; /* Adjust this value based on your layout needs */
+}
