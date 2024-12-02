@@ -13,14 +13,21 @@
     padding: 12px 20px !important; /* Increase the padding for better clickability */
     cursor: pointer;  /* Ensure the cursor indicates that the entire line is clickable */
     width: 100% !important; /* Make each category option fill the width */
-    border: 2px solid green !important; /* Add green border by default */
+    border: 2px solid #888 !important; /* Gray border by default */
     background-color: #f9f9f9; /* Optional: set a neutral background color */
 }
 
-/* Add a green outline for the clickable category options on hover or focus */
+/* Add a bold highlight for the clickable category options on hover or focus */
 .select2-results__option:hover, .select2-results__option:focus {
-    background-color: #e1f7d5 !important; /* Optional: Highlight on hover */
-    border: 2px solid green !important; /* Maintain the green border on hover/focus */
+    background-color: #66bb6a !important; /* Darker green for hover/focus */
+    border: 2px solid #388e3c !important; /* Dark green border on hover/focus */
+}
+
+/* Make the selected option’s background more visible */
+.select2-results__option[aria-selected="true"] {
+    background-color: #388e3c !important; /* Dark green for selected category */
+    color: white !important; /* White text for selected item */
+    border: 2px solid #388e3c !important; /* Dark green border for selected item */
 }
 
 /* Adjust width for the category names to make them more clickable */

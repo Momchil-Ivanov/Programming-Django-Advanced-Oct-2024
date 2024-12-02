@@ -48,22 +48,17 @@ class CreateTipView(CreateView):
         response = super().form_valid(form)  # Call the parent form_valid method to save the tip
 
         # Process tags
-        tags_input = self.request.POST.get('tags')  # Get the tags input from the form
+        tags_input = self.request.POST.get('tags')
         if tags_input:
-            tags = [tag.strip() for tag in tags_input.split(',')]  # Split and clean up the tags
+            # Split the tags by commas, strip them, and create Tag objects
+            tags = [tag.strip() for tag in tags_input.split(',')]
             tag_objects = []
             for tag in tags:
-                tag_obj, created = Tag.objects.get_or_create(name=tag)  # Create or fetch existing tags
+                tag_obj, created = Tag.objects.get_or_create(name=tag)
                 tag_objects.append(tag_obj)
-            form.instance.tags.set(tag_objects)  # Assign the tags to the tip instance
+            form.instance.tags.set(tag_objects)  # Use the set() method to assign the tags
 
-        # Process categories
-        categories = self.request.POST.getlist('categories')  # Get the selected categories from the form
-        if categories:
-            category_objects = Category.objects.filter(id__in=categories)  # Fetch the category objects from the database
-            form.instance.categories.set(category_objects)  # Assign the categories to the tip instance
-
-        return response  # Return the response from the parent method
+        return response
 
     def form_invalid(self, form):
 
@@ -106,6 +101,18 @@ class EditTipView(UpdateView):
         # Ensure that the form's current data, including the incorrect title, is passed back
         return self.render_to_response(self.get_context_data(form=form))
 
+# class TipDetailView(DetailView):
+#     model = Tip
+#     template_name = 'tips/tip-view-page.html'
+#     context_object_name = 'tip'
+#
+#     def get_context_data(self, **kwargs):
+#         context = super().get_context_data(**kwargs)
+#         tip = self.get_object()
+#         context['comments'] = tip.comments.order_by('-created_at')  # Fetch comments for this tip
+#         context['comment_form'] = CommentForm()  # Add the comment form to the context
+#         return context
+
 class TipDetailView(DetailView):
     model = Tip
     template_name = 'tips/tip-view-page.html'
@@ -114,8 +121,16 @@ class TipDetailView(DetailView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         tip = self.get_object()
-        context['comments'] = tip.comments.order_by('-created_at')  # Fetch comments for this tip
-        context['comment_form'] = CommentForm()  # Add the comment form to the context
+
+        # Fetch associated comments for this tip, ordered by the most recent
+        context['comments'] = tip.comments.order_by('-created_at')
+
+        # Include the comment form
+        context['comment_form'] = CommentForm()
+
+        # Pass the tags related to this tip
+        context['tags'] = tip.tags.all()
+
         return context
 
 
@@ -215,9 +230,40 @@ def edit_comment(request, pk):
         return redirect('tip_detail', pk=comment.tip.pk)
 
 def category_search(request):
-    if 'q' in request.GET:
-        query = request.GET.get('q')
-        categories = Category.objects.filter(name__icontains=query)
-        results = [{"id": category.id, "name": category.name} for category in categories]
-        return JsonResponse({'categories': results})
-    return JsonResponse({'categories': []})
+    search_query = request.GET.get('q', '')
+    exclude_ids = request.GET.get('exclude_ids', '')
+
+    # Split the exclude_ids into a list, but only if it's not empty
+    exclude_ids = [int(id) for id in exclude_ids.split(',') if id]
+
+    # Filter categories based on search query and exclude selected categories
+    categories = Category.objects.filter(name__icontains=search_query).exclude(id__in=exclude_ids)
+
+    # Return the results as JSON
+    results = [{'id': category.id, 'name': category.name} for category in categories]
+
+    return JsonResponse({'categories': results})
+
+# def tag_search(request):
+#     search_query = request.GET.get('q', '')
+#
+#     # Get tags that match the search query
+#     tags = Tag.objects.filter(name__icontains=search_query)
+#
+#     # Return the results as JSON
+#     results = [{'id': tag.id, 'name': tag.name} for tag in tags]
+#
+#     return JsonResponse({'tags': results})
+
+def tag_search(request):
+    search_query = request.GET.get('q', '')
+    exclude_ids = request.GET.get('exclude_ids', '').split(',')
+    exclude_ids = [int(id) for id in exclude_ids if id]
+
+    # Query for tags that match the search query, excluding selected ones
+    tags = Tag.objects.filter(name__icontains=search_query).exclude(id__in=exclude_ids)
+
+    # Ensure the response includes both existing and new tags
+    results = [{"id": tag.id, "name": tag.name} for tag in tags]
+
+    return JsonResponse({"tags": results})

@@ -14,4 +14,5 @@ urlpatterns = [
     path('comment/edit/<int:pk>/', views.edit_comment, name='edit_comment'),  # Edit comment URL
     path('comment/delete/<int:pk>/', views.delete_comment, name='delete_comment'),  # Delete comment URL
     path('category-search/', views.category_search, name='category_search'),
+    path('tag-search/', views.tag_search, name='tag_search'),
 ]

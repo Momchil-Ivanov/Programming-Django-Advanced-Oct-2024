@@ -19,8 +19,14 @@
 
 /* Add a green outline for the clickable category options on hover or focus */
 .select2-results__option:hover, .select2-results__option:focus {
-    background-color: #e1f7d5 !important; /* Optional: Highlight on hover */
-    border: 2px solid green !important; /* Maintain the green border on hover/focus */
+    background-color: #a3e8a3 !important; /* Darker green for hover/focus */
+    border: 2px solid #388e3c !important; /* Darker green border on hover/focus */
+}
+
+/* Make sure the selected option's background is more noticeable */
+.select2-results__option[aria-selected="true"] {
+    background-color: #c8e6c9 !important; /* Highlight selected option with a clear color */
+    border: 2px solid #388e3c !important; /* Dark green border for selected item */
 }
 
 /* Adjust width for the category names to make them more clickable */

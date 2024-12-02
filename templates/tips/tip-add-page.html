@@ -3,6 +3,8 @@
 
 {% block content %}
 <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+<!-- Include the Select2 CSS -->
+<link href="https://cdn.jsdelivr.net/npm/select2@4.0.13/dist/css/select2.min.css" rel="stylesheet" />
 
 <div class="container mt-4">
     <h2>Add a New Tip</h2>
@@ -49,11 +51,11 @@
             {% endif %}
         </div>
 
-        <!-- Categories (Dynamic selection) -->
+        <!-- Categories (Dynamic search bar) -->
         <div class="form-group">
             <label for="id_categories">Categories</label>
             <select id="id_categories" name="categories" class="form-control select2-multiple" multiple="multiple">
-                <!-- Categories will be dynamically loaded and displayed here -->
+                <!-- Categories will be dynamically loaded here via Select2 -->
             </select>
             {% if form.categories.errors %}
                 <div class="invalid-feedback">
@@ -67,15 +69,9 @@
         <!-- Tags -->
         <div class="form-group">
             <label for="id_tags">Tags</label>
-            <input type="text" id="id_tags" name="tags" class="form-control" placeholder="Start typing tags" value="{{ form.tags.value|default:'' }}" />
-        </div>
-
-        <!-- Tag Management -->
-        <div id="tag-list" class="mt-2">
-            <!-- Tags will be displayed here dynamically -->
-        </div>
-        <div class="mt-2">
-            <button type="button" id="add-tag-btn" class="btn btn-secondary">Add Tag</button>
+            <select id="id_tags" name="tags" class="form-control select2-multiple" multiple="multiple" placeholder="Search or add tags">
+                <!-- Tags will be dynamically loaded here via Select2 -->
+            </select>
         </div>
 
         <!-- Submit -->
@@ -89,14 +85,22 @@
 
 <script>
     $(document).ready(function() {
-        // Initialize Select2 with AJAX for dynamic category search
+        // Initialize Select2 for categories with AJAX for dynamic search
         $('#id_categories').select2({
-            placeholder: 'Search for categories',
+            placeholder: 'Search for categories',  // Placeholder text
             minimumInputLength: 1,  // Trigger search after typing 1 character
             ajax: {
                 url: '{% url "category_search" %}',  // Django view URL for category search
                 dataType: 'json',
                 delay: 250,  // Wait 250ms after typing before sending request
+                data: function(params) {
+                    const searchQuery = params.term || '';  // Get the current search query
+                    const selectedCategoryIds = $('#id_categories').val() || [];
+                    return {
+                        q: searchQuery,
+                        exclude_ids: selectedCategoryIds.join(',')  // Pass selected category IDs as a comma-separated string
+                    };
+                },
                 processResults: function(data) {
                     return {
                         results: data.categories.map(function(category) {
@@ -110,15 +114,62 @@
             }
         });
 
-        // Collect selected categories before form submission
+        // Initialize Select2 for tags with AJAX and the ability to add new tags
+        $('#id_tags').select2({
+            placeholder: 'Search or add tags',  // Placeholder text
+            minimumInputLength: 1,  // Trigger search after typing 1 character
+            tags: true,  // Allow new tags to be added by typing
+            ajax: {
+                url: '{% url "tag_search" %}',  // Django view URL for tag search
+                dataType: 'json',
+                delay: 250,  // Wait 250ms after typing before sending request
+                data: function(params) {
+                    const searchQuery = params.term || '';  // Get the current search query
+                    const selectedTagIds = $('#id_tags').val() || [];
+                    return { 
+                        q: searchQuery, 
+                        exclude_ids: selectedTagIds.join(',')  // Exclude selected tags from dropdown
+                    };
+                },
+                processResults: function(data) {
+                    return {
+                        results: data.tags.map(function(tag) {
+                            return {
+                                id: tag.id,  // The ID for selection
+                                text: tag.name  // The name that will be displayed
+                            };
+                        })
+                    };
+                }
+            },
+            // Prevent adding duplicates to the field
+            createTag: function(params) {
+                const term = $.trim(params.term);
+                const existingTags = $('#id_tags').val() || [];
+                // Allow adding a tag if it's not already in the field or database
+                if (existingTags.includes(term)) {
+                    return null;  // Don't add it again
+                }
+                return { id: term, text: term };  // Create a new tag
+            }
+        });
+
+        // Collect selected categories and tags before form submission
         $('form').submit(function() {
             const selectedCategories = [];
             $('#id_categories').val().forEach(function(categoryId) {
                 selectedCategories.push(categoryId);
             });
             $('#id_categories').val(selectedCategories).trigger('change');  // Update the hidden categories field
+
+            const selectedTags = [];
+            $('#id_tags').val().forEach(function(tagId) {
+                selectedTags.push(tagId);
+            });
+            $('#id_tags').val(selectedTags).trigger('change');  // Update the hidden tags field
         });
     });
 </script>
+
 {% endblock %}
 {% endblock %}
