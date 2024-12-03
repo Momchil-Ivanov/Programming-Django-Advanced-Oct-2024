@@ -216,7 +216,7 @@ def category_search(request):
 def tag_search(request):
     search_query = request.GET.get('q', '')
     exclude_ids = request.GET.get('exclude_ids', '').split(',')
-    exclude_ids = [int(id) for id in exclude_ids if id]
+    exclude_ids = [int(id) for id in exclude_ids if id]  # Convert to list of integers
 
     # Query for tags that match the search query, excluding selected ones
     tags = Tag.objects.filter(name__icontains=search_query).exclude(id__in=exclude_ids)

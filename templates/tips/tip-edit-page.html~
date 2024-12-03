@@ -103,8 +103,8 @@
                 dataType: 'json',
                 delay: 250,
                 data: function(params) {
-                    return { 
-                        q: params.term || '', 
+                    return {
+                        q: params.term || '',
                         exclude_ids: '{{ selected_category_ids|join:"," }}'  // Passing selected categories to exclude
                     };
                 },
@@ -118,37 +118,53 @@
             }
         });
 
-        // Initialize Select2 for tags with AJAX and the ability to add new tags
-        $('#id_tags').select2({
-            placeholder: 'Search or add tags',
-            minimumInputLength: 1,
-            tags: true,
-            ajax: {
-                url: '{% url "tag_search" %}',
-                dataType: 'json',
-                delay: 250,
-                data: function(params) {
-                    return { q: params.term || '' };
-                },
-                processResults: function(data) {
-                    return {
-                        results: data.tags.map(function(tag) {
-                            return { id: tag.id, text: tag.name };
-                        })
-                    };
-                }
-            },
-            createTag: function(params) {
-                const term = $.trim(params.term);
-                // Avoid adding the same tag twice
-                if ($('#id_tags').val().includes(term)) return null;
-            
-                // Create the new tag dynamically without server-side validation
-                const newTag = { id: term, text: term };
-                return newTag;
+        // Remove category when clicking the 'x'
+        $('.remove-category').on('click', function() {
+            var categoryId = $(this).closest('.badge').data('category-id');
+            var selectedCategories = $('#id_categories').val() || [];
+            var index = selectedCategories.indexOf(categoryId.toString());
+
+            if (index !== -1) {
+                selectedCategories.splice(index, 1);  // Remove category from selected categories
+                $('#id_categories').val(selectedCategories).trigger('change');  // Update the select2
+                $(this).closest('.badge').remove();  // Remove the badge
             }
         });
-    });
+
+        // Initialize Select2 for tags with AJAX and the ability to add new tags
+     $('#id_tags').select2({
+                placeholder: 'Search or add tags',
+                minimumInputLength: 1,
+                tags: true,
+                ajax: {
+                    url: '{% url "tag_search" %}',
+                    dataType: 'json',
+                    delay: 250,
+                    data: function(params) {
+                        return {
+                            q: params.term || '',
+                            exclude_ids: '{{ selected_tag_ids|join:"," }}'  // Passing selected tags to exclude
+                        };
+                    },
+                    processResults: function(data) {
+                        return {
+                            results: data.tags.map(function(tag) {
+                                return { id: tag.id, text: tag.name };
+                            })
+                        };
+                    }
+                },
+                createTag: function(params) {
+                    const term = $.trim(params.term);
+                    // Avoid adding the same tag twice
+                    if ($('#id_tags').val().includes(term)) return null;
+    
+                    // Create the new tag dynamically without server-side validation
+                    const newTag = { id: term, text: term };
+                    return newTag;
+                }
+            });
+        });
 </script>
 {% endblock %}
 {% endblock %}
