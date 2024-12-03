@@ -7,5 +7,10 @@ class Tag(models.Model):
         unique=True,
     )
 
+    def save(self, *args, **kwargs):
+        # Ensure the tag name is always saved in lowercase
+        self.name = self.name.lower()
+        super().save(*args, **kwargs)
+
     def __str__(self):
         return self.name

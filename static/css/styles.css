@@ -13,26 +13,144 @@
     padding: 12px 20px !important;
     cursor: pointer;
     width: 100% !important;
-    border: 2px solid #888 !important;
     background-color: #f9f9f9;
+    /* Removed border to avoid outlines */
 }
 
 /* Highlight options on hover or focus */
 .select2-results__option:hover, .select2-results__option:focus {
     background-color: #66bb6a !important;
-    border: 2px solid #388e3c !important;
 }
 
 /* Make the selected option’s background more visible */
 .select2-results__option[aria-selected="true"] {
     background-color: #388e3c !important;
     color: white !important;
-    border: 2px solid #388e3c !important;
 }
 
-/* Adjust width for category names */
-.select2-results__option {
-    width: 100% !important;
+/* Styling for the container */
+.create-tag-container {
+    margin-top: 5rem;
+    display: flex;
+    justify-content: center;
+}
+
+/* Styling for the content column */
+.create-tag-column {
+    max-width: 600px;
+    width: 100%;
+}
+
+/* Title Styling */
+.create-tag-title {
+    font-size: 2rem;
+    color: #388e3c;
+    text-align: center;
+    margin-bottom: 1.5rem;
+}
+
+/* Create Tag Button Styling */
+.create-tag-button {
+    width: 100%;
+    background-color: #388e3c;
+    color: white;
+    border: none;
+    padding: 10px;
+    font-size: 1rem;
+    cursor: pointer;
+}
+
+/* Styling for the Tag Name label */
+.tag-name-label {
+    display: block;
+    text-align: center;
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: #388e3c;
+    background-color: #e8f5e9;
+    padding: 8px;
+    border-radius: 4px;
+    margin-bottom: 10px;
+}
+
+/* Styling for the Tag Name input */
+.tag-name-input {
+    width: 100%;
+    border: 2px solid #388e3c;
+    padding: 10px;
+    border-radius: 4px;
+    font-size: 1rem;
+}
+
+/* Tag Suggestions Styling */
+#tag_suggestions {
+    border: 1px solid #ccc;
+    background-color: white;
+    max-height: 200px;
+    overflow-y: auto;
+    position: absolute;
+    width: 100%;
+    z-index: 100;
+    /* Removed border styling from the suggestions box */
+}
+
+/* Styling for the Existing Tags Box */
+.existing-tags-box {
+    background-color: #f7fafc;  /* Light, neutral background */
+    padding: 10px 15px;  /* Adequate padding for spacing */
+    border-radius: 8px;  /* Soft rounded corners */
+    margin-bottom: 15px;  /* Increased margin for spacing between boxes */
+    width: 100%;  /* Let the box take the full width of the parent container */
+    max-width: 350px;  /* Restrict the width slightly */
+    margin-left: 0;  /* Align it to the left */
+    margin-right: auto;  /* Keep it aligned to the left */
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);  /* Light shadow for depth */
+}
+
+/* Title Styling for "Existing Tags" */
+.existing-tags-box strong {
+    font-size: 1.1rem;
+    color: #388e3c;  /* Use a green color to match the theme */
+    font-weight: 600;
+    margin-bottom: 8px;
+    display: block;  /* Ensure the title is on its own line */
+}
+
+/* Adjust the width of the suggestions */
+.tag-suggestion {
+    padding: 8px 15px;  /* Increased padding for better readability */
+    cursor: pointer;
+    border-radius: 4px;  /* Slight rounding for individual tags */
+    background-color: #ffffff;  /* White background to distinguish suggestions */
+    margin-bottom: 5px;  /* Space between suggestions */
+    transition: background-color 0.3s, transform 0.3s;  /* Smooth transition on hover */
+    width: 100%;
+    max-width: 300px;  /* Slight width restriction */
+    /* Removed border styling to avoid outline */
+}
+
+/* Hover Effect for Tag Suggestions */
+.tag-suggestion:hover {
+    background-color: #e3f2e1;  /* Light green on hover */
+    transform: scale(1.05);  /* Slightly scale up the tag for emphasis */
+}
+
+/* Styling for the Tag Suggestions List */
+#tag_suggestions {
+    position: absolute;
+    z-index: 100;
+    background-color: white;
+    width: 100%;
+    max-width: 350px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);  /* Subtle shadow for suggestions */
+    border-radius: 8px;
+    overflow-y: auto;
+    max-height: 200px;  /* Limit the height */
+}
+
+/* Centering suggestions container */
+#tag_suggestions .d-flex {
+    justify-content: center;
 }
 
 /* Move the "Tags" label lower */

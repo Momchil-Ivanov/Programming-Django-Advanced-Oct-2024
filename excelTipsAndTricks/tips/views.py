@@ -6,7 +6,6 @@ from django.views.decorators.http import require_POST
 from django.views.generic import ListView, CreateView, UpdateView, DetailView, DeleteView
 from .models import Tip
 from .forms import TipForm
-from ..categories.forms import CategoryForm
 from ..categories.models import Category
 from ..common.forms import CommentForm
 from ..common.models import Comment
@@ -74,12 +73,24 @@ class EditTipView(UpdateView):
         return context
 
     def form_valid(self, form):
+        # Handle tags: create new tags if they do not exist
+        tags = form.cleaned_data.get('tags', [])
+        existing_tags = Tag.objects.all()
+
+        # Iterate through each tag and create it if it does not exist
+        for tag in tags:
+            if not existing_tags.filter(name=tag.name.lower()).exists():
+                new_tag = Tag(name=tag.name.lower())
+                new_tag.save()
+
         # Set tags and categories after validation
         form.instance.tags.set(form.cleaned_data['tags'])
         form.instance.categories.set(form.cleaned_data['categories'])
+
         return super().form_valid(form)
 
     def form_invalid(self, form):
+        print(form.errors)
         messages.error(self.request, "There was an error with your form submission. Please fix the issues.")
         return self.render_to_response(self.get_context_data(form=form))
 
@@ -200,7 +211,7 @@ def edit_comment(request, pk):
         return redirect('tip_detail', pk=comment.tip.pk)
 
 
-
+@login_required
 def category_search(request):
     search_query = request.GET.get('q', '')
     exclude_ids = request.GET.get('exclude_ids', '').split(',')
@@ -213,19 +224,18 @@ def category_search(request):
     results = [{'id': category.id, 'name': category.name} for category in categories]
     return JsonResponse({'categories': results})
 
+@login_required
 def tag_search(request):
-    search_query = request.GET.get('q', '')
+    search_query = request.GET.get('q', '').strip()
     exclude_ids = request.GET.get('exclude_ids', '').split(',')
-    exclude_ids = [int(id) for id in exclude_ids if id]  # Convert to list of integers
+    exclude_ids = [int(id) for id in exclude_ids if id.isdigit()]
 
-    # Query for tags that match the search query, excluding selected ones
-    tags = Tag.objects.filter(name__icontains=search_query).exclude(id__in=exclude_ids)
+    if search_query:
+        # Case insensitive search for existing tags
+        existing_tags = Tag.objects.filter(name__icontains=search_query).exclude(id__in=exclude_ids)
 
-    # If the search query is not an existing tag, create a new tag
-    if not tags.filter(name=search_query).exists() and search_query:
-        new_tag = Tag.objects.create(name=search_query)
-        tags = tags | Tag.objects.filter(id=new_tag.id)
+        results = [{"id": tag.id, "name": tag.name} for tag in existing_tags]
+    else:
+        results = []
 
-    # Return the filtered tags as JSON
-    results = [{"id": tag.id, "name": tag.name} for tag in tags]
     return JsonResponse({"tags": results})

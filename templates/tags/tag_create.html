@@ -1,0 +1,101 @@
+{% extends 'base.html' %}
+
+{% block title %}Create or Select a Tag{% endblock %}
+
+{% block content %}
+<div class="container mt-4 d-flex justify-content-center">
+    <div class="create-tag-column">
+        <h2 class="create-tag-title">Create a New Tag:</h2>
+    
+        <!-- Form for creating or selecting a tag -->
+        <form method="POST">
+            {% csrf_token %}
+            <div class="form-group">
+                <label for="tag_name" class="tag-name-label">Tag Name</label>
+                <input type="text" id="tag_name" name="name" class="tag-name-input form-control" required maxlength="50">
+
+                <!-- Display form errors for the 'name' field -->
+                {% if form.name.errors %}
+                    <div class="errorlist mt-2 text-center">
+                        {% for error in form.name.errors %}
+                            <p class="text-danger">{{ error }}</p>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+            
+            <!-- Display suggestions dynamically -->
+            <div id="tag_suggestions" class="mt-2"></div>
+            
+            <!-- Submit button for creating a tag -->
+            <div class="d-flex justify-content-center mt-4">
+                <button type="submit" class="btn btn-primary">Create Tag</button>
+            </div>
+        </form>
+
+        <!-- Existing Tags section -->
+        {% if existing_tags %}
+        <div class="existing-tags-box mt-4">
+            <strong>Existing Tags:</strong>
+            <div id="existing-tags-list">
+                {% for tag in existing_tags %}
+                    <div class="tag-suggestion existing-tag" data-id="{{ tag.id }}">{{ tag.text }}</div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+{% block extra_js %}
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+<script>
+$(document).ready(function() {
+    $('#tag_name').on('input', function() {
+        var query = $(this).val().trim();
+        
+        // If there's some input
+        if (query.length >= 1) {
+            $.ajax({
+                url: '{% url "tag_autocomplete" %}',
+                data: { 'q': query },
+                dataType: 'json',
+                success: function(data) {
+                    var suggestions = data.tags;
+                    var suggestionsHtml = '';
+
+                    // If there are suggestions, show "Existing Tags:"
+                    if (suggestions.length > 0) {
+                        suggestionsHtml += '<div class="tag-suggestion existing-tag" style="cursor: default; color: gray;">Existing Tags:</div>';
+                    }
+                    
+                    // Add the tags below "Existing Tags:"
+                    suggestions.forEach(function(tag) {
+                        suggestionsHtml += '<div class="tag-suggestion" data-id="' + tag.id + '">' + tag.text + '</div>';
+                    });
+
+                    // Show or hide the suggestion box based on results
+                    if (suggestions.length > 0) {
+                        $('#tag_suggestions').html(suggestionsHtml).show();
+                    } else {
+                        $('#tag_suggestions').hide();
+                    }
+                }
+            });
+        } else {
+            // If the input is empty, hide the suggestion box
+            $('#tag_suggestions').hide();
+        }
+    });
+
+    // Hide suggestions when clicking outside
+    $(document).on('click', function(e) {
+        if (!$(e.target).closest('#tag_name').length) {
+            $('#tag_suggestions').hide();
+        }
+    });
+});
+</script>
+{% endblock %}
+{% endblock %}

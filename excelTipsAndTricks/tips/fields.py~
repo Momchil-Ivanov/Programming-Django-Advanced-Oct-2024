@@ -1,0 +1,19 @@
+from django import forms
+from .models import Tag
+
+class CustomTagField(forms.ModelMultipleChoiceField):
+    def to_python(self, value):
+        """
+        Convert input values to Tag instances, and create new tags if necessary.
+        """
+        if isinstance(value, str):
+            value = [value]
+
+        tags = []
+        for tag_name in value:
+            tag_name = tag_name.strip()
+            # Create or get the existing tag instance
+            tag, created = Tag.objects.get_or_create(name=tag_name)
+            tags.append(tag)
+
+        return tags

@@ -21,17 +21,11 @@ class TipForm(forms.ModelForm):
         fields = ['title', 'content', 'image_url', 'tags', 'categories']
 
     def clean_tags(self):
-        tags = self.cleaned_data.get('tags', '').strip()
-        if tags:
-            tag_objs = []
-            tag_names = tags.split(',')
-            for tag_name in tag_names:
-                tag_name = tag_name.strip()
-                if tag_name:  # Ensure no empty tags are processed
-                    tag_obj, created = Tag.objects.get_or_create(name=tag_name)
-                    tag_objs.append(tag_obj)
-            return tag_objs
-        return []
+        tags = self.cleaned_data.get('tags', [])
+        tag_objs = []
+        for tag in tags:
+            tag_objs.append(tag)
+        return tag_objs
 
     def clean_title(self):
         title = self.cleaned_data.get('title')

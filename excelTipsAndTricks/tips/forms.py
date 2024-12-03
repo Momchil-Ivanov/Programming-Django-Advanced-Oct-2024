@@ -22,10 +22,13 @@ class TipForm(forms.ModelForm):
 
     def clean_tags(self):
         tags = self.cleaned_data.get('tags', [])
-        tag_objs = []
-        for tag in tags:
-            tag_objs.append(tag)
-        return tag_objs
+        tag_names = [tag.name.lower() for tag in tags]
+
+        # Ensure no duplicate tags in the list (case-insensitive)
+        if len(tag_names) != len(set(tag_names)):
+            raise forms.ValidationError("Duplicate tags are not allowed.")
+
+        return tags
 
     def clean_title(self):
         title = self.cleaned_data.get('title')

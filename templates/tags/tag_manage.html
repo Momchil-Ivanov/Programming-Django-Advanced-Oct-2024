@@ -1,0 +1,56 @@
+{% extends 'base.html' %}
+
+{% block title %}Manage Tags{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2 class="text-center mb-4">Manage Tags</h2>
+
+    <!-- Tag Search Form (Specific to tags manage page) -->
+    <div class="mb-4 d-flex justify-content-center">
+        <form action="{% url 'manage_tags' %}" method="GET" class="d-flex justify-content-center" style="max-width: 400px; width: 100%;">
+            <input 
+                type="text" 
+                name="query" 
+                placeholder="Search tags..." 
+                class="form-control" 
+                style="flex: 1; margin-right: 10px;" 
+                value="{{ query }}"
+            >
+            <button type="submit" class="btn btn-outline-success">
+                <i class="fas fa-search"></i>
+            </button>
+        </form>
+    </div>
+
+    <!-- Tag Table -->
+    <div class="table-responsive">
+        <table class="table table-bordered text-center">
+            <thead>
+                <tr>
+                    <th>Tag Name</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for tag in tags %}
+                <tr>
+                    <td>{{ tag.name }}</td>
+                    <td>
+                        <form action="{% url 'manage_tags' %}" method="POST" style="display:inline;">
+                            {% csrf_token %}
+                            <input type="hidden" name="tag_id" value="{{ tag.id }}">
+                            <button type="submit" class="btn btn-danger">Delete</button>
+                        </form>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="2">No tags found matching your search.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
