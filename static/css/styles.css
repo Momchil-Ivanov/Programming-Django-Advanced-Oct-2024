@@ -1,41 +1,41 @@
 /* Ensure Select2 field width remains consistent */
 #id_categories {
-    width: 100% !important; /* Force the width to be 100% of its container */
+    width: 100% !important;
 }
 
 /* Adjust the input field inside Select2 to not shrink */
 .select2-container--default .select2-search--inline .select2-search__field {
-    width: 100% !important; /* Ensure the search field stretches to 100% width */
+    width: 100% !important;
 }
 
-/* Make the clickable category options bigger and ensure the whole line is clickable */
+/* Make the clickable category options bigger */
 .select2-results__option {
-    padding: 12px 20px !important; /* Increase the padding for better clickability */
-    cursor: pointer;  /* Ensure the cursor indicates that the entire line is clickable */
-    width: 100% !important; /* Make each category option fill the width */
-    border: 2px solid #888 !important; /* Gray border by default */
-    background-color: #f9f9f9; /* Optional: set a neutral background color */
+    padding: 12px 20px !important;
+    cursor: pointer;
+    width: 100% !important;
+    border: 2px solid #888 !important;
+    background-color: #f9f9f9;
 }
 
-/* Add a bold highlight for the clickable category options on hover or focus */
+/* Highlight options on hover or focus */
 .select2-results__option:hover, .select2-results__option:focus {
-    background-color: #66bb6a !important; /* Darker green for hover/focus */
-    border: 2px solid #388e3c !important; /* Dark green border on hover/focus */
+    background-color: #66bb6a !important;
+    border: 2px solid #388e3c !important;
 }
 
 /* Make the selected option’s background more visible */
 .select2-results__option[aria-selected="true"] {
-    background-color: #388e3c !important; /* Dark green for selected category */
-    color: white !important; /* White text for selected item */
-    border: 2px solid #388e3c !important; /* Dark green border for selected item */
+    background-color: #388e3c !important;
+    color: white !important;
+    border: 2px solid #388e3c !important;
 }
 
-/* Adjust width for the category names to make them more clickable */
+/* Adjust width for category names */
 .select2-results__option {
-    width: 100% !important; /* Make each category option fill the width */
+    width: 100% !important;
 }
 
-/* Move the "Tags" text lower */
+/* Move the "Tags" label lower */
 .form-group label[for="id_tags"] {
-    margin-top: 20px; /* Adjust this value based on your layout needs */
+    margin-top: 20px;
 }

@@ -145,8 +145,8 @@
             // Prevent adding duplicates to the field
             createTag: function(params) {
                 const term = $.trim(params.term);
-                // Check if the tag already exists in the field
                 const existingTags = $('#id_tags').val() || [];
+                // Allow adding a tag if it's not already in the field or database
                 if (existingTags.includes(term)) {
                     return null;  // Don't add it again
                 }

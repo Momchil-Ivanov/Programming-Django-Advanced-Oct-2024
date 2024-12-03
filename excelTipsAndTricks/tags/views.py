@@ -7,21 +7,24 @@ from excelTipsAndTricks.categories.models import Category
 
 # Autocomplete view for tags
 def tag_autocomplete(request):
-    term = request.GET.get('term', '')  # Get the 'term' parameter from the GET request
-    exclude_ids = request.GET.get('exclude_ids', '')  # Get the exclude_ids parameter (comma-separated)
+    term = request.GET.get('q', '')  # Select2 uses 'q' by default
+    exclude_ids = request.GET.get('exclude_ids', '')
 
-    # Convert exclude_ids into a list of tag names (or IDs) if provided
-    exclude_ids = exclude_ids.split(',') if exclude_ids else []
+    # Parse exclude IDs if provided
+    exclude_ids = [int(id) for id in exclude_ids.split(',') if id.isdigit()]
 
-    if term:  # Only perform the query if 'term' is provided
-        # Filter tags by name, excluding any tags already selected
+    if term:
+        # Search for tags excluding provided IDs
         tags = Tag.objects.filter(
-            Q(name__icontains=term) & ~Q(name__in=exclude_ids)  # Case-insensitive search and exclude selected tags
-        ).values('name')  # Return only the name field for the tags
+            Q(name__icontains=term) & ~Q(id__in=exclude_ids)
+        ).values('id', 'name')  # Include IDs for Select2
 
-        return JsonResponse(list(tags), safe=False)  # Return tags as a JSON response
+        # Format data for Select2
+        return JsonResponse({
+            'tags': [{'id': tag['id'], 'text': tag['name']} for tag in tags]
+        })
 
-    return JsonResponse([], safe=False)  # Return an empty list if no 'term' is provided
+    return JsonResponse({'tags': []})
 
 # Search view for tips and categories based on tags
 class TagSearchView(TemplateView):

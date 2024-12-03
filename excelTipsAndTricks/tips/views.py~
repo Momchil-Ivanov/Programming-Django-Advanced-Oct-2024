@@ -6,6 +6,7 @@ from django.views.decorators.http import require_POST
 from django.views.generic import ListView, CreateView, UpdateView, DetailView, DeleteView
 from .models import Tip
 from .forms import TipForm
+from ..categories.forms import CategoryForm
 from ..categories.models import Category
 from ..common.forms import CommentForm
 from ..common.models import Comment
@@ -43,20 +44,10 @@ class CreateTipView(CreateView):
     template_name = 'tips/tip-add-page.html'
     success_url = reverse_lazy('all_tips')
 
+
     def form_valid(self, form):
         form.instance.author = self.request.user  # Assign the current user as the author
-        response = super().form_valid(form)  # Call the parent form_valid method to save the tip
-
-        # Process tags
-        tags_input = self.request.POST.get('tags')
-        if tags_input:
-            # Split the tags by commas, strip them, and create Tag objects
-            tags = [tag.strip() for tag in tags_input.split(',')]
-            tag_objects = []
-            for tag in tags:
-                tag_obj, created = Tag.objects.get_or_create(name=tag)
-                tag_objects.append(tag_obj)
-            form.instance.tags.set(tag_objects)  # Use the set() method to assign the tags
+        response = super().form_valid(form)  # Save the tip
 
         return response
 
@@ -68,6 +59,7 @@ class CreateTipView(CreateView):
         # Return the response with the form
         return self.render_to_response({'form': form})
 
+
 class EditTipView(UpdateView):
     model = Tip
     form_class = TipForm
@@ -75,43 +67,21 @@ class EditTipView(UpdateView):
     context_object_name = 'tip'
     success_url = reverse_lazy('all_tips')
 
-    def get_queryset(self):
-        # Only allow authors to edit their own tips
-        return Tip.objects.filter(author=self.request.user)
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['selected_category_ids'] = list(self.object.categories.values_list('id', flat=True))
+        context['selected_tag_ids'] = list(self.object.tags.values_list('id', flat=True))
+        return context
 
     def form_valid(self, form):
-        form.instance.author = self.request.user
-        response = super().form_valid(form)
-
-        # Process tags
-        tags_input = self.request.POST.get('tags')
-        if tags_input:
-            tags = [tag.strip() for tag in tags_input.split(',')]
-            tag_objects = []
-            for tag in tags:
-                tag_obj, created = Tag.objects.get_or_create(name=tag)
-                tag_objects.append(tag_obj)
-            form.instance.tags.set(tag_objects)
-
-        return response
+        # Set tags and categories after validation
+        form.instance.tags.set(form.cleaned_data['tags'])
+        form.instance.categories.set(form.cleaned_data['categories'])
+        return super().form_valid(form)
 
     def form_invalid(self, form):
-        # Add custom error message when the form is invalid
         messages.error(self.request, "There was an error with your form submission. Please fix the issues.")
-        # Ensure that the form's current data, including the incorrect title, is passed back
         return self.render_to_response(self.get_context_data(form=form))
-
-# class TipDetailView(DetailView):
-#     model = Tip
-#     template_name = 'tips/tip-view-page.html'
-#     context_object_name = 'tip'
-#
-#     def get_context_data(self, **kwargs):
-#         context = super().get_context_data(**kwargs)
-#         tip = self.get_object()
-#         context['comments'] = tip.comments.order_by('-created_at')  # Fetch comments for this tip
-#         context['comment_form'] = CommentForm()  # Add the comment form to the context
-#         return context
 
 class TipDetailView(DetailView):
     model = Tip
@@ -229,31 +199,19 @@ def edit_comment(request, pk):
         messages.error(request, 'You are not authorized to edit this comment.')
         return redirect('tip_detail', pk=comment.tip.pk)
 
+
+
 def category_search(request):
     search_query = request.GET.get('q', '')
-    exclude_ids = request.GET.get('exclude_ids', '')
+    exclude_ids = request.GET.get('exclude_ids', '').split(',')
+    exclude_ids = [int(id) for id in exclude_ids if id.isdigit()]  # Convert to list of integers
 
-    # Split the exclude_ids into a list, but only if it's not empty
-    exclude_ids = [int(id) for id in exclude_ids.split(',') if id]
-
-    # Filter categories based on search query and exclude selected categories
+    # Filter categories based on the search query and exclude already selected ones
     categories = Category.objects.filter(name__icontains=search_query).exclude(id__in=exclude_ids)
 
-    # Return the results as JSON
+    # Return the filtered categories as JSON
     results = [{'id': category.id, 'name': category.name} for category in categories]
-
     return JsonResponse({'categories': results})
-
-# def tag_search(request):
-#     search_query = request.GET.get('q', '')
-#
-#     # Get tags that match the search query
-#     tags = Tag.objects.filter(name__icontains=search_query)
-#
-#     # Return the results as JSON
-#     results = [{'id': tag.id, 'name': tag.name} for tag in tags]
-#
-#     return JsonResponse({'tags': results})
 
 def tag_search(request):
     search_query = request.GET.get('q', '')
@@ -263,7 +221,11 @@ def tag_search(request):
     # Query for tags that match the search query, excluding selected ones
     tags = Tag.objects.filter(name__icontains=search_query).exclude(id__in=exclude_ids)
 
-    # Ensure the response includes both existing and new tags
-    results = [{"id": tag.id, "name": tag.name} for tag in tags]
+    # If the search query is not an existing tag, create a new tag
+    if not tags.filter(name=search_query).exists() and search_query:
+        new_tag = Tag.objects.create(name=search_query)
+        tags = tags | Tag.objects.filter(id=new_tag.id)
 
+    # Return the filtered tags as JSON
+    results = [{"id": tag.id, "name": tag.name} for tag in tags]
     return JsonResponse({"tags": results})

@@ -1,9 +1,12 @@
 {% extends 'base.html' %}
+{% load static %}
 
 {% block content %}
+<link rel="stylesheet" href="{% static 'css/styles.css' %}">
+<link href="https://cdn.jsdelivr.net/npm/select2@4.0.13/dist/css/select2.min.css" rel="stylesheet" />
+
 <div class="container mt-4">
     <h2>Edit Tip: {{ tip.title }}</h2>
-
 
     <form method="post">
         {% csrf_token %}
@@ -11,8 +14,7 @@
         <!-- Title -->
         <div class="form-group">
             <label for="id_title">Title</label>
-            <input type="text" id="id_title" name="title" class="form-control {% if form.title.errors %}is-invalid{% endif %}" 
-                value="{{ form.title.value|default:'' }}" required />
+            <input type="text" id="id_title" name="title" class="form-control {% if form.title.errors %}is-invalid{% endif %}" placeholder="Enter title" value="{{ form.title.value|default:'' }}" required />
             {% if form.title.errors %}
                 <div class="invalid-feedback">
                     {% for error in form.title.errors %}
@@ -25,8 +27,7 @@
         <!-- Content -->
         <div class="form-group">
             <label for="id_content">Content</label>
-            <textarea id="id_content" name="content" class="form-control {% if form.content.errors %}is-invalid{% endif %}" 
-                rows="5" required>{{ form.content.value|default:'' }}</textarea>
+            <textarea id="id_content" name="content" class="form-control {% if form.content.errors %}is-invalid{% endif %}" rows="5" placeholder="Enter tip content" required>{{ form.content.value|default:'' }}</textarea>
             {% if form.content.errors %}
                 <div class="invalid-feedback">
                     {% for error in form.content.errors %}
@@ -39,8 +40,7 @@
         <!-- Image URL -->
         <div class="form-group">
             <label for="id_image_url">Image URL</label>
-            <input type="url" id="id_image_url" name="image_url" class="form-control {% if form.image_url.errors %}is-invalid{% endif %}" 
-                value="{{ form.image_url.value|default:'' }}" />
+            <input type="url" id="id_image_url" name="image_url" class="form-control {% if form.image_url.errors %}is-invalid{% endif %}" placeholder="Optional URL for an image" value="{{ form.image_url.value|default:'' }}" />
             {% if form.image_url.errors %}
                 <div class="invalid-feedback">
                     {% for error in form.image_url.errors %}
@@ -51,9 +51,16 @@
         </div>
 
         <!-- Categories -->
-        <div class="form-group">
+        <div class="form-group mb-2">
             <label for="id_categories">Categories</label>
-            {{ form.categories }}
+            <select id="id_categories" name="categories" class="form-control select2-multiple" multiple="multiple">
+                {% for category in form.categories.field.queryset %}
+                <option value="{{ category.id }}"
+                    {% if category.id in selected_category_ids %}selected{% endif %}>
+                    {{ category.name }}
+                </option>
+                {% endfor %}
+            </select>
             {% if form.categories.errors %}
                 <div class="invalid-feedback">
                     {% for error in form.categories.errors %}
@@ -66,53 +73,80 @@
         <!-- Tags -->
         <div class="form-group">
             <label for="id_tags">Tags</label>
-            <input type="text" id="id_tags" name="tags" class="form-control" value="{{ form.tags.value|default:'' }}" placeholder="Start typing tags" />
+            <select id="id_tags" name="tags" class="form-control select2-multiple" multiple="multiple">
+                {% for tag in form.tags.field.queryset %}
+                <option value="{{ tag.id }}"
+                    {% if tag.id in selected_tag_ids %}selected{% endif %}>
+                    {{ tag.name }}
+                </option>
+                {% endfor %}
+            </select>
         </div>
 
-        <!-- Tag Management -->
-        <div id="tag-list" class="mt-2">
-            {% for tag in form.instance.tags.all %}
-                <span class="badge badge-primary mx-1" data-tag="{{ tag.name }}">
-                    {{ tag.name }} <button type="button" class="btn-close btn-sm remove-tag" aria-label="Remove"></button>
-                </span>
-            {% endfor %}
-        </div>
-        <div class="mt-2">
-            <button type="button" id="add-tag-btn" class="btn btn-secondary">Add Tag</button>
-        </div>
-
-        <button type="submit" class="btn btn-primary mt-3">Update Tip</button>
+        <!-- Submit -->
+        <button type="submit" class="btn btn-success mt-3">Update Tip</button>
     </form>
 </div>
 
 {% block extra_js %}
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/select2@4.0.13/dist/js/select2.min.js"></script>
 
 <script>
     $(document).ready(function() {
-        // Handle Add Tag Button Click
-        $('#add-tag-btn').click(function() {
-            const tagInput = $('#id_tags');
-            const tagValue = tagInput.val().trim();
-
-            if (tagValue) {
-                $('#tag-list').append(`<span class="badge badge-primary mx-1" data-tag="${tagValue}">${tagValue} <button type="button" class="btn-close btn-sm remove-tag" aria-label="Remove"></button></span>`);
-                tagInput.val('');
+        // Initialize Select2 for categories with AJAX for dynamic search
+        $('#id_categories').select2({
+            placeholder: 'Search for categories',
+            minimumInputLength: 1,
+            ajax: {
+                url: '{% url "category_search" %}',
+                dataType: 'json',
+                delay: 250,
+                data: function(params) {
+                    return { 
+                        q: params.term || '', 
+                        exclude_ids: '{{ selected_category_ids|join:"," }}'  // Passing selected categories to exclude
+                    };
+                },
+                processResults: function(data) {
+                    return {
+                        results: data.categories.map(function(category) {
+                            return { id: category.id, text: category.name };
+                        })
+                    };
+                }
             }
         });
 
-        // Handle Remove Tag Button Click
-        $('#tag-list').on('click', '.remove-tag', function() {
-            $(this).parent().remove();
-        });
-
-        // Collect Tags on Form Submit
-        $('form').submit(function() {
-            const tags = [];
-            $('#tag-list span').each(function() {
-                tags.push($(this).data('tag'));
-            });
-            $('#id_tags').val(tags.join(', ')); // Set the hidden input with the tags
+        // Initialize Select2 for tags with AJAX and the ability to add new tags
+        $('#id_tags').select2({
+            placeholder: 'Search or add tags',
+            minimumInputLength: 1,
+            tags: true,
+            ajax: {
+                url: '{% url "tag_search" %}',
+                dataType: 'json',
+                delay: 250,
+                data: function(params) {
+                    return { q: params.term || '' };
+                },
+                processResults: function(data) {
+                    return {
+                        results: data.tags.map(function(tag) {
+                            return { id: tag.id, text: tag.name };
+                        })
+                    };
+                }
+            },
+            createTag: function(params) {
+                const term = $.trim(params.term);
+                // Avoid adding the same tag twice
+                if ($('#id_tags').val().includes(term)) return null;
+            
+                // Create the new tag dynamically without server-side validation
+                const newTag = { id: term, text: term };
+                return newTag;
+            }
         });
     });
 </script>

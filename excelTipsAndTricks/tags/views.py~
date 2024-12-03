@@ -8,9 +8,19 @@ from excelTipsAndTricks.categories.models import Category
 # Autocomplete view for tags
 def tag_autocomplete(request):
     term = request.GET.get('term', '')  # Get the 'term' parameter from the GET request
+    exclude_ids = request.GET.get('exclude_ids', '')  # Get the exclude_ids parameter (comma-separated)
+
+    # Convert exclude_ids into a list of tag names (or IDs) if provided
+    exclude_ids = exclude_ids.split(',') if exclude_ids else []
+
     if term:  # Only perform the query if 'term' is provided
-        tags = Tag.objects.filter(name__icontains=term).values('name')  # Case-insensitive search
+        # Filter tags by name, excluding any tags already selected
+        tags = Tag.objects.filter(
+            Q(name__icontains=term) & ~Q(name__in=exclude_ids)  # Case-insensitive search and exclude selected tags
+        ).values('name')  # Return only the name field for the tags
+
         return JsonResponse(list(tags), safe=False)  # Return tags as a JSON response
+
     return JsonResponse([], safe=False)  # Return an empty list if no 'term' is provided
 
 # Search view for tips and categories based on tags

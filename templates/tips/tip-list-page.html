@@ -4,46 +4,17 @@
 
 {% block content %}
 <div class="container my-4">
-    <h2>All Tips</h2>
-
-    <!-- Button to create new tip, visible to authenticated users -->
-    {% if user.is_authenticated %}
-        <a href="{% url 'create_tip' %}" class="btn btn-primary mb-3">Create New Tip</a>
-    {% endif %}
-
-    <!-- Show tips -->
-    {% if tips %}
-        <div class="list-group">
-            {% for tip in tips %}
-                <div class="list-group-item">
-                    <!-- Title: Only clickable and blue -->
-                    <a href="{% url 'tip_detail' tip.pk %}" class="d-block text-decoration-none text-primary">
-                        <h5>{{ tip.title }}</h5>
-                    </a>
-                    
-                    <!-- Description: Not clickable and not blue -->
-                    <p>{{ tip.content|truncatewords:30 }}</p> <!-- Show a truncated version of the content -->
-
-                    <!-- Edit and Delete buttons visible to the author or superusers -->
-                    {% if tip.author == user or user.is_superuser %}
-                        <div class="d-flex mt-2">
-                            <!-- Edit button -->
-                            <a href="{% url 'edit_tip' tip.pk %}" class="btn btn-warning btn-sm mr-2">Edit</a>
-                            <!-- Delete button -->
-                            <form action="{% url 'delete_tip' tip.pk %}" method="get" style="display:inline;">
-                                {% csrf_token %}
-                                <button type="submit" class="btn btn-danger btn-sm">Delete</button>
-                            </form>
-                        </div>
-                    {% endif %}
-                </div>
-            {% endfor %}
+    <div class="row">
+        <div class="col text-center">
+            <h2>All Tips</h2>
         </div>
+    </div>
 
-        <!-- Pagination controls -->
-        <div class="pagination mt-3">
+    <!-- Pagination controls at the top, right under "All Tips" -->
+    <div class="row">
+        <div class="col text-center">
             <nav>
-                <ul class="pagination">
+                <ul class="pagination justify-content-center">
                     {% if page_obj.has_previous %}
                         <!-- First page link -->
                         <li class="page-item">
@@ -90,8 +61,105 @@
                 </ul>
             </nav>
         </div>
+    </div>
+
+    <!-- Button to create new tip, centered -->
+    {% if user.is_authenticated %}
+        <div class="row">
+            <div class="col text-center mb-3">
+                <a href="{% url 'create_tip' %}" class="btn btn-primary">Create New Tip</a>
+            </div>
+        </div>
+    {% endif %}
+
+    <!-- Show tips -->
+    {% if tips %}
+        <div class="list-group">
+            {% for tip in tips %}
+                <div class="list-group-item text-center">
+                    <!-- Title: Only clickable and blue -->
+                    <a href="{% url 'tip_detail' tip.pk %}" class="d-block text-decoration-none text-primary">
+                        <h5>{{ tip.title }}</h5>
+                    </a>
+
+                    <!-- Replace description with image -->
+                    {% if tip.image_url %}
+                        <img src="{{ tip.image_url }}" alt="Tip Image" class="img-fluid mx-auto d-block">
+                    {% else %}
+                        <p>No image available</p>
+                    {% endif %}
+
+                    <!-- Edit and Delete buttons visible to the author or superusers -->
+                    {% if tip.author == user or user.is_superuser %}
+                        <div class="d-flex justify-content-center mt-2">
+                            <!-- Edit button -->
+                            <a href="{% url 'edit_tip' tip.pk %}" class="btn btn-warning btn-sm mr-2">Edit</a>
+                            <!-- Delete button -->
+                            <form action="{% url 'delete_tip' tip.pk %}" method="get" style="display:inline;">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+                            </form>
+                        </div>
+                    {% endif %}
+                </div>
+            {% endfor %}
+        </div>
     {% else %}
         <p>No tips available.</p>
     {% endif %}
+
+    <!-- Pagination controls at the bottom, after the last tip -->
+    <div class="row">
+        <div class="col text-center">
+            <nav>
+                <ul class="pagination justify-content-center">
+                    {% if page_obj.has_previous %}
+                        <!-- First page link -->
+                        <li class="page-item">
+                            <a class="page-link" href="?page=1" aria-label="First">
+                                <span aria-hidden="true">&laquo;&laquo;</span> First
+                            </a>
+                        </li>
+                        <!-- Previous page link -->
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ page_obj.previous_page_number }}" aria-label="Previous">
+                                <span aria-hidden="true">&laquo;</span> Previous
+                            </a>
+                        </li>
+                    {% endif %}
+
+                    <!-- Custom page range links -->
+                    {% for page_num in custom_page_range %}
+                        {% if page_num == page_obj.number %}
+                            <!-- Current page: highlighted and unclickable -->
+                            <li class="page-item active" aria-current="page">
+                                <span class="page-link">{{ page_num }}</span>
+                            </li>
+                        {% else %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ page_num }}">{{ page_num }}</a>
+                            </li>
+                        {% endif %}
+                    {% endfor %}
+
+                    {% if page_obj.has_next %}
+                        <!-- Next page link -->
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ page_obj.next_page_number }}" aria-label="Next">
+                                Next <span aria-hidden="true">&raquo;</span>
+                            </a>
+                        </li>
+                        <!-- Last page link -->
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}" aria-label="Last">
+                                Last <span aria-hidden="true">&raquo;&raquo;</span>
+                            </a>
+                        </li>
+                    {% endif %}
+                </ul>
+            </nav>
+        </div>
+    </div>
+
 </div>
 {% endblock %}

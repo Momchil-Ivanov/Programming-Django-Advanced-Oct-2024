@@ -1,40 +1,115 @@
 /* Ensure Select2 field width remains consistent */
 #id_categories {
-    width: 100% !important; /* Force the width to be 100% of its container */
+    width: 100% !important;
 }
 
 /* Adjust the input field inside Select2 to not shrink */
 .select2-container--default .select2-search--inline .select2-search__field {
-    width: 100% !important; /* Ensure the search field stretches to 100% width */
+    width: 100% !important;
 }
 
-/* Make the clickable category options bigger and ensure the whole line is clickable */
+/* Make the clickable category options bigger */
 .select2-results__option {
-    padding: 12px 20px !important; /* Increase the padding for better clickability */
-    cursor: pointer;  /* Ensure the cursor indicates that the entire line is clickable */
-    width: 100% !important; /* Make each category option fill the width */
-    border: 2px solid green !important; /* Add green border by default */
-    background-color: #f9f9f9; /* Optional: set a neutral background color */
+    padding: 12px 20px !important;
+    cursor: pointer;
+    width: 100% !important;
+    border: 2px solid #888 !important;
+    background-color: #f9f9f9;
 }
 
-/* Add a green outline for the clickable category options on hover or focus */
+/* Highlight options on hover or focus */
 .select2-results__option:hover, .select2-results__option:focus {
-    background-color: #a3e8a3 !important; /* Darker green for hover/focus */
-    border: 2px solid #388e3c !important; /* Darker green border on hover/focus */
+    background-color: #66bb6a !important;
+    border: 2px solid #388e3c !important;
 }
 
-/* Make sure the selected option's background is more noticeable */
+/* Make the selected option’s background more visible */
 .select2-results__option[aria-selected="true"] {
-    background-color: #c8e6c9 !important; /* Highlight selected option with a clear color */
-    border: 2px solid #388e3c !important; /* Dark green border for selected item */
+    background-color: #388e3c !important;
+    color: white !important;
+    border: 2px solid #388e3c !important;
 }
 
-/* Adjust width for the category names to make them more clickable */
+/* Adjust width for category names */
 .select2-results__option {
-    width: 100% !important; /* Make each category option fill the width */
+    width: 100% !important;
 }
 
-/* Move the "Tags" text lower */
+/* Move the "Tags" label lower */
 .form-group label[for="id_tags"] {
-    margin-top: 20px; /* Adjust this value based on your layout needs */
+    margin-top: 20px;
+}
+
+/* Center pagination and improve visibility */
+.center-pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    position: relative;
+    bottom: 0;
+    margin-top: 30px; /* Add margin top to give space above pagination */
+}
+
+.pagination {
+    display: flex;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    justify-content: center;
+    flex-wrap: wrap; /* Allow items to wrap on smaller screens */
+}
+
+.page-item {
+    margin: 0 3px; /* Reduce margin for a more compact view */
+}
+
+.page-link {
+    padding: 0.25rem 0.5rem; /* Smaller padding for mobile */
+    font-size: 0.9rem;  /* Smaller font size for better fit on mobile */
+    border-radius: 5px;
+    transition: background-color 0.2s;
+}
+
+/* Make buttons more visible */
+.page-link {
+    color: #007bff;
+    background-color: #f8f9fa;
+    border: 1px solid #dee2e6;
+}
+
+.page-link:hover {
+    background-color: #007bff;
+    color: #ffffff;
+}
+
+.page-item.active .page-link {
+    background-color: #007bff;
+    color: #fff;
+    border-color: #007bff;
+}
+
+/* Ensure pagination buttons remain clickable */
+.page-item a.page-link {
+    display: block;
+    text-decoration: none;
+}
+
+/* Make pagination buttons smaller and ensure they fit on small screens */
+@media (max-width: 768px) {
+    .page-link {
+        padding: 0.5rem 0.75rem; /* Slightly larger padding for mobile */
+        font-size: 0.85rem;  /* Reduce font size to make it fit better */
+    }
+
+    /* Adjust pagination item margin for better visibility on mobile */
+    .page-item {
+        margin: 5px 2px; /* Adjust margin for small screens */
+    }
+
+    /* Ensure pagination doesn't overflow */
+    .pagination {
+        overflow: auto;
+        white-space: nowrap;  /* Prevent wrapping for better mobile fit */
+    }
 }
