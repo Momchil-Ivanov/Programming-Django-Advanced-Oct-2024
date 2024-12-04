@@ -1,5 +1,4 @@
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.db.models import Q
 from django.http import HttpResponseForbidden, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse_lazy
@@ -7,7 +6,6 @@ from django.views.decorators.http import require_POST
 from django.views.generic import ListView, CreateView, UpdateView, DetailView, DeleteView
 from .models import Tip
 from .forms import TipForm
-from ..categories.forms import CategoryForm
 from ..categories.models import Category
 from ..common.forms import CommentForm
 from ..common.models import Comment
@@ -233,11 +231,12 @@ def tag_search(request):
     exclude_ids = [int(id) for id in exclude_ids if id.isdigit()]
 
     if search_query:
-        # Case insensitive search for existing tags
-        existing_tags = Tag.objects.filter(name__icontains=search_query).exclude(id__in=exclude_ids)
-
-        results = [{"id": tag.id, "name": tag.name} for tag in existing_tags]
+        # Filter tags based on the search query and exclude already selected ones
+        tags = Tag.objects.filter(name__icontains=search_query).exclude(id__in=exclude_ids)
     else:
-        results = []
+        # Exclude already selected tags even when no search query is entered
+        tags = Tag.objects.exclude(id__in=exclude_ids)
 
+    # Return the filtered tags as JSON
+    results = [{"id": tag.id, "name": tag.name} for tag in tags]
     return JsonResponse({"tags": results})

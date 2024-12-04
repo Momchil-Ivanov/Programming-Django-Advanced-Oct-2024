@@ -6,11 +6,16 @@
 <div class="container mt-4 d-flex justify-content-center">
     <div class="create-tag-column">
         <h2 class="create-tag-title">Create a New Tag:</h2>
+
+        <!-- Submit button for creating a tag directly under the title -->
+        <div class="d-flex justify-content-center mt-2">
+            <button type="submit" form="create-tag-form" class="btn btn-primary">Create Tag</button>
+        </div>
     
         <!-- Form for creating or selecting a tag -->
-        <form method="POST">
+        <form id="create-tag-form" method="POST">
             {% csrf_token %}
-            <div class="form-group">
+            <div class="form-group mt-3">
                 <label for="tag_name" class="tag-name-label">Tag Name</label>
                 <input type="text" id="tag_name" name="name" class="tag-name-input form-control" required maxlength="50">
 
@@ -26,11 +31,6 @@
             
             <!-- Display suggestions dynamically -->
             <div id="tag_suggestions" class="mt-2"></div>
-            
-            <!-- Submit button for creating a tag -->
-            <div class="d-flex justify-content-center mt-4">
-                <button type="submit" class="btn btn-primary">Create Tag</button>
-            </div>
         </form>
 
         <!-- Existing Tags section -->

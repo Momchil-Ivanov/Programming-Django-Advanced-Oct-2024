@@ -213,12 +213,14 @@ def edit_comment(request, pk):
 
 @login_required
 def category_search(request):
-    search_query = request.GET.get('q', '')
+    search_query = request.GET.get('q', '').strip()
     exclude_ids = request.GET.get('exclude_ids', '').split(',')
     exclude_ids = [int(id) for id in exclude_ids if id.isdigit()]  # Convert to list of integers
 
-    # Filter categories based on the search query and exclude already selected ones
-    categories = Category.objects.filter(name__icontains=search_query).exclude(id__in=exclude_ids)
+    if search_query:
+        categories = Category.objects.filter(name__icontains=search_query).exclude(id__in=exclude_ids)
+    else:
+        categories = Category.objects.exclude(id__in=exclude_ids)
 
     # Return the filtered categories as JSON
     results = [{'id': category.id, 'name': category.name} for category in categories]
@@ -231,11 +233,12 @@ def tag_search(request):
     exclude_ids = [int(id) for id in exclude_ids if id.isdigit()]
 
     if search_query:
-        # Case insensitive search for existing tags
-        existing_tags = Tag.objects.filter(name__icontains=search_query).exclude(id__in=exclude_ids)
-
-        results = [{"id": tag.id, "name": tag.name} for tag in existing_tags]
+        # Filter tags based on the search query and exclude already selected ones
+        tags = Tag.objects.filter(name__icontains=search_query).exclude(id__in=exclude_ids)
     else:
-        results = []
+        # Exclude already selected tags even when no search query is entered
+        tags = Tag.objects.exclude(id__in=exclude_ids)
 
+    # Return the filtered tags as JSON
+    results = [{"id": tag.id, "name": tag.name} for tag in tags]
     return JsonResponse({"tags": results})

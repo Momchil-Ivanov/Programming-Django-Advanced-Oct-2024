@@ -16,7 +16,7 @@
 
                 <!-- Display form errors for the 'name' field -->
                 {% if form.name.errors %}
-                    <div class="errorlist mt-2 text-cen">
+                    <div class="errorlist mt-2 text-center">
                         {% for error in form.name.errors %}
                             <p class="text-danger">{{ error }}</p>
                         {% endfor %}
@@ -26,7 +26,7 @@
             
             <!-- Display suggestions dynamically -->
             <div id="tag_suggestions" class="mt-2"></div>
-            
+
             <!-- Submit button for creating a tag -->
             <div class="d-flex justify-content-center mt-4">
                 <button type="submit" class="btn btn-primary">Create Tag</button>

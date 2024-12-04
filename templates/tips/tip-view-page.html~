@@ -26,16 +26,16 @@
     </div>
 
     <!-- Display tags -->
-<div class="mt-3">
-    <strong>Tags:</strong>
-    {% if tip.tags.exists %}
-        {% for tag in tip.tags.all %}
-            <span class="badge bg-secondary">{{ tag.name }}</span>
-        {% endfor %}
-    {% else %}
-        <p class="text-muted">No tags assigned to this tip.</p>
-    {% endif %}
-</div>
+    <div class="mt-3">
+        <strong>Tags:</strong>
+        {% if tip.tags.exists %}
+            {% for tag in tip.tags.all %}
+                <span class="badge bg-secondary">{{ tag.name }}</span>
+            {% endfor %}
+        {% else %}
+            <p class="text-muted">No tags assigned to this tip.</p>
+        {% endif %}
+    </div>
 
     <!-- Like and Dislike buttons -->
     <div class="mt-4 d-flex align-items-center">
@@ -47,7 +47,7 @@
             </button>
         </form>
         <span class="me-4">{{ tip.total_likes }} Likes</span>
-        
+
         <form action="{% url 'dislike_tip' tip.id %}" method="post" class="me-3">
             {% csrf_token %}
             <button type="submit" class="btn {% if user in tip.dislikes.all %}btn-danger{% else %}btn-outline-danger{% endif %}">

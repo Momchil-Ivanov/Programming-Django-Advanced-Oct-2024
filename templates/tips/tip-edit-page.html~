@@ -51,7 +51,7 @@
         </div>
 
         <!-- Categories -->
-        <div class="form-group mb-2">
+        <div class="form-group">
             <label for="id_categories">Categories</label>
             <select id="id_categories" name="categories" class="form-control select2-multiple" multiple="multiple">
                 {% for category in form.categories.field.queryset %}
@@ -61,13 +61,6 @@
                 </option>
                 {% endfor %}
             </select>
-            {% if form.categories.errors %}
-                <div class="invalid-feedback">
-                    {% for error in form.categories.errors %}
-                        <p>{{ error }}</p>
-                    {% endfor %}
-                </div>
-            {% endif %}
         </div>
 
         <!-- Tags -->
@@ -103,9 +96,10 @@
                 dataType: 'json',
                 delay: 250,
                 data: function(params) {
+                    const selectedCategories = $('#id_categories').val() || [];
                     return { 
                         q: params.term || '', 
-                        exclude_ids: '{{ selected_category_ids|join:"," }}'  // Passing selected categories to exclude
+                        exclude_ids: 
                     };
                 },
                 processResults: function(data) {
@@ -118,54 +112,31 @@
             }
         });
 
-        // Initialize Select2 for tags with AJAX and the ability to add new tags
-        $('#id_tags').select2({
-            placeholder: 'Search or add tags',
-            minimumInputLength: 1,
-            tags: true,
-            ajax: {
-                url: '{% url "tag_search" %}',
-                dataType: 'json',
-                delay: 250,
-                data: function(params) {
-                    return {
-                        q: params.term || '',
-                        exclude_ids: '{{ selected_tag_ids|join:"," }}'
-                    };
-                },
-                processResults: function(data) {
-                    return {
-                        results: data.tags.map(function(tag) {
-                            return { id: tag.id, text: tag.name };
-                        })
-                    };
-                }
-            },
-            createTag: function(params) {
-                const term = $.trim(params.term);
-                // Allow creation of tags with different cases
-                const existingTags = $('#id_tags option').filter(function() {
-                    return $(this).text().toLowerCase() === term.toLowerCase();  // Case-insensitive comparison
-                });
-
-                if (existingTags.length) {
-                    return null; // Prevent duplicate creation
-                }
-
-                // Allow new tag creation even if case differs
-                return { id: term, text: term }; // Allow new tag creation
-            }
-        });
-
-        // Restrict AJAX request until a tag is selected
-        $('#id_tags').on('select2:open', function(e) {
-            var selectedTags = $(this).val(); // Get the selected tags
-
-            // If the input is empty (no tag is selected), block the request
-            if (!selectedTags || selectedTags.length === 0) {
-                e.preventDefault();  // This will prevent the automatic fetching of tags
-            }
-        });
+        // Initialize Select2 for tags with AJAX (disable tag creation)
+ $('#id_tags').select2({
+    placeholder: 'Search for tags',
+    minimumInputLength: 1,
+    ajax: {
+        url: '{% url "tag_search" %}',
+        dataType: 'json',
+        delay: 250,
+        data: function(params) {
+            // Get all selected tag IDs to exclude them from the search results
+            const selectedTags = $('#id_tags').val() || [];
+            return {
+                q: params.term || '',  // Current search term
+                exclude_ids: selectedTags.join(',')  // Exclude already selected tags
+            };
+        },
+        processResults: function(data) {
+            return {
+                results: data.tags.map(function(tag) {
+                    return { id: tag.id, text: tag.name };
+                })
+            };
+        }
+    }
+});
     });
 </script>
 {% endblock %}
