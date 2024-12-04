@@ -4,7 +4,7 @@ from excelTipsAndTricks.tags.models import Tag  # Import Tag model
 
 class Category(models.Model):
     name = models.CharField(
-        max_length=100,
+        max_length=50,
         unique=True,
     )
     description = models.TextField(

@@ -1,122 +1,127 @@
+{% extends 'base.html' %}
+
 {% load static %}
 
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}Excel Tips and Tricks{% endblock %}</title>
+{% block content %}
+<!-- This ensures the content is centered under the search bar -->
+<div class="container mt-4">
+    <div class="d-flex justify-content-center">
+        <div class="col-12 col-md-8">
+            <h1>{{ tip.title }}</h1>
 
-    <!-- Bootstrap CSS via CDN -->
-    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Font Awesome CDN -->
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
-    <!-- Custom CSS -->
-    <link rel="stylesheet" href="{% static 'css/home.css' %}">
+            <!-- Display image if it exists -->
+            {% if tip.image_url %}
+                <img src="{{ tip.image_url }}" alt="Image related to {{ tip.title }}" class="img-fluid mb-3" />
+            {% endif %}
 
+            <p>{{ tip.content }}</p>
 
-    <!-- Select2 CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0/dist/css/select2.min.css" rel="stylesheet">
-
-    {% block extra_head %}{% endblock %}
-</head>
-<body class="d-flex flex-column min-vh-100">
-    <!-- Header -->
-    <header class="bg-success text-white text-center py-4">
-        <h1 class="display-4">{% block header_title %}Welcome to Excel Tips and Tricks{% endblock %}</h1>
-        <nav>
-            <ul class="nav justify-content-center">  <!-- Center buttons -->
-                <li class="nav-item">
-                    <a class="nav-link btn-excel mx-2 px-4" href="{% url 'home' %}">Home</a>
-                </li>
-
-                <!-- Always visible About button -->
-                <li class="nav-item">
-                    <a class="nav-link btn-excel mx-2 px-4" href="{% url 'about' %}">About</a>
-                </li>
-
-                {% if user.is_authenticated %}
-                    <li class="nav-item">
-                        <a class="nav-link btn-excel mx-2 px-4" href="{% url 'view_category' %}">Categories</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link btn-excel mx-2 px-4" href="{% url 'all_tips' %}">Tips</a>
-                    </li>
-                    <li class="nav-item">
-                        <a href="{% url 'profile' %}" class="nav-link btn-excel mx-2 px-4">Profile</a>
-                    </li>
-
-                    <!-- Show Create Tag button for authenticated users -->
-                    {% if not user.is_anonymous %}
-                        <li class="nav-item">
-                            <a class="nav-link btn-excel mx-2 px-4" href="{% url 'create_tags' %}">Create Tag</a>
-                        </li>
-                    {% endif %}
-
-                    <!-- Show Tags button for staff admins and superusers -->
-                    {% if user.is_staff %}
-                        <li class="nav-item">
-                            <a class="nav-link btn-excel mx-2 px-4" href="{% url 'manage_tags' %}">All Tags</a>
-                        </li>
-                    {% endif %}
-
-                    <li class="nav-item">
-                        <form action="{% url 'logout' %}" method="POST" style="display: inline;">
-                            {% csrf_token %}
-                            <button type="submit" class="btn-logout mx-2 px-4 text-white">
-                                Logout <i class="fas fa-sign-out-alt ml-2"></i>
-                            </button>
-                        </form>
-                    </li>
+            <!-- Display categories -->
+            <div class="mt-3">
+                <strong>Categories:</strong>
+                {% if tip.categories.exists %}
+                    {% for category in tip.categories.all %}
+                        <span class="badge bg-primary">{{ category.name }}</span>
+                    {% endfor %}
                 {% else %}
-                    <li class="nav-item">
-                        <a href="{% url 'login' %}" class="nav-link btn-excel mx-2 px-4">Login</a>
-                    </li>
+                    <p class="text-muted">No categories assigned to this tip.</p>
                 {% endif %}
-            </ul>
-        </nav>
-    </header>
+            </div>
 
-    <!-- Tag Search Form -->
-    {% if user.is_authenticated %}
-    <div class="container mt-4 d-flex justify-content-center">
-        <form action="{% url 'search_tags' %}" method="GET" class="d-flex justify-content-center" style="width: 100%; max-width: 400px;">
-            <input type="text" name="query" placeholder="Search bar..." class="form-control green-outline" style="width: 100%; padding-right: 50px;">
-            <button type="submit" class="btn btn-outline-light ml-2" style="position: absolute; right: 10px;">
-                <i class="fas fa-search"></i> Search
-            </button>
-        </form>
-    </div>
-    {% endif %}
+            <!-- Display tags -->
+            <div class="mt-3">
+                <strong>Tags:</strong>
+                {% if tip.tags.exists %}
+                    {% for tag in tip.tags.all %}
+                        <span class="badge bg-secondary">{{ tag.name }}</span>
+                    {% endfor %}
+                {% else %}
+                    <p class="text-muted">No tags assigned to this tip.</p>
+                {% endif %}
+            </div>
 
-    <!-- Display success and error messages -->
-    {% if messages %}
-        <div class="container mt-4 d-flex justify-content-center">
-            <div class="alert alert-info text-center" style="width: 80%;">  <!-- Adjust width as needed -->
-                {% for message in messages %}
-                    <p>{{ message }}</p>
-                {% endfor %}
+            <!-- Like and Dislike buttons -->
+            <div class="mt-4 d-flex align-items-center">
+                <!-- Like Button -->
+                <form action="{% url 'like_tip' tip.id %}" method="post" class="me-3">
+                    {% csrf_token %}
+                    <button type="submit" class="btn {% if user in tip.likes.all %}btn-success{% else %}btn-outline-success{% endif %}">
+                        <i class="fas fa-thumbs-up"></i> Like
+                    </button>
+                </form>
+                <span class="me-4">{{ tip.total_likes }} Likes</span>
+                
+                <form action="{% url 'dislike_tip' tip.id %}" method="post" class="me-3">
+                    {% csrf_token %}
+                    <button type="submit" class="btn {% if user in tip.dislikes.all %}btn-danger{% else %}btn-outline-danger{% endif %}">
+                        <i class="fas fa-thumbs-down"></i> Dislike
+                    </button>
+                </form>
+                <span>{{ tip.total_dislikes }} Dislikes</span>
+            </div>
+
+            <!-- Comments Section -->
+            <div class="mt-5">
+                <h2>Comments</h2>
+                <div id="comments">
+                    {% for comment in comments %}
+                        <div class="comment border rounded p-3 mb-3">
+                            <strong>{{ comment.author.username }}</strong>
+                            <p>{{ comment.content }}</p>
+                            <small class="text-muted">Posted on {{ comment.created_at|date:"Y-m-d H:i" }}</small>
+
+                            {% if user == comment.author or user.is_superuser or user.is_staff %}
+                                <div class="mt-3">
+                                    <a href="{% url 'edit_comment' pk=comment.pk %}" class="btn btn-warning btn-sm">Edit</a>
+                                    <a href="{% url 'delete_comment' pk=comment.pk %}" class="btn btn-danger btn-sm">Delete</a>
+                                </div>
+                            {% endif %}
+                        </div>
+                    {% empty %}
+                        <p>No comments yet. Be the first to comment!</p>
+                    {% endfor %}
+                </div>
+
+                <!-- Pagination for Comments -->
+                {% if comments.has_other_pages %}
+                    <nav class="mt-4">
+                        <ul class="pagination">
+                            {% if comments.has_previous %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ comments.previous_page_number }}">Previous</a>
+                                </li>
+                            {% endif %}
+                            {% for num in comments.paginator.page_range %}
+                                <li class="page-item {% if comments.number == num %}active{% endif %}">
+                                    <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+                                </li>
+                            {% endfor %}
+                            {% if comments.has_next %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ comments.next_page_number }}">Next</a>
+                                </li>
+                            {% endif %}
+                        </ul>
+                    </nav>
+                {% endif %}
+
+                <!-- Add Comment Form -->
+                {% if user.is_authenticated %}
+                    <form method="post" action="{% url 'add_comment' tip.id %}" class="mt-4">
+                        {% csrf_token %}
+                        <div class="form-group">
+                            {{ comment_form.content.label_tag }}
+                            {{ comment_form.content }}
+                        </div>
+                        <button type="submit" class="btn btn-primary">Add Comment</button>
+                    </form>
+                {% else %}
+                    <p class="mt-4">
+                        <a href="{% url 'login' %}">Log in</a> to add a comment.
+                    </p>
+                {% endif %}
             </div>
         </div>
-    {% endif %}
-
-    {% block content %}  <!-- Content block to be filled by each page -->
-    {% endblock %}
-
-    <!-- Footer -->
-    <footer class="bg-dark text-white text-center py-3 mt-auto">
-        <p>&copy; 2024 Excel Tips and Tricks</p>
-    </footer>
-
-    <!-- Bootstrap JS -->
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.3/dist/umd/popper.min.js"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
-
-    <!-- Select2 JS -->
-    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0/dist/js/select2.min.js"></script>
-
-    {% block extra_js %}  <!-- Extra JS block to add custom JS per page -->
-    {% endblock %}
-</body>
-</html>
+    </div>
+</div>
+{% endblock %}

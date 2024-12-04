@@ -2,45 +2,44 @@
 {% load static %}
 
 {% block content %}
-<div class="container mt-5">
-    <h2 class="mb-4">Your Profile</h2>
+<div class="container mt-5 d-flex justify-content-center">
+    <div class="w-75">
+        <h2 class="mb-4 text-center">Your Profile</h2>
 
-    <!-- Profile Picture Section -->
-    <div class="mb-4">
-        <h3>Profile Picture</h3>
-        {% if user_profile.profile_picture %}
-            <img src="{{ user_profile.profile_picture.url }}" alt="Profile Picture" class="img-thumbnail" style="width: 150px; height: auto;">
-        {% elif user_profile.profile_picture_url %}
-            <img src="{{ user_profile.profile_picture_url }}" alt="Profile Picture" class="img-thumbnail" style="width: 150px; height: auto;">
-        {% else %}
-            <img src="{% static 'images/accounts/default_profile_picture.png' %}" alt="Default Profile Picture" class="img-thumbnail" style="width: 150px; height: auto;">
-        {% endif %}
-    </div>
-
-    <!-- Personal Information Section -->
-    <div>
-        <h3>Personal Information</h3>
-        <p><strong>Username:</strong> {{ user.username }}</p>
-        <p><strong>Email:</strong> {{ user.email }}</p>
-        <p><strong>Bio:</strong> {{ user_profile.bio|default:"No bio available." }}</p>
-        <p><strong>Website:</strong> 
-            {% if user_profile.website %}
-                <a href="{{ user_profile.website }}" target="_blank">{{ user_profile.website }}</a>
+        <!-- Profile Picture Section -->
+        <div class="mb-4 text-center">
+            <h3>Profile Picture</h3>
+            {% if user_profile.profile_picture %}
+                <img src="{{ user_profile.profile_picture.url }}" alt="Profile Picture" class="img-thumbnail" style="width: 150px; height: auto;">
+            {% elif user_profile.profile_picture_url %}
+                <img src="{{ user_profile.profile_picture_url }}" alt="Profile Picture" class="img-thumbnail" style="width: 150px; height: auto;">
             {% else %}
-                Not provided
+                <img src="{% static 'images/accounts/default_profile_picture.png' %}" alt="Default Profile Picture" class="img-thumbnail" style="width: 150px; height: auto;">
             {% endif %}
-        </p>
-        <p><strong>Age:</strong> {{ user_profile.age|default:"Not specified" }}</p>
-    </div>
+        </div>
 
-    <!-- Action Buttons Section -->
-    <div class="mt-4">
-        <a href="{% url 'profile_update' %}" class="btn btn-info">Edit Profile</a>
-        <a href="{% url 'password_change' %}" class="btn btn-warning">Change Password</a>
-        <a href="{% url 'profile_delete' %}" class="btn btn-danger">Delete Profile</a>
-    </div>
+        <!-- Personal Information Section -->
+        <div class="text-center">
+            <h3>Personal Information</h3>
+            <p><strong>Username:</strong> {{ user.username }}</p>
+            <p><strong>Email:</strong> {{ user.email }}</p>
+            <p><strong>Bio:</strong> {{ user_profile.bio|default:"No bio available." }}</p>
+            <p><strong>Website:</strong> 
+                {% if user_profile.website %}
+                    <a href="{{ user_profile.website }}" target="_blank">{{ user_profile.website }}</a>
+                {% else %}
+                    Not provided
+                {% endif %}
+            </p>
+            <p><strong>Age:</strong> {{ user_profile.age|default:"Not specified" }}</p>
+        </div>
 
-    <hr class="my-4">
-    <a href="{% url 'home' %}" class="btn btn-secondary">Back to Home</a>
+        <!-- Action Buttons Section -->
+        <div class="mt-4 text-center">
+            <a href="{% url 'profile_update' %}" class="btn btn-info">Edit Profile</a>
+            <a href="{% url 'password_change' %}" class="btn btn-warning">Change Password</a>
+            <a href="{% url 'profile_delete' %}" class="btn btn-danger">Delete Profile</a>
+        </div>
+    </div>
 </div>
 {% endblock %}

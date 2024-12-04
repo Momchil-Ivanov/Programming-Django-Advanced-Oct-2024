@@ -1,4 +1,5 @@
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.core.paginator import Paginator
 from django.http import HttpResponseForbidden, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse_lazy
@@ -94,6 +95,7 @@ class EditTipView(UpdateView):
         messages.error(self.request, "There was an error with your form submission. Please fix the issues.")
         return self.render_to_response(self.get_context_data(form=form))
 
+
 class TipDetailView(DetailView):
     model = Tip
     template_name = 'tips/tip-view-page.html'
@@ -101,17 +103,15 @@ class TipDetailView(DetailView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        tip = self.get_object()
 
-        # Fetch associated comments for this tip, ordered by the most recent
-        context['comments'] = tip.comments.order_by('-created_at')
+        # Paginate comments (5 comments per page)
+        comments = Comment.objects.filter(tip=self.object).order_by('-created_at')
+        paginator = Paginator(comments, 5)  # Show 5 comments per page
+        page_number = self.request.GET.get('page')
+        page_obj = paginator.get_page(page_number)
 
-        # Include the comment form
-        context['comment_form'] = CommentForm()
-
-        # Pass the tags related to this tip
-        context['tags'] = tip.tags.all()
-
+        context['comments'] = page_obj
+        context['comment_form'] = CommentForm()  # Ensure you pass the comment form as well
         return context
 
 

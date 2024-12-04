@@ -95,7 +95,7 @@
                             <!-- Edit button -->
                             <a href="{% url 'edit_tip' tip.pk %}" class="btn btn-warning btn-sm mr-2">Edit</a>
                             <!-- Delete button -->
-                            <form action="{% url 'delete_tip' tip.pk %}" method="get" style="display:inline;">
+                            <form action="{% url 'delete_tip' tip.pk %}" method="POST" style="display:inline;">
                                 {% csrf_token %}
                                 <button type="submit" class="btn btn-danger btn-sm">Delete</button>
                             </form>

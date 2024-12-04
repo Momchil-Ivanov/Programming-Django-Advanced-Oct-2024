@@ -6,7 +6,7 @@ from excelTipsAndTricks.tags.models import Tag
 class Tip(models.Model):
     title = models.CharField(
         unique=True,
-        max_length=100,
+        max_length=50,
     )
 
     content = models.TextField()

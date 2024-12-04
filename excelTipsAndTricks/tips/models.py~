@@ -36,7 +36,7 @@ class Tip(models.Model):
     )
 
     # Changed likes and dislikes to represent specific actions and improve consistency
-    likes = models.ManyToManyFpython -m venv venvield(
+    likes = models.ManyToManyField(
         User,
         related_name='liked_tips',
         blank=True,

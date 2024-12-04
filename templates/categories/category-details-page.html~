@@ -13,14 +13,6 @@
             <p>No image available</p>
         {% endif %}
 
-        <div class="d-flex flex-column align-items-start mt-2">
-            <a href="{% url 'category_edit' pk=category.pk %}" class="btn btn-warning btn-sm mr-2">Edit</a>
-            <form action="{% url 'category_delete' pk=category.pk %}" method="POST" style="display: inline;">
-                {% csrf_token %}
-                <button type="submit" class="btn btn-danger btn-sm">Delete</button>
-            </form>
-        </div>
-
         <h4>Tips in this category:</h4>
         {% if related_tips %}
             <ul class="list-group mt-3">

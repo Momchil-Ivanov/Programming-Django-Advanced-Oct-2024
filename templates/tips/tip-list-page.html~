@@ -10,7 +10,7 @@
         </div>
     </div>
 
-    <!-- Pagination controls right under "All Tips" -->
+    <!-- Pagination controls at the top, right under "All Tips" -->
     <div class="row">
         <div class="col text-center">
             <nav>
@@ -107,5 +107,59 @@
     {% else %}
         <p>No tips available.</p>
     {% endif %}
+
+    <!-- Pagination controls at the bottom, after the last tip -->
+    <div class="row">
+        <div class="col text-center">
+            <nav>
+                <ul class="pagination justify-content-center">
+                    {% if page_obj.has_previous %}
+                        <!-- First page link -->
+                        <li class="page-item">
+                            <a class="page-link" href="?page=1" aria-label="First">
+                                <span aria-hidden="true">&laquo;&laquo;</span> First
+                            </a>
+                        </li>
+                        <!-- Previous page link -->
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ page_obj.previous_page_number }}" aria-label="Previous">
+                                <span aria-hidden="true">&laquo;</span> Previous
+                            </a>
+                        </li>
+                    {% endif %}
+
+                    <!-- Custom page range links -->
+                    {% for page_num in custom_page_range %}
+                        {% if page_num == page_obj.number %}
+                            <!-- Current page: highlighted and unclickable -->
+                            <li class="page-item active" aria-current="page">
+                                <span class="page-link">{{ page_num }}</span>
+                            </li>
+                        {% else %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ page_num }}">{{ page_num }}</a>
+                            </li>
+                        {% endif %}
+                    {% endfor %}
+
+                    {% if page_obj.has_next %}
+                        <!-- Next page link -->
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ page_obj.next_page_number }}" aria-label="Next">
+                                Next <span aria-hidden="true">&raquo;</span>
+                            </a>
+                        </li>
+                        <!-- Last page link -->
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}" aria-label="Last">
+                                Last <span aria-hidden="true">&raquo;&raquo;</span>
+                            </a>
+                        </li>
+                    {% endif %}
+                </ul>
+            </nav>
+        </div>
+    </div>
+
 </div>
 {% endblock %}

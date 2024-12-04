@@ -3,7 +3,7 @@
 {% block title %}Category: {{ category.name }} - Excel Tips and Tricks{% endblock %}
 
 {% block content %}
-    <div class="container my-4">
+    <div class="container my-4 text-center">
         <h2>{{ category.name }}</h2>
         <p>{{ category.description }}</p>
         
@@ -15,7 +15,7 @@
 
         <h4>Tips in this category:</h4>
         {% if related_tips %}
-            <ul class="list-group mt-3">
+            <ul class="list-group mt-3 mx-auto" style="max-width: 500px;">
                 {% for tip in related_tips %}
                     <li class="list-group-item">
                         <a href="{% url 'tip_detail' pk=tip.pk %}">{{ tip.title }}</a>
