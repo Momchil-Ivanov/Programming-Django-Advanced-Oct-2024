@@ -9,12 +9,12 @@
     <!-- Tag Search Form (Specific to tags manage page) -->
     <div class="mb-4 d-flex justify-content-center">
         <form action="{% url 'manage_tags' %}" method="GET" class="d-flex justify-content-center" style="max-width: 400px; width: 100%;">
-            <input 
-                type="text" 
-                name="query" 
-                placeholder="Search tags..." 
-                class="form-control" 
-                style="flex: 1; margin-right: 10px;" 
+            <input
+                type="text"
+                name="query"
+                placeholder="Search tags..."
+                class="form-control"
+                style="flex: 1; margin-right: 10px;"
                 value="{{ query }}"
             >
             <button type="submit" class="btn btn-outline-success">
@@ -37,8 +37,8 @@
                 <tr>
                     <td>{{ tag.name }}</td>
                     <td>
-                        <!-- Delete button triggers the modal -->
-                        <button type="button" class="btn btn-danger" onclick="openDeleteModal({{ tag.id }})">Delete</button>
+                        <!-- Redirect to delete confirmation page -->
+                        <a href="{% url 'delete_tag' tag.id %}" class="btn btn-danger">Delete</a>
                     </td>
                 </tr>
                 {% empty %}
@@ -50,50 +50,4 @@
         </table>
     </div>
 </div>
-
-<!-- Confirmation Modal -->
-<div class="modal fade" id="confirmDeleteModal" tabindex="-1" aria-labelledby="confirmDeleteModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="confirmDeleteModalLabel">Confirm Deletion</h5>
-            </div>
-            <div class="modal-body">
-                Are you sure you want to delete this tag?
-            </div>
-            <div class="modal-footer">
-                <!-- Cancel button -->
-                <button type="button" class="btn btn-secondary" onclick="closeDeleteModal()">Cancel</button>
-                <form id="deleteForm" method="POST" style="display: inline;">
-                    {% csrf_token %}
-                    <input type="hidden" id="tag_id" name="tag_id">
-                    <button type="submit" class="btn btn-danger">Delete</button>
-                </form>
-            </div>
-        </div>
-    </div>
-</div>
-
-<script type="text/javascript">
-    // Open the modal and set the tag_id to the hidden input field
-    function openDeleteModal(tagId) {
-        document.getElementById('tag_id').value = tagId;
-        var myModal = new bootstrap.Modal(document.getElementById('confirmDeleteModal'));
-        myModal.show();
-    }
-
-    // Close the modal manually when Cancel is clicked
-    function closeDeleteModal() {
-        var modalElement = document.getElementById('confirmDeleteModal');
-        var backdrop = document.querySelector('.modal-backdrop');
-
-        // Hide the modal and the backdrop
-        modalElement.classList.remove('show');
-        modalElement.style.display = 'none';
-        if (backdrop) {
-            backdrop.classList.remove('show');
-            backdrop.style.display = 'none';
-        }
-    }
-</script>
 {% endblock %}

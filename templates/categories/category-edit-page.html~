@@ -5,6 +5,13 @@
 {% block content %}
     <div class="container my-4">
         <h2>Edit Category</h2>
+    
+            <!-- Delete button -->
+        <form action="{% url 'category_delete' pk=category.pk %}" method="GET" style="display: inline;">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+        </form>
+    
         <!-- Form fields -->
         <form method="post">
             {% csrf_token %}

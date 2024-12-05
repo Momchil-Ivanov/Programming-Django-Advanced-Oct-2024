@@ -3,7 +3,7 @@ from django.contrib.auth.decorators import user_passes_test
 from django.core.paginator import Paginator
 from django.http import JsonResponse, HttpResponseForbidden
 from django.db.models import Q
-from django.shortcuts import redirect, render
+from django.shortcuts import redirect, render, get_object_or_404
 from django.views.generic import TemplateView
 
 from .forms import TagForm
@@ -72,11 +72,11 @@ class TagSearchView(TemplateView):
 
 @user_passes_test(lambda u: u.is_staff or u.is_superuser)  # Ensure only staff or superusers can access
 def manage_tags(request):
-    query = request.GET.get('query', '')  # Get the search query from GET request (if any)
+    query = request.GET.get('query', '')
     if query:
-        tags = Tag.objects.filter(Q(name__icontains=query))  # Case-insensitive search for tags
+        tags = Tag.objects.filter(name__icontains=query)
     else:
-        tags = Tag.objects.all()  # If no query, show all tags
+        tags = Tag.objects.all()
 
     if request.method == 'POST':
         tag_id = request.POST.get('tag_id')
@@ -86,9 +86,22 @@ def manage_tags(request):
             messages.success(request, "Tag deleted successfully.")
         except Tag.DoesNotExist:
             messages.error(request, "Tag not found.")
-        return redirect('manage_tags')  # Redirect to the same page after deleting
+        return redirect('manage_tags')
 
     return render(request, 'tags/tag_manage.html', {'tags': tags, 'query': query})
+
+@user_passes_test(lambda u: u.is_staff or u.is_superuser)  # Ensure only staff or superusers can access
+def delete_tag(request, tag_id):
+    # Get the tag to be deleted
+    tag = get_object_or_404(Tag, id=tag_id)
+
+    if request.method == 'POST':
+        # Delete the tag if the form is submitted
+        tag.delete()
+        messages.success(request, "Tag deleted successfully.")
+        return redirect('manage_tags')
+
+    return render(request, 'tags/tag_delete.html', {'tag': tag})
 
 
 def create_tags(request):

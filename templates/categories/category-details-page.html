@@ -4,9 +4,17 @@
 
 {% block content %}
     <div class="container my-4 text-center">
+    
+        <!-- Edit and Delete button -->
+        <form action="{% url 'category_delete' pk=category.pk %}" method="GET" style="display: inline;">
+            {% csrf_token %}
+            <a href="{% url 'category_edit' pk=category.pk %}" class="btn btn-warning btn-sm mr-2">Edit</a>
+            <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+        </form>
+    
         <h2>{{ category.name }}</h2>
         <p>{{ category.description }}</p>
-        
+
         {% if category.image_url %}
             <img src="{{ category.image_url }}" alt="{{ category.name }}" class="img-fluid mb-2" width="150">
         {% else %}

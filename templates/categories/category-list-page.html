@@ -76,10 +76,9 @@
             <ul class="list-group">
                 {% for category in categories %}
                     <li class="list-group-item text-center">
-                        <!-- Make the category name clickable -->
-                        <a href="{% url 'category_detail' pk=category.pk %}">
-                            <strong>{{ category.name }}</strong>
-                        </a><br>
+
+                        <strong>{{ category.name }}</strong>
+                    
                         {% if category.description %}
                             <p>{{ category.description }}</p>
                         {% endif %}
@@ -98,11 +97,9 @@
                                         <!-- Edit button -->
                                         <a href="{% url 'category_edit' pk=category.pk %}" class="btn btn-warning btn-sm mr-2">Edit</a>
                                         
-                                        <!-- Delete button -->
-                                        <form action="{% url 'category_delete' pk=category.pk %}" method="GET" style="display: inline;">
-                                            {% csrf_token %}
-                                            <button type="submit" class="btn btn-danger btn-sm">Delete</button>
-                                        </form>
+                                        <!-- Details button -->
+                                        <a href="{% url 'category_detail' pk=category.pk %}" class="btn btn-info btn-sm">Details</a>
+                                    
                                     </div>
                                 {% endif %}
                             {% endif %}

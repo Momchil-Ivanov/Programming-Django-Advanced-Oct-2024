@@ -77,10 +77,8 @@
         <div class="list-group">
             {% for tip in tips %}
                 <div class="list-group-item text-center">
-                    <!-- Title: Only clickable and blue -->
-                    <a href="{% url 'tip_detail' tip.pk %}" class="d-block text-decoration-none text-primary">
-                        <h5>{{ tip.title }}</h5>
-                    </a>
+                    <!-- Title: No longer clickable -->
+                    <h5>{{ tip.title }}</h5>
 
                     <!-- Replace description with image -->
                     {% if tip.image_url %}
@@ -94,8 +92,10 @@
                         <div class="d-flex justify-content-center mt-2">
                             <!-- Edit button -->
                             <a href="{% url 'edit_tip' tip.pk %}" class="btn btn-warning btn-sm mr-2">Edit</a>
+                            <!-- Details button -->
+                            <a href="{% url 'tip_detail' tip.pk %}" class="btn btn-info btn-sm mr-2">Details</a>              
                             <!-- Delete button -->
-                            <form action="{% url 'delete_tip' tip.pk %}" method="get" style="display:inline;">
+                            <form action="{% url 'delete_tip' tip.pk %}" method="POST" style="display:inline;">
                                 {% csrf_token %}
                                 <button type="submit" class="btn btn-danger btn-sm">Delete</button>
                             </form>

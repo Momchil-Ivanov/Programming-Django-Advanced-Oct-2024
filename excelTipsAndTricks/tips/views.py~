@@ -30,9 +30,9 @@ class AllTipsView(LoginRequiredMixin, ListView):
         context = super().get_context_data(**kwargs)
         page_obj = context['page_obj']
 
-        # Calculate the page range to show 5 pages before and after the current page
+        # Adjust indices to show 5 pages before and after
         start_index = max(1, page_obj.number - 5)  # At least 5 pages before the current page
-        end_index = min(page_obj.paginator.num_pages + 1, page_obj.number + 6)  # At most 5 pages after the current page
+        end_index = min(page_obj.paginator.num_pages + 1, page_obj.number + 6)
 
         context['custom_page_range'] = range(start_index, end_index)
         return context
@@ -123,7 +123,10 @@ class TipDeleteView(DeleteView):
 
     def get_queryset(self):
         # Ensures only the tip's author can delete the tip
-        return Tip.objects.filter(author=self.request.user)
+        if self.request.user.is_staff:
+            return Tip.objects.all()
+        else:
+            return Tip.objects.filter(author=self.request.user)
 
     def get(self, request, *args, **kwargs):
         # Show confirmation page when GET request is made

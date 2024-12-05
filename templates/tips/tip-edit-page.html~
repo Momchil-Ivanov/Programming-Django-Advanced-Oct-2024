@@ -6,6 +6,15 @@
 <link href="https://cdn.jsdelivr.net/npm/select2@4.0.13/dist/css/select2.min.css" rel="stylesheet" />
 
 <div class="container mt-4">
+
+    <!-- Delete Button -->
+    {% if user == tip.author or user.is_superuser or user.is_staff %}
+        <div class="text-center mb-3">
+            <a href="{% url 'edit_comment' pk=comment.pk %}" class="btn btn-warning btn-sm">Edit</a>
+            <a href="{% url 'delete_tip' tip.id %}" class="btn btn-danger btn-sm">Delete Tip</a>
+        </div>
+    {% endif %}
+
     <h2>Edit Tip: {{ tip.title }}</h2>
 
     <form method="post">
@@ -99,7 +108,7 @@
                     const selectedCategories = $('#id_categories').val() || [];
                     return { 
                         q: params.term || '', 
-                        exclude_ids: 
+                        exclude_ids: selectedCategories.join(',')
                     };
                 },
                 processResults: function(data) {

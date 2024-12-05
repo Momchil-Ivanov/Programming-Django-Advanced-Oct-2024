@@ -17,7 +17,7 @@
                 {% endfor %}
             </ul>
             <!-- Pagination for Tags -->
-            <div class="pagination" style="text-align: right; margin-top: 10px;">
+            <div class="pagination" style="text-align: center; margin-top: 10px;">
                 <span class="page-link">
                     {% if tags.has_previous %}
                         <a href="?query={{ query }}&page_tags=1">&laquo; First</a>
@@ -51,7 +51,7 @@
                 {% endfor %}
             </ul>
             <!-- Pagination for Tips -->
-            <div class="pagination" style="text-align: right; margin-top: 10px;">
+            <div class="pagination" style="text-align: center; margin-top: 10px;">
                 <span class="page-link">
                     {% if tips.has_previous %}
                         <a href="?query={{ query }}&page_tips=1">&laquo; First</a>
@@ -85,7 +85,7 @@
                 {% endfor %}
             </ul>
             <!-- Pagination for Categories -->
-            <div class="pagination" style="text-align: right; margin-top: 10px;">
+            <div class="pagination" style="text-align: center; margin-top: 10px;">
                 <span class="page-link">
                     {% if categories.has_previous %}
                         <a href="?query={{ query }}&page_categories=1">&laquo; First</a>

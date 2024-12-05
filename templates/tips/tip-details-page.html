@@ -6,6 +6,15 @@
 <div class="container mt-4">
     <div class="d-flex justify-content-center">
         <div class="col-12 col-md-8">
+        
+            <!-- Edit and Delete Button -->
+            {% if user == tip.author or user.is_superuser or user.is_staff %}
+                <div class="text-center mb-3">
+                    <a href="{% url 'edit_tip' tip.pk %}" class="btn btn-warning btn-sm mr-2">Edit</a>
+                    <a href="{% url 'delete_tip' tip.id %}" class="btn btn-danger btn-sm">Delete Tip</a>
+                </div>
+            {% endif %}
+        
             <h1 class="text-center">{{ tip.title }}</h1>
 
             <!-- Display image if it exists -->

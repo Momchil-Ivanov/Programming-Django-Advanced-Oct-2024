@@ -1,4 +1,5 @@
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.http import HttpResponseRedirect
 from django.shortcuts import get_object_or_404
 from django.urls import reverse_lazy
 from django.contrib import messages
@@ -51,7 +52,6 @@ class CategoryCreateView(LoginRequiredMixin, CreateView):
 
     def form_invalid(self, form):
         # Add debug print to log errors
-        print(form.errors)  # Debugging step to see form errors in the console
         messages.error(self.request, "There was an error with your form submission. Please fix the issues.")
         return self.render_to_response({'form': form})
 
@@ -67,7 +67,6 @@ class CategoryUpdateView(LoginRequiredMixin, UpdateView):
 
     def form_invalid(self, form):
         # Add debug print to log errors
-        print(form.errors)  # Debugging step to see form errors in the console
         messages.error(self.request, "There was an error with your form submission. Please fix the issues.")
         return self.render_to_response({'form': form})
 
@@ -83,16 +82,15 @@ class CategoryDeleteView(LoginRequiredMixin, DeleteView):
         # Ensure we are deleting the correct category
         return get_object_or_404(Category, pk=self.kwargs['pk'])
 
-    def get(self, request, *args, **kwargs):
-        # This should show the confirmation page before performing the delete
-        category = self.get_object()
-        return self.render_to_response({'object': category})
-
     def post(self, request, *args, **kwargs):
         # Perform the deletion after confirmation
         category = self.get_object()
         messages.success(self.request, f'Category "{category.name}" has been successfully deleted.')
         return super().post(request, *args, **kwargs)
+
+    def form_invalid(self, form):
+        # If the user clicks Cancel, redirect them back to the edit page
+        return HttpResponseRedirect(reverse_lazy('category_edit', kwargs={'pk': self.object.pk}))
 
 class CategoryDetailView(LoginRequiredMixin, DetailView):
     model = Category

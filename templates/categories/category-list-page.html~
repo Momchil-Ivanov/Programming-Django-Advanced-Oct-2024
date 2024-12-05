@@ -76,13 +76,12 @@
             <ul class="list-group">
                 {% for category in categories %}
                     <li class="list-group-item text-center">
-                        <!-- Make the category name clickable -->
-                        <a href="{% url 'category_detail' pk=category.pk %}">
-                            <strong>{{ category.name }}</strong>
-                        </a><br>
+
+                        <strong>{{ category.name }}</strong>
+                    
                         {% if category.description %}
-                    <p>{{ category.description }}</p>
-                {% endif %}
+                            <p>{{ category.description }}</p>
+                        {% endif %}
 
                         <div class="d-flex flex-column align-items-center mt-2">
                             {% if category.image_url %}
@@ -97,6 +96,9 @@
                                     <div class="d-flex justify-content-center mt-2">
                                         <!-- Edit button -->
                                         <a href="{% url 'category_edit' pk=category.pk %}" class="btn btn-warning btn-sm mr-2">Edit</a>
+                                        
+                                        <!-- Details button -->
+                                        <a href="{% url 'category_detail' pk=category.pk %}" class="btn btn-info btn-sm">Details</a>
                                         
                                         <!-- Delete button -->
                                         <form action="{% url 'category_delete' pk=category.pk %}" method="GET" style="display: inline;">

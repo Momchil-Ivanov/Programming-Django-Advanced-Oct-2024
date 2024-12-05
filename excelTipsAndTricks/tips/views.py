@@ -98,7 +98,7 @@ class EditTipView(UpdateView):
 
 class TipDetailView(DetailView):
     model = Tip
-    template_name = 'tips/tip-view-page.html'
+    template_name = 'tips/tip-details-page.html'
     context_object_name = 'tip'
 
     def get_context_data(self, **kwargs):
@@ -123,7 +123,10 @@ class TipDeleteView(DeleteView):
 
     def get_queryset(self):
         # Ensures only the tip's author can delete the tip
-        return Tip.objects.filter(author=self.request.user)
+        if self.request.user.is_staff:
+            return Tip.objects.all()
+        else:
+            return Tip.objects.filter(author=self.request.user)
 
     def get(self, request, *args, **kwargs):
         # Show confirmation page when GET request is made

@@ -3,10 +3,18 @@
 {% block title %}Category: {{ category.name }} - Excel Tips and Tricks{% endblock %}
 
 {% block content %}
-    <div class="container my-4">
+    <div class="container my-4 text-center">
+    
+        <!-- EDelete button -->
+        <form action="{% url 'category_delete' pk=category.pk %}" method="GET" style="display: inline;">
+            {% csrf_token %}
+            <a href="{% url 'category_edit' pk=category.pk %}" class="btn btn-warning btn-sm mr-2">Edit</a>
+            <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+        </form>
+    
         <h2>{{ category.name }}</h2>
         <p>{{ category.description }}</p>
-        
+
         {% if category.image_url %}
             <img src="{{ category.image_url }}" alt="{{ category.name }}" class="img-fluid mb-2" width="150">
         {% else %}
@@ -15,7 +23,7 @@
 
         <h4>Tips in this category:</h4>
         {% if related_tips %}
-            <ul class="list-group mt-3">
+            <ul class="list-group mt-3 mx-auto" style="max-width: 500px;">
                 {% for tip in related_tips %}
                     <li class="list-group-item">
                         <a href="{% url 'tip_detail' pk=tip.pk %}">{{ tip.title }}</a>
