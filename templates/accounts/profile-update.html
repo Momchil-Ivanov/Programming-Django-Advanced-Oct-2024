@@ -22,10 +22,9 @@
         </div>
         {% endif %}
 
-        <!-- Bio -->
         <div class="form-group">
             <label for="id_bio">Bio</label>
-            {{ form.bio|add_class:"form-control" }}
+            <textarea name="bio" id="id_bio" class="form-control" style="height: 200px;">{{ form.bio.value }}</textarea>
         </div>
 
         <!-- Profile Picture Upload (File Upload) -->

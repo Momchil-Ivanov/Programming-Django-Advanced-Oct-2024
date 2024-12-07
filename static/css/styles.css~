@@ -3,6 +3,8 @@
     width: 100% !important;
 }
 
+
+
 /* Adjust the input field inside Select2 to not shrink */
 .select2-container--default .select2-search--inline .select2-search__field {
     width: 100% !important;
@@ -13,21 +15,19 @@
     padding: 12px 20px !important;
     cursor: pointer;
     width: 100% !important;
-    border: 2px solid #888 !important;
     background-color: #f9f9f9;
+    /* Removed border to avoid outlines */
 }
 
 /* Highlight options on hover or focus */
 .select2-results__option:hover, .select2-results__option:focus {
     background-color: #66bb6a !important;
-    border: 2px solid #388e3c !important;
 }
 
 /* Make the selected option’s background more visible */
 .select2-results__option[aria-selected="true"] {
     background-color: #388e3c !important;
     color: white !important;
-    border: 2px solid #388e3c !important;
 }
 
 /* Styling for the container */
@@ -93,6 +93,7 @@
     position: absolute;
     width: 100%;
     z-index: 100;
+    /* Removed border styling from the suggestions box */
 }
 
 /* Styling for the Existing Tags Box */
@@ -127,7 +128,7 @@
     transition: background-color 0.3s, transform 0.3s;  /* Smooth transition on hover */
     width: 100%;
     max-width: 300px;  /* Slight width restriction */
-    border: 1px solid #ddd;  /* Light border for better definition */
+    /* Removed border styling to avoid outline */
 }
 
 /* Hover Effect for Tag Suggestions */
@@ -141,7 +142,6 @@
     position: absolute;
     z-index: 100;
     background-color: white;
-    border: 1px solid #ddd;
     width: 100%;
     max-width: 350px;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);  /* Subtle shadow for suggestions */

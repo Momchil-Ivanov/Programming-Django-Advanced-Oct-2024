@@ -4,14 +4,14 @@
 
 {% block content %}
     <div class="container my-4">
+            <!-- Delete button -->
+            <form action="{% if category.pk %}{% url 'category_delete' pk=category.pk %}{% endif %}" method="POST" style="display: inline;">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+            </form>
+
         <h2>Edit Category</h2>
-    
-        <!-- Delete button -->
-        <form action="{% url 'category_delete' pk=category.pk %}" method="GET" style="display: inline;">
-            {% csrf_token %}
-            <button type="submit" class="btn btn-danger btn-sm">Delete</button>
-        </form>
-    
+
         <!-- Form fields -->
         <form method="post">
             {% csrf_token %}
@@ -21,7 +21,7 @@
                     {% if field.name == 'description' %}
                         <!-- For description, use a textarea with a larger size -->
                         <textarea name="{{ field.name }}" id="{{ field.id_for_label }}"
-                                  class="form-control {% if field.errors %}is-invalid{% endif %}" rows="4">{{ field.value|default:'' }}</textarea>
+                                  class="form-control {% if field.errors %}is-invalid{% endif %}" rows="10">{{ field.value|default:'' }}</textarea>
                     {% else %}
                         <!-- For other fields, manually add form-control class -->
                         <input type="{{ field.type }}" name="{{ field.name }}" id="{{ field.id_for_label }}"

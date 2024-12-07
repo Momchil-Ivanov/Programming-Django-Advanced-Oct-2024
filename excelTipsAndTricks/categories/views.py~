@@ -58,6 +58,11 @@ class CategoryUpdateView(LoginRequiredMixin, UpdateView):
     template_name = 'categories/category-edit-page.html'
     success_url = reverse_lazy('view_category')
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['category'] = self.get_object()
+        return context
+
     def form_valid(self, form):
         return super().form_valid(form)
 
@@ -93,6 +98,14 @@ class CategoryDeleteView(LoginRequiredMixin, DeleteView):
         category = self.get_object()
         messages.success(self.request, f'Category "{category.name}" has been successfully deleted.')
         return super().post(request, *args, **kwargs)
+
+    def dispatch(self, request, *args, **kwargs):
+        category = self.get_object()  # Fetch the category
+        # Check if the current user is the author or an admin (staff or superuser)
+        if category.author != request.user and not request.user.is_staff and not request.user.is_superuser:
+            messages.error(self.request, "You do not have permission to delete this category.")
+            return redirect('view_category')  # Redirect to category list if no permission
+        return super().dispatch(request, *args, **kwargs)
 
 class CategoryDetailView(LoginRequiredMixin, DetailView):
     model = Category

@@ -58,6 +58,11 @@ class CategoryUpdateView(LoginRequiredMixin, UpdateView):
     template_name = 'categories/category-edit-page.html'
     success_url = reverse_lazy('view_category')
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['category'] = self.get_object()  # Ensure this passes the category object
+        return context
+
     def form_valid(self, form):
         return super().form_valid(form)
 

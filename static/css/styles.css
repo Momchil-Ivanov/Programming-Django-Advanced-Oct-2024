@@ -3,6 +3,16 @@
     width: 100% !important;
 }
 
+/* Adjust the size of the content textarea */
+#id_content {
+    width: 100%; /* Full width of the container */
+    height: 300px; /* Increase height as needed */
+    font-size: 16px; /* Make text easier to read */
+    padding: 10px; /* Add spacing inside the textarea */
+    border-radius: 4px; /* Slightly rounded corners */
+    resize: vertical; /* Allow vertical resizing only */
+}
+
 /* Adjust the input field inside Select2 to not shrink */
 .select2-container--default .select2-search--inline .select2-search__field {
     width: 100% !important;

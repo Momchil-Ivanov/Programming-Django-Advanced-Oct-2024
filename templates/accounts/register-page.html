@@ -30,7 +30,11 @@
                 <!-- Email -->
                 <div class="form-group">
                     <label for="{{ form.email.id_for_label }}">Email</label>
-                    <input type="email" name="email" value="{{ form.email.value }}" class="form-control" id="{{ form.email.id_for_label }}">
+                    <input type="email" 
+                           name="email" 
+                           value="{% if form.email.value %}{{ form.email.value }}{% else %}""{% endif %}" 
+                           class="form-control" 
+                           id="{{ form.email.id_for_label }}">
                     {% if form.email.errors %}
                         <div class="alert alert-danger mt-2">
                             <ul>

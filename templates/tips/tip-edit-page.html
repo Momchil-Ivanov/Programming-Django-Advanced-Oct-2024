@@ -35,7 +35,7 @@
         <!-- Content -->
         <div class="form-group">
             <label for="id_content">Content</label>
-            <textarea id="id_content" name="content" class="form-control {% if form.content.errors %}is-invalid{% endif %}" rows="5" placeholder="Enter tip content" required>{{ form.content.value|default:'' }}</textarea>
+            <textarea id="id_content" name="content" class="form-control {% if form.content.errors %}is-invalid{% endif %}" rows="10" placeholder="Enter tip content" required>{{ form.content.value|default:'' }}</textarea>
             {% if form.content.errors %}
                 <div class="invalid-feedback">
                     {% for error in form.content.errors %}
