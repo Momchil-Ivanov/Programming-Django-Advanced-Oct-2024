@@ -1,6 +1,7 @@
 from django.contrib.auth import login, logout, authenticate
-from django.contrib.auth.decorators import login_required
+from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib.auth.forms import AuthenticationForm
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.models import User
 from django.contrib.auth.views import PasswordChangeView, LoginView
 from django.urls import reverse_lazy
@@ -13,8 +14,13 @@ from django.contrib import messages
 from excelTipsAndTricks.accounts.forms import CustomPasswordChangeForm, ProfileUpdateForm, CustomUserCreationForm
 from excelTipsAndTricks.accounts.models import UserProfile
 
+class UnauthenticatedOnlyMixin:
+    def dispatch(self, request, *args, **kwargs):
+        if request.user.is_authenticated:
+            return redirect('home')  # Redirect to home if logged in
+        return super().dispatch(request, *args, **kwargs)
 
-class RegisterView(FormView):
+class RegisterView(UnauthenticatedOnlyMixin, FormView):
     template_name = 'accounts/register-page.html'
     form_class = CustomUserCreationForm  # Your custom form
     success_url = reverse_lazy('login')
@@ -44,7 +50,7 @@ class RegisterView(FormView):
         return super().form_valid(form)
 
 
-class CustomLoginView(FormView):
+class CustomLoginView(UnauthenticatedOnlyMixin, FormView):
     template_name = 'accounts/login-page.html'
     form_class = AuthenticationForm
     success_url = reverse_lazy('home')
@@ -62,6 +68,16 @@ class CustomLoginView(FormView):
 
 class CustomLogoutView(View):
     def post(self, request):
+        # Log out the user and render the logout page with countdown
+        logout(request)
+        return render(request, 'accounts/logout-page.html')  # Show the countdown page
+
+    def get(self, request):
+        # Redirect unauthenticated users to the home page
+        if not request.user.is_authenticated:
+            return redirect('home')  # Redirect to home if the user is not logged in
+
+        # If logged in, log out and show the logout page
         logout(request)
         return render(request, 'accounts/logout-page.html')
 
@@ -82,7 +98,7 @@ class CustomPasswordChangeView(PasswordChangeView):
         return super().form_valid(form)
 
 
-class ProfilePageView(TemplateView):
+class ProfilePageView(LoginRequiredMixin, TemplateView):
     template_name = 'accounts/profile-page.html'
 
     def get_context_data(self, **kwargs):
@@ -92,7 +108,7 @@ class ProfilePageView(TemplateView):
         return context
 
 
-class ProfileUpdateView(UpdateView):
+class ProfileUpdateView(LoginRequiredMixin, UpdateView):
     model = UserProfile
     form_class = ProfileUpdateForm  # Use the custom form here
     template_name = 'accounts/profile-update.html'
@@ -113,7 +129,7 @@ class ProfileUpdateView(UpdateView):
         return self.render_to_response(self.get_context_data(form=form))
 
 
-class ProfileDeleteView(DeleteView):
+class ProfileDeleteView(LoginRequiredMixin, DeleteView):
     model = User
     template_name = 'accounts/profile-delete.html'
     context_object_name = 'user'

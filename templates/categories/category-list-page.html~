@@ -60,13 +60,11 @@
 
         <!-- Create a new category button, centered -->
         {% if user.is_authenticated %}
-            {% if user.is_staff or user.is_superuser %}
                 <div class="row">
                     <div class="col text-center">
                         <a href="{% url 'category_create' %}" class="btn btn-success mt-3">Create a New Category</a>
                     </div>
                 </div>
-            {% endif %}
         {% endif %}
 
         <!-- Message when no categories are available -->
@@ -90,24 +88,18 @@
                                 <p>No image available</p>
                             {% endif %}
 
-                            <!-- Show edit and delete buttons only if the user is authenticated, staff, or superuser -->
-                            {% if user.is_authenticated %}
-                                {% if user.is_staff or user.is_superuser %}
-                                    <div class="d-flex justify-content-center mt-2">
-                                        <!-- Edit button -->
-                                        <a href="{% url 'category_edit' pk=category.pk %}" class="btn btn-warning btn-sm mr-2">Edit</a>
-                                        
-                                        <!-- Details button -->
-                                        <a href="{% url 'category_detail' pk=category.pk %}" class="btn btn-info btn-sm">Details</a>
-                                        
-                                        <!-- Delete button -->
-                                        <form action="{% url 'category_delete' pk=category.pk %}" method="GET" style="display: inline;">
-                                            {% csrf_token %}
-                                            <button type="submit" class="btn btn-danger btn-sm">Delete</button>
-                                        </form>
-                                    </div>
-                                {% endif %}
+                    <!-- Show edit and delete buttons only if the user is authenticated -->
+                    {% if user.is_authenticated %}
+                        <div class="d-flex justify-content-center mt-2">
+                            <!-- Details button for all authenticated users -->
+                            <a href="{% url 'category_detail' pk=category.pk %}" class="btn btn-info btn-sm mr-2">Details</a>
+                            
+                            <!-- Edit button for the category creator, staff, or superusers -->
+                            {% if user == category.author or user.is_staff or user.is_superuser %}
+                                <a href="{% url 'category_edit' pk=category.pk %}" class="btn btn-warning btn-sm">Edit</a>
                             {% endif %}
+                        </div>
+                    {% endif %}
                         </div>
                     </li>
                 {% endfor %}

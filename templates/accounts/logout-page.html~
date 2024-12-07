@@ -6,6 +6,25 @@
     <div class="container text-center my-5">
         <h2>You have successfully logged out.</h2>
         <p>Thank you for visiting Excel Tips and Tricks. We hope to see you again soon!</p>
-        <a href="{% url 'home' %}" class="btn btn-success mt-4">Return to Home</a>
+        
+        <p id="countdown"></p>  <!-- Display the countdown here -->
+        
+        <!-- Redirect to login page after countdown -->
+        <script type="text/javascript">
+            var countdown = 4;  // Start countdown from 3seconds
+            var countdownElement = document.getElementById('countdown');
+
+            function updateCountdown() {
+                countdownElement.textContent = "You will be redirected to the login page in " + countdown + " second(s).";
+                if (countdown === 0) {
+                    window.location.href = "{% url 'login' %}";
+                } else {
+                    countdown--;
+                }
+            }
+
+            // Update countdown every second
+            setInterval(updateCountdown, 1000);
+        </script>
     </div>
 {% endblock %}

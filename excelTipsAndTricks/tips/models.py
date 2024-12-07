@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User
 from excelTipsAndTricks.categories.models import Category
+from excelTipsAndTricks.common.models import LikeDislike
 from excelTipsAndTricks.tags.models import Tag
 
 class Tip(models.Model):
@@ -35,18 +36,18 @@ class Tip(models.Model):
         related_name='tips',
     )
 
-    # Changed likes and dislikes to represent specific actions and improve consistency
-    likes = models.ManyToManyField(
-        User,
-        related_name='liked_tips',
-        blank=True,
-    )
-
-    dislikes = models.ManyToManyField(
-        User,
-        related_name='disliked_tips',
-        blank=True,
-    )
+    # # Changed likes and dislikes to represent specific actions and improve consistency
+    # likes = models.ManyToManyField(
+    #     User,
+    #     related_name='liked_tips',
+    #     blank=True,
+    # )
+    #
+    # dislikes = models.ManyToManyField(
+    #     User,
+    #     related_name='disliked_tips',
+    #     blank=True,
+    # )
 
     tags = models.ManyToManyField(
         Tag,
@@ -58,7 +59,7 @@ class Tip(models.Model):
         return self.title
 
     def total_likes(self):
-        return self.likes.count()
+        return self.like_dislikes.filter(action=LikeDislike.LIKE).count()
 
     def total_dislikes(self):
-        return self.dislikes.count()
+        return self.like_dislikes.filter(action=LikeDislike.DISLIKE).count()

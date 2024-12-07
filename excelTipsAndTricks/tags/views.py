@@ -1,5 +1,6 @@
 from django.contrib import messages
-from django.contrib.auth.decorators import user_passes_test
+from django.contrib.auth.decorators import user_passes_test, login_required
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.paginator import Paginator
 from django.http import JsonResponse, HttpResponseForbidden
 from django.db.models import Q
@@ -11,7 +12,7 @@ from .models import Tag
 from excelTipsAndTricks.tips.models import Tip
 from excelTipsAndTricks.categories.models import Category
 
-class TagSearchView(TemplateView):
+class TagSearchView(LoginRequiredMixin, TemplateView):
     template_name = 'tags/tag_search_results.html'
 
     def get_context_data(self, **kwargs):
@@ -104,9 +105,8 @@ def delete_tag(request, tag_id):
     return render(request, 'tags/tag_delete.html', {'tag': tag})
 
 
+@login_required
 def create_tags(request):
-    if not request.user.is_authenticated or request.user.is_anonymous:
-        return HttpResponseForbidden("You are not authorized to create tags.")
 
     if request.method == 'POST':
         form = TagForm(request.POST)
@@ -114,7 +114,6 @@ def create_tags(request):
             # Check if the tag already exists by name
             tag_name = form.cleaned_data['name'].lower()
             if Tag.objects.filter(name=tag_name).exists():
-                print("Tag already exists.")  # Debugging line
                 messages.error(request, "Tag already exists.")
             else:
                 # Handle the creation of a new tag
@@ -122,8 +121,6 @@ def create_tags(request):
                 messages.success(request, "Tag created successfully!")
             return redirect('create_tags')  # Correct redirect to the 'create_tags' URL name
         else:
-            # Print form errors to console for debugging
-            print(form.errors)  # Debugging line
             messages.error(request, "There was an error with your form submission. Please try again.")
 
     else:
@@ -131,6 +128,7 @@ def create_tags(request):
 
     return render(request, 'tags/tag_create.html', {'form': form})
 
+@user_passes_test(lambda u: u.is_staff or u.is_superuser)  # Ensure only staff or superusers can access
 def tag_autocomplete(request):
     query = request.GET.get('q', '').strip()
     if query:

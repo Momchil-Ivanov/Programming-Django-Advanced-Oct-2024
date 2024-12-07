@@ -5,12 +5,20 @@
 {% block content %}
     <div class="container my-4 text-center">
     
-        <!-- EDelete button -->
+        <!-- Edit and Delete button -->
         <form action="{% url 'category_delete' pk=category.pk %}" method="GET" style="display: inline;">
-            {% csrf_token %}
-            <a href="{% url 'category_edit' pk=category.pk %}" class="btn btn-warning btn-sm mr-2">Edit</a>
-            <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+            {% if user == category.author or user.is_staff or user.is_superuser %}
+                {% csrf_token %}
+                <a href="{% url 'category_edit' pk=category.pk %}" class="btn btn-warning btn-sm mr-2">Edit</a>
+                <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+            {% endif %}
         </form>
+    
+    
+                                    <!-- Edit button for the category creator, staff, or superusers -->
+                                {% if user == category.author or user.is_staff or user.is_superuser %}
+                                    <a href="{% url 'category_edit' pk=category.pk %}" class="btn btn-warning btn-sm">Edit</a>
+                                {% endif %}
     
         <h2>{{ category.name }}</h2>
         <p>{{ category.description }}</p>

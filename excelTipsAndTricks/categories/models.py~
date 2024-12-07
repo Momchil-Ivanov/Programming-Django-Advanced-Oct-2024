@@ -1,4 +1,3 @@
-from django.contrib.auth.models import User
 from django.db import models
 from excelTipsAndTricks.tags.models import Tag  # Import Tag model
 
@@ -15,16 +14,9 @@ class Category(models.Model):
     image_url = models.URLField(
         help_text="URL of the category image, mandatory field.",
     )
-    tags = models.ManyToManyField(
-        Tag,
-        related_name='categories'
-    )  # Link categories to tags
+    tags = models.ManyToManyField(Tag, related_name='categories')  # Link categories to tags
 
-    author = models.ForeignKey(
-        User,
-        on_delete=models.CASCADE,
-        related_name='categories'
-    )  # Add author field
+    author = models.ForeignKey(User, on_delete=models.CASCADE, related_name='categories')  # Add author field
 
     def __str__(self):
         return self.name

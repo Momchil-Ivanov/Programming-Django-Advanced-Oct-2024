@@ -1,26 +1,26 @@
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.decorators import login_required
+from django.contrib import messages
+from django.core.exceptions import PermissionDenied
 from django.core.paginator import Paginator
-from django.http import HttpResponseForbidden, JsonResponse
+from django.http import HttpResponseForbidden, JsonResponse, Http404, HttpResponseRedirect
 from django.shortcuts import get_object_or_404, redirect, render
-from django.urls import reverse_lazy
+from django.urls import reverse_lazy, reverse
 from django.views.decorators.http import require_POST
 from django.views.generic import ListView, CreateView, UpdateView, DetailView, DeleteView
+
 from .models import Tip
 from .forms import TipForm
 from ..categories.models import Category
 from ..common.forms import CommentForm
-from ..common.models import Comment
+from ..common.models import Comment, LikeDislike
 from ..tags.models import Tag
-from django.contrib.auth.decorators import login_required
-from django.contrib import messages
 
 class AllTipsView(LoginRequiredMixin, ListView):
     model = Tip
     template_name = 'tips/tip-list-page.html'
     context_object_name = 'tips'
     paginate_by = 5  # Show 5 tips per page
-
-    login_url = '/login/'  # Redirect unauthenticated users to login
 
     def get_queryset(self):
         # Sort the tips alphabetically by title
@@ -38,7 +38,7 @@ class AllTipsView(LoginRequiredMixin, ListView):
         return context
 
 
-class CreateTipView(CreateView):
+class CreateTipView(LoginRequiredMixin, CreateView):
     model = Tip
     form_class = TipForm
     template_name = 'tips/tip-add-page.html'
@@ -59,8 +59,7 @@ class CreateTipView(CreateView):
         # Return the response with the form
         return self.render_to_response({'form': form})
 
-
-class EditTipView(UpdateView):
+class EditTipView(LoginRequiredMixin, UpdateView):
     model = Tip
     form_class = TipForm
     template_name = 'tips/tip-edit-page.html'
@@ -91,14 +90,21 @@ class EditTipView(UpdateView):
         return super().form_valid(form)
 
     def form_invalid(self, form):
-        print(form.errors)
         messages.error(self.request, "There was an error with your form submission. Please fix the issues.")
         return self.render_to_response(self.get_context_data(form=form))
 
+    # Ensure that users can only edit their own tips or be a superuser
+    # Override the dispatch method to check for permissions
+    def dispatch(self, request, *args, **kwargs):
+        obj = self.get_object()  # This fetches the object
+        if obj.author != self.request.user and not self.request.user.is_superuser and not self.request.user.is_staff:
+            messages.error(self.request, "You do not have permission to edit this tip.")
+            return redirect('all_tips')  # Redirect if user doesn't have permission
+        return super().dispatch(request, *args, **kwargs)
 
-class TipDetailView(DetailView):
+class TipDetailView(LoginRequiredMixin, DetailView):
     model = Tip
-    template_name = 'tips/tip-view-page.html'
+    template_name = 'tips/tip-details-page.html'
     context_object_name = 'tip'
 
     def get_context_data(self, **kwargs):
@@ -114,56 +120,80 @@ class TipDetailView(DetailView):
         context['comment_form'] = CommentForm()  # Ensure you pass the comment form as well
         return context
 
-
-class TipDeleteView(DeleteView):
+class TipDeleteView(LoginRequiredMixin, DeleteView):
     model = Tip
     template_name = 'tips/tip-delete-page.html'  # Confirmation page
     context_object_name = 'tip'
     success_url = reverse_lazy('all_tips')  # Redirect after deletion
 
-    def get_queryset(self):
-        # Ensures only the tip's author can delete the tip
-        if self.request.user.is_staff:
-            return Tip.objects.all()
-        else:
-            return Tip.objects.filter(author=self.request.user)
+    def get_object(self, queryset=None):
+        """Override the method to ensure we fetch the correct tip and check permissions."""
+        obj = super().get_object(queryset)  # Get the object
+        if obj.author != self.request.user and not self.request.user.is_superuser and not self.request.user.is_staff:
+            # If the user is not the author or a superuser/staff, redirect with an error message
+            messages.error(self.request, "You do not have permission to delete this tip.")
+            return None  # Return None to trigger the redirect in dispatch()
+        return obj
+
+    def dispatch(self, request, *args, **kwargs):
+        """Override the dispatch method to handle redirection when permission is denied."""
+        obj = self.get_object()  # This fetches the object and checks permissions
+        if obj is None:  # If the object is None (permission denied), redirect to all_tips
+            return redirect('all_tips')
+        return super().dispatch(request, *args, **kwargs)
 
     def get(self, request, *args, **kwargs):
-        # Show confirmation page when GET request is made
+        """Show confirmation page when GET request is made"""
         return super().get(request, *args, **kwargs)
 
     def post(self, request, *args, **kwargs):
-        # Handle deletion when the user confirms it
+        """Handle deletion when user confirms"""
         return super().post(request, *args, **kwargs)
-
 
 @login_required
 def like_tip(request, pk):
     tip = get_object_or_404(Tip, pk=pk)
-    if request.user in tip.dislikes.all():
-        tip.dislikes.remove(request.user)
-    if request.user not in tip.likes.all():
-        tip.likes.add(request.user)
-        messages.success(request, 'You liked this tip.')
-    else:
-        tip.likes.remove(request.user)
+
+    # Remove the dislike if exists
+    LikeDislike.objects.filter(user=request.user, tip=tip, action=LikeDislike.DISLIKE).delete()
+
+    # Add or remove the like
+    existing_like = LikeDislike.objects.filter(user=request.user, tip=tip, action=LikeDislike.LIKE)
+    if existing_like.exists():
+        existing_like.delete()
         messages.info(request, 'You removed your like.')
+    else:
+        LikeDislike.objects.create(user=request.user, tip=tip, action=LikeDislike.LIKE)
+        messages.success(request, 'You liked this tip.')
+
     return redirect('tip_detail', pk=pk)
 
 
 @login_required
 def dislike_tip(request, pk):
     tip = get_object_or_404(Tip, pk=pk)
-    if request.user in tip.likes.all():
-        tip.likes.remove(request.user)
-    if request.user not in tip.dislikes.all():
-        tip.dislikes.add(request.user)
-        messages.success(request, 'You disliked this tip.')
-    else:
-        tip.dislikes.remove(request.user)
+
+    # Remove the like if exists
+    LikeDislike.objects.filter(user=request.user, tip=tip, action=LikeDislike.LIKE).delete()
+
+    # Add or remove the dislike
+    existing_dislike = LikeDislike.objects.filter(user=request.user, tip=tip, action=LikeDislike.DISLIKE)
+    if existing_dislike.exists():
+        existing_dislike.delete()
         messages.info(request, 'You removed your dislike.')
+    else:
+        LikeDislike.objects.create(user=request.user, tip=tip, action=LikeDislike.DISLIKE)
+        messages.success(request, 'You disliked this tip.')
+
     return redirect('tip_detail', pk=pk)
 
+def login_required_with_message(view_func):
+    def _wrapped_view(request, *args, **kwargs):
+        if not request.user.is_authenticated:
+            messages.error(request, 'You need to be logged in to access this page.')
+            return redirect('login')  # Or your custom login page
+        return view_func(request, *args, **kwargs)
+    return _wrapped_view
 
 @login_required
 @require_POST
@@ -181,11 +211,12 @@ def add_comment(request, pk):
     return redirect('tip_detail', pk=tip.pk)  # Redirecting to the tip page
 
 
-@login_required
+@login_required_with_message
 def delete_comment(request, pk):
     comment = get_object_or_404(Comment, pk=pk)
     if request.user != comment.author and not request.user.is_superuser and not request.user.is_staff:
-        return HttpResponseForbidden("You are not authorized to delete this comment.")
+        messages.error(request, 'You are not authorized to delete this comment.')
+        return redirect('tip_detail', pk=comment.tip.pk)
 
     tip = comment.tip  # Keep track of the tip before deleting
     comment.delete()
@@ -193,7 +224,7 @@ def delete_comment(request, pk):
     return redirect('tip_detail', pk=tip.pk)  # Redirect to the tip page
 
 
-@login_required
+@login_required_with_message
 def edit_comment(request, pk):
     comment = get_object_or_404(Comment, pk=pk)
 

@@ -87,20 +87,19 @@
                         <p>No image available</p>
                     {% endif %}
 
-                    <!-- Edit and Delete buttons visible to the author or superusers -->
-                    {% if tip.author == user or user.is_superuser %}
-                        <div class="d-flex justify-content-center mt-2">
+                    <!-- Edit button visible to the author or superusers -->
+                <div class="d-flex justify-content-center mt-2">
+                    {% if tip.author == user or user.is_superuser or %}
                             <!-- Edit button -->
                             <a href="{% url 'edit_tip' tip.pk %}" class="btn btn-warning btn-sm mr-2">Edit</a>
-                            <!-- Details button -->
-                            <a href="{% url 'tip_detail' tip.pk %}" class="btn btn-info btn-sm mr-2">Details</a>              
-                            <!-- Delete button -->
-                            <form action="{% url 'delete_tip' tip.pk %}" method="POST" style="display:inline;">
-                                {% csrf_token %}
-                                <button type="submit" class="btn btn-danger btn-sm">Delete</button>
-                            </form>
-                        </div>
                     {% endif %}
+                        
+                    {% if user.is_authenticated %}
+                        <!-- Details button -->
+                         <a href="{% url 'tip_detail' tip.pk %}" class="btn btn-info btn-sm mr-2">Details</a>
+                    {% endif %}
+                </div>
+                
                 </div>
             {% endfor %}
         </div>
