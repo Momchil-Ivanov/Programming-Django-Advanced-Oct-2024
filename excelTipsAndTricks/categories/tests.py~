@@ -14,24 +14,22 @@ class CategoryFormTests(TestCase):
         self.tag = Tag.objects.create(name='Test Tag')
 
     def test_category_name_uniqueness(self):
-        # Create a category with the test user as the author, and assign the tag to the category
+        # Create a category with the test user as the author
         category1 = Category.objects.create(
             name='Unique Category',
             description='Test category',
             image_url='http://example.com/image.jpg',
             author=self.user  # Assign the author
         )
-        category1.tags.add(self.tag)  # Add the tag to the category
 
         # Try to create a second category with the same name
         with self.assertRaises(Exception):
-            category2 = Category.objects.create(
+            Category.objects.create(
                 name='Unique Category',
                 description='Another test category',
                 image_url='http://example.com/image2.jpg',
                 author=self.user  # Assign the author
             )
-            category2.tags.add(self.tag)  # Add the same tag to the new category
 
 class CategoryModelTests(TestCase):
 

@@ -1,9 +1,12 @@
-from django.db.utils import IntegrityError
 from django.test import TestCase
 from django.contrib.auth.models import User
+from psycopg2._psycopg import IntegrityError
+
 from excelTipsAndTricks.categories.models import Category
 from excelTipsAndTricks.tags.models import Tag
 from .models import Tip
+from django.core.exceptions import ValidationError
+
 
 class TipModelTests(TestCase):
     def setUp(self):

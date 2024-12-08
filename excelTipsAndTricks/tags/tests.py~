@@ -26,4 +26,4 @@ class TagFormTests(TestCase):
         # Invalid tag name (too long)
         form = TagForm(data={'name': 'A' * 51})
         self.assertFalse(form.is_valid())  # Form should be invalid
-        self.assertIn('Ensure this value has at most 50 characters (it has 51).', form.errors['name'])
+        self.assertIn('Tag name is too long. Max length is 50 characters.', form.errors['name'])

@@ -1,3 +1,9 @@
+# import django
+# from django.conf import settings
+#
+# # Set up Django if it isn't already
+# if not settings.configured:
+#     django.setup()
 from django.conf import settings
 from django.urls import reverse
 from django.test import TestCase
