@@ -61,3 +61,10 @@ class LikeDislike(models.Model):
 
     class Meta:
         unique_together = ('user', 'tip')  # Ensures one action per user per tip
+
+class AboutPage(models.Model):
+    title = models.CharField(max_length=100)
+    description = models.TextField()
+
+    def __str__(self):
+        return self.title

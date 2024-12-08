@@ -1,4 +1,3 @@
-from asgiref.sync import sync_to_async
 from channels.db import database_sync_to_async
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.decorators import login_required
@@ -177,7 +176,7 @@ def like_tip_sync(request, pk):
     return redirect('tip_detail', pk=pk)
 
 
-@login_required
+@login_required()
 async def like_tip(request, pk):
     return await like_tip_sync(request, pk)
 
@@ -216,10 +215,11 @@ def login_required_with_message(view_func):
         return view_func(request, *args, **kwargs)
     return _wrapped_view
 
-@database_sync_to_async
-def add_comment_sync(request, pk, form_data):
+@login_required
+@require_POST
+def add_comment(request, pk):
     tip = get_object_or_404(Tip, pk=pk)
-    form = CommentForm(form_data)
+    form = CommentForm(request.POST)
     if form.is_valid():
         comment = form.save(commit=False)
         comment.tip = tip
@@ -228,79 +228,41 @@ def add_comment_sync(request, pk, form_data):
         messages.success(request, 'Your comment has been added.')
     else:
         messages.error(request, 'Failed to add comment. Please try again.')
-
-# Async view for add_comment that delegates work to sync function
-@login_required
-@require_POST
-async def add_comment(request, pk):
-    # Call the async version of the comment adding logic
-    await add_comment_sync(request, pk, request.POST)
-    return redirect('tip_detail', pk=pk)  # Redirecting to the tip page
+    return redirect('tip_detail', pk=tip.pk)  # Redirecting to the tip page
 
 
-@database_sync_to_async
-def delete_comment_sync(request, pk):
+@login_required_with_message
+def delete_comment(request, pk):
     comment = get_object_or_404(Comment, pk=pk)
     if request.user != comment.author and not request.user.is_superuser and not request.user.is_staff:
-        return False, comment.tip.pk  # Return False and the tip pk for redirect
+        messages.error(request, 'You are not authorized to delete this comment.')
+        return redirect('tip_detail', pk=comment.tip.pk)
 
     tip = comment.tip  # Keep track of the tip before deleting
     comment.delete()
-    return True, tip.pk  # Return True and the tip pk for redirect
-
-# Async view for delete_comment that delegates work to sync function
-@login_required
-async def delete_comment(request, pk):
-    success, tip_pk = await delete_comment_sync(request, pk)
-    if not success:
-        messages.error(request, 'You are not authorized to delete this comment.')
-    else:
-        messages.success(request, 'The comment has been deleted.')
-    return redirect('tip_detail', pk=tip_pk)  # Redirect to the tip page
+    messages.success(request, 'The comment has been deleted.')
+    return redirect('tip_detail', pk=tip.pk)  # Redirect to the tip page
 
 
-# The sync version for editing a comment, wrapped with sync_to_async
-@sync_to_async
-def edit_comment_sync(request, pk, form_data=None):
+@login_required_with_message
+def edit_comment(request, pk):
     comment = get_object_or_404(Comment, pk=pk)
 
+    # Ensure that the user is the author, superuser, or staff to edit the comment
     if request.user == comment.author or request.user.is_superuser or request.user.is_staff:
-        if form_data:
-            form = CommentForm(form_data, instance=comment)
+        if request.method == 'POST':
+            form = CommentForm(request.POST, instance=comment)
             if form.is_valid():
                 form.save()
-                return True, form
-            return False, form
+                messages.success(request, 'Your comment has been updated.')
+                return redirect('tip_detail', pk=comment.tip.pk)
         else:
             form = CommentForm(instance=comment)
-            return False, form
-    return False, None  # Return False if the user isn't authorized
 
-# Async view for edit_comment that delegates work to sync function
-@login_required
-async def edit_comment(request, pk):
-    success, form = await edit_comment_sync(request, pk, request.POST if request.method == 'POST' else None)
-
-    if not success:
-        if form is None:
-            messages.error(request, 'You are not authorized to edit this comment.')
-        else:
-            messages.error(request, 'Failed to update comment. Please try again.')
-        return redirect('tip_detail', pk=pk)  # Redirect to the tip page (check the pk here)
-
-    # Debugging: Log the tip pk to check if it's correct
-    print(f"Comment updated, redirecting to tip with pk: {form.instance.tip.pk}")
-    print(f"Tip associated with the comment: {form.instance.tip}")
-
-    # Ensure the correct tip pk is used for redirection
-    tip = form.instance.tip
-    if not tip:
-        print("Error: No tip associated with the comment.")
-        messages.error(request, 'Associated tip not found.')
-        return redirect('all_tips')  # Or any other fallback page
-
-    messages.success(request, 'Your comment has been updated.')
-    return redirect('tip_detail', pk=tip.pk)  # Correct pk to tip instance's pk after successful update
+        return render(request, 'tips/tip-comment-edit.html', {'form': form})
+    else:
+        messages.error(request, 'You are not authorized to edit this comment.')
+        return redirect('tip_detail', pk=comment.tip.pk)
 
 
 @login_required

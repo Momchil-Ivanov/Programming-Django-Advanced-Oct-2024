@@ -75,17 +75,7 @@ class EditTipView(LoginRequiredMixin, UpdateView):
         return context
 
     def form_valid(self, form):
-        # Handle tags: create new tags if they do not exist
-        tags = form.cleaned_data.get('tags', [])
-        existing_tags = Tag.objects.all()
-
-        # Iterate through each tag and create it if it does not exist
-        for tag in tags:
-            if not existing_tags.filter(name=tag.name.lower()).exists():
-                new_tag = Tag(name=tag.name.lower())
-                new_tag.save()
-
-        # Set tags and categories after validation
+        # Only set the tags and categories as selected in the form
         form.instance.tags.set(form.cleaned_data['tags'])
         form.instance.categories.set(form.cleaned_data['categories'])
 

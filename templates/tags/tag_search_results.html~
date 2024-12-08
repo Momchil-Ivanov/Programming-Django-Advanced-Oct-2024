@@ -1,111 +1,127 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<div style="text-align: center;">
-    <h2>Search Results for "{{ query }}"</h2>
+<div class="container">
+    <h2 class="text-center">Search Results for "{{ query }}"</h2>
 
-    <div style="display: flex; justify-content: space-between;">
-
+    <div class="row">
         <!-- Tags Section -->
-        <div style="flex: 1; padding: 10px;">
-            <h3>Tags</h3>
-            <ul style="list-style-type: none; padding: 0;">
-                {% for tag in tags %}
-                    <li>{{ tag.name }}</li>
-                {% empty %}
-                    <li>No tags found for "{{ query }}"</li>
-                {% endfor %}
-            </ul>
-            <!-- Pagination for Tags -->
-            <div class="pagination" style="text-align: center; margin-top: 10px;">
-                <span class="page-link">
-                    {% if tags.has_previous %}
-                        <a href="?query={{ query }}&page_tags=1">&laquo; First</a>
-                        <a href="?query={{ query }}&page_tags={{ tags.previous_page_number }}">Previous</a>
-                    {% endif %}
-                    {% for num in tags_page_range %}
-                        {% if num == tags.number %}
-                            <strong>{{ num }}</strong>
-                        {% else %}
-                            <a href="?query={{ query }}&page_tags={{ num }}">{{ num }}</a>
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header">
+                    <h3>Tags</h3>
+                </div>
+                <div class="card-body">
+                    <ul class="list-group">
+                        {% for tag in tags %}
+                            <li class="list-group-item">{{ tag.name }}</li>
+                        {% empty %}
+                            <li class="list-group-item">No tags found for "{{ query }}"</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+                <!-- Pagination for Tags -->
+                <div class="card-footer text-center">
+                    <div class="pagination">
+                        {% if tags.has_previous %}
+                            <a href="?query={{ query }}&page_tags=1">&laquo; First</a>
+                            <a href="?query={{ query }}&page_tags={{ tags.previous_page_number }}">Previous</a>
                         {% endif %}
-                    {% endfor %}
-                    {% if tags.has_next %}
-                        <a href="?query={{ query }}&page_tags={{ tags.next_page_number }}">Next</a>
-                        <a href="?query={{ query }}&page_tags={{ tags.paginator.num_pages }}">Last &raquo;</a>
-                    {% endif %}
-                </span>
+                        {% for num in tags_page_range %}
+                            {% if num == tags.number %}
+                                <strong>{{ num }}</strong>
+                            {% else %}
+                                <a href="?query={{ query }}&page_tags={{ num }}">{{ num }}</a>
+                            {% endif %}
+                        {% endfor %}
+                        {% if tags.has_next %}
+                            <a href="?query={{ query }}&page_tags={{ tags.next_page_number }}">Next</a>
+                            <a href="?query={{ query }}&page_tags={{ tags.paginator.num_pages }}">Last &raquo;</a>
+                        {% endif %}
+                    </div>
+                </div>
             </div>
         </div>
 
         <!-- Tips Section -->
-        <div style="flex: 1; padding: 10px;">
-            <h3>Tips</h3>
-            <ul style="list-style-type: none; padding: 0;">
-                {% for tip in tips %}
-                    <li>
-                        <a href="{% url 'tip_detail' tip.id %}">{{ tip.title }}</a>
-                    </li>
-                {% empty %}
-                    <li>No tips found for "{{ query }}"</li>
-                {% endfor %}
-            </ul>
-            <!-- Pagination for Tips -->
-            <div class="pagination" style="text-align: center; margin-top: 10px;">
-                <span class="page-link">
-                    {% if tips.has_previous %}
-                        <a href="?query={{ query }}&page_tips=1">&laquo; First</a>
-                        <a href="?query={{ query }}&page_tips={{ tips.previous_page_number }}">Previous</a>
-                    {% endif %}
-                    {% for num in tips_page_range %}
-                        {% if num == tips.number %}
-                            <strong>{{ num }}</strong>
-                        {% else %}
-                            <a href="?query={{ query }}&page_tips={{ num }}">{{ num }}</a>
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header">
+                    <h3>Tips</h3>
+                </div>
+                <div class="card-body">
+                    <ul class="list-group">
+                        {% for tip in tips %}
+                            <li class="list-group-item">
+                                <a href="{% url 'tip_detail' tip.id %}">{{ tip.title }}</a>
+                            </li>
+                        {% empty %}
+                            <li class="list-group-item">No tips found for "{{ query }}"</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+                <!-- Pagination for Tips -->
+                <div class="card-footer text-center">
+                    <div class="pagination">
+                        {% if tips.has_previous %}
+                            <a href="?query={{ query }}&page_tips=1">&laquo; First</a>
+                            <a href="?query={{ query }}&page_tips={{ tips.previous_page_number }}">Previous</a>
                         {% endif %}
-                    {% endfor %}
-                    {% if tips.has_next %}
-                        <a href="?query={{ query }}&page_tips={{ tips.next_page_number }}">Next</a>
-                        <a href="?query={{ query }}&page_tips={{ tips.paginator.num_pages }}">Last &raquo;</a>
-                    {% endif %}
-                </span>
+                        {% for num in tips_page_range %}
+                            {% if num == tips.number %}
+                                <strong>{{ num }}</strong>
+                            {% else %}
+                                <a href="?query={{ query }}&page_tips={{ num }}">{{ num }}</a>
+                            {% endif %}
+                        {% endfor %}
+                        {% if tips.has_next %}
+                            <a href="?query={{ query }}&page_tips={{ tips.next_page_number }}">Next</a>
+                            <a href="?query={{ query }}&page_tips={{ tips.paginator.num_pages }}">Last &raquo;</a>
+                        {% endif %}
+                    </div>
+                </div>
             </div>
         </div>
 
         <!-- Categories Section -->
-        <div style="flex: 1; padding: 10px;">
-            <h3>Categories</h3>
-            <ul style="list-style-type: none; padding: 0;">
-                {% for category in categories %}
-                    <li>
-                        <a href="{% url 'category_detail' category.id %}">{{ category.name }}</a>
-                    </li>
-                {% empty %}
-                    <li>No categories found for "{{ query }}"</li>
-                {% endfor %}
-            </ul>
-            <!-- Pagination for Categories -->
-            <div class="pagination" style="text-align: center; margin-top: 10px;">
-                <span class="page-link">
-                    {% if categories.has_previous %}
-                        <a href="?query={{ query }}&page_categories=1">&laquo; First</a>
-                        <a href="?query={{ query }}&page_categories={{ categories.previous_page_number }}">Previous</a>
-                    {% endif %}
-                    {% for num in categories_page_range %}
-                        {% if num == categories.number %}
-                            <strong>{{ num }}</strong>
-                        {% else %}
-                            <a href="?query={{ query }}&page_categories={{ num }}">{{ num }}</a>
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header">
+                    <h3>Categories</h3>
+                </div>
+                <div class="card-body">
+                    <ul class="list-group">
+                        {% for category in categories %}
+                            <li class="list-group-item">
+                                <a href="{% url 'category_detail' category.id %}">{{ category.name }}</a>
+                            </li>
+                        {% empty %}
+                            <li class="list-group-item">No categories found for "{{ query }}"</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+                <!-- Pagination for Categories -->
+                <div class="card-footer text-center">
+                    <div class="pagination">
+                        {% if categories.has_previous %}
+                            <a href="?query={{ query }}&page_categories=1">&laquo; First</a>
+                            <a href="?query={{ query }}&page_categories={{ categories.previous_page_number }}">Previous</a>
                         {% endif %}
-                    {% endfor %}
-                    {% if categories.has_next %}
-                        <a href="?query={{ query }}&page_categories={{ categories.next_page_number }}">Next</a>
-                        <a href="?query={{ query }}&page_categories={{ categories.paginator.num_pages }}">Last &raquo;</a>
-                    {% endif %}
-                </span>
+                        {% for num in categories_page_range %}
+                            {% if num == categories.number %}
+                                <strong>{{ num }}</strong>
+                            {% else %}
+                                <a href="?query={{ query }}&page_categories={{ num }}">{{ num }}</a>
+                            {% endif %}
+                        {% endfor %}
+                        {% if categories.has_next %}
+                            <a href="?query={{ query }}&page_categories={{ categories.next_page_number }}">Next</a>
+                            <a href="?query={{ query }}&page_categories={{ categories.paginator.num_pages }}">Last &raquo;</a>
+                        {% endif %}
+                    </div>
+                </div>
             </div>
         </div>
-
     </div>
 </div>
 {% endblock %}

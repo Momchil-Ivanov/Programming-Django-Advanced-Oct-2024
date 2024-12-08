@@ -3,8 +3,8 @@
 {% block title %}About - Excel Tips and Tricks{% endblock %}
 
 {% block content %}
-    <main class="container mt-5 text-center">
-        <h2>Learn More About Excel Tips and Tricks</h2>
-        <p>We are passionate about helping you improve your Excel skills with the best tips and tricks!</p>
-    </main>
+<main class="container mt-5 text-center">
+    <h2 id="about-title">{{ title }}</h2>  <!-- Title from context -->
+    <p id="about-description">{{ description }}</p>  <!-- Description from context -->
+</main>
 {% endblock %}
