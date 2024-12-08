@@ -1,8 +1,10 @@
+from channels.db import database_sync_to_async
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.core.exceptions import PermissionDenied
 from django.core.paginator import Paginator
+from django.db import transaction
 from django.http import HttpResponseForbidden, JsonResponse, Http404, HttpResponseRedirect
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse_lazy, reverse
@@ -150,42 +152,60 @@ class TipDeleteView(LoginRequiredMixin, DeleteView):
         """Handle deletion when user confirms"""
         return super().post(request, *args, **kwargs)
 
-@login_required
-def like_tip(request, pk):
+# Convert your like_tip function to synchronous if possible, or use async properly
+@database_sync_to_async
+def like_tip_sync(request, pk):
+    # Retrieve the tip object (ensure this is synchronous)
     tip = get_object_or_404(Tip, pk=pk)
 
-    # Remove the dislike if exists
+    # Remove the dislike if it exists (use database_sync_to_async properly)
     LikeDislike.objects.filter(user=request.user, tip=tip, action=LikeDislike.DISLIKE).delete()
 
-    # Add or remove the like
-    existing_like = LikeDislike.objects.filter(user=request.user, tip=tip, action=LikeDislike.LIKE)
-    if existing_like.exists():
-        existing_like.delete()
-        messages.info(request, 'You removed your like.')
-    else:
-        LikeDislike.objects.create(user=request.user, tip=tip, action=LikeDislike.LIKE)
-        messages.success(request, 'You liked this tip.')
+    # Add or remove the like (check if it exists)
+    existing_like = LikeDislike.objects.filter(user=request.user, tip=tip, action=LikeDislike.LIKE).exists()
+
+    # Use a transaction to ensure atomicity for both the like and messages
+    with transaction.atomic():
+        if existing_like:
+            LikeDislike.objects.filter(user=request.user, tip=tip, action=LikeDislike.LIKE).delete()
+            messages.info(request, 'You removed your like.')
+        else:
+            LikeDislike.objects.create(user=request.user, tip=tip, action=LikeDislike.LIKE)
+            messages.success(request, 'You liked this tip.')
 
     return redirect('tip_detail', pk=pk)
 
 
-@login_required
-def dislike_tip(request, pk):
+@login_required()
+async def like_tip(request, pk):
+    return await like_tip_sync(request, pk)
+
+
+@database_sync_to_async
+def dislike_tip_sync(request, pk):
     tip = get_object_or_404(Tip, pk=pk)
 
     # Remove the like if exists
     LikeDislike.objects.filter(user=request.user, tip=tip, action=LikeDislike.LIKE).delete()
 
     # Add or remove the dislike
-    existing_dislike = LikeDislike.objects.filter(user=request.user, tip=tip, action=LikeDislike.DISLIKE)
-    if existing_dislike.exists():
-        existing_dislike.delete()
-        messages.info(request, 'You removed your dislike.')
-    else:
-        LikeDislike.objects.create(user=request.user, tip=tip, action=LikeDislike.DISLIKE)
-        messages.success(request, 'You disliked this tip.')
+    existing_dislike = LikeDislike.objects.filter(user=request.user, tip=tip, action=LikeDislike.DISLIKE).exists()
+
+    # Use a transaction to ensure atomicity for both the dislike and messages
+    with transaction.atomic():
+        if existing_dislike:
+            LikeDislike.objects.filter(user=request.user, tip=tip, action=LikeDislike.DISLIKE).delete()
+            messages.info(request, 'You removed your dislike.')
+        else:
+            LikeDislike.objects.create(user=request.user, tip=tip, action=LikeDislike.DISLIKE)
+            messages.success(request, 'You disliked this tip.')
 
     return redirect('tip_detail', pk=pk)
+
+# Async view for dislike_tip that delegates work to sync function
+@login_required
+async def dislike_tip(request, pk):
+    return await dislike_tip_sync(request, pk)
 
 def login_required_with_message(view_func):
     def _wrapped_view(request, *args, **kwargs):

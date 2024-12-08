@@ -1,8 +1,11 @@
+from asgiref.sync import sync_to_async
+from channels.db import database_sync_to_async
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.core.exceptions import PermissionDenied
 from django.core.paginator import Paginator
+from django.db import transaction
 from django.http import HttpResponseForbidden, JsonResponse, Http404, HttpResponseRedirect
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse_lazy, reverse
@@ -150,56 +153,73 @@ class TipDeleteView(LoginRequiredMixin, DeleteView):
         """Handle deletion when user confirms"""
         return super().post(request, *args, **kwargs)
 
-@login_required
-def like_tip(request, pk):
+# Convert your like_tip function to synchronous if possible, or use async properly
+@database_sync_to_async
+def like_tip_sync(request, pk):
+    # Retrieve the tip object (ensure this is synchronous)
     tip = get_object_or_404(Tip, pk=pk)
 
-    # Remove the dislike if exists
+    # Remove the dislike if it exists (use database_sync_to_async properly)
     LikeDislike.objects.filter(user=request.user, tip=tip, action=LikeDislike.DISLIKE).delete()
 
-    # Add or remove the like
-    existing_like = LikeDislike.objects.filter(user=request.user, tip=tip, action=LikeDislike.LIKE)
-    if existing_like.exists():
-        existing_like.delete()
-        messages.info(request, 'You removed your like.')
-    else:
-        LikeDislike.objects.create(user=request.user, tip=tip, action=LikeDislike.LIKE)
-        messages.success(request, 'You liked this tip.')
+    # Add or remove the like (check if it exists)
+    existing_like = LikeDislike.objects.filter(user=request.user, tip=tip, action=LikeDislike.LIKE).exists()
+
+    # Use a transaction to ensure atomicity for both the like and messages
+    with transaction.atomic():
+        if existing_like:
+            LikeDislike.objects.filter(user=request.user, tip=tip, action=LikeDislike.LIKE).delete()
+            messages.info(request, 'You removed your like.')
+        else:
+            LikeDislike.objects.create(user=request.user, tip=tip, action=LikeDislike.LIKE)
+            messages.success(request, 'You liked this tip.')
 
     return redirect('tip_detail', pk=pk)
 
 
 @login_required
-def dislike_tip(request, pk):
+async def like_tip(request, pk):
+    return await like_tip_sync(request, pk)
+
+
+@database_sync_to_async
+def dislike_tip_sync(request, pk):
     tip = get_object_or_404(Tip, pk=pk)
 
     # Remove the like if exists
     LikeDislike.objects.filter(user=request.user, tip=tip, action=LikeDislike.LIKE).delete()
 
     # Add or remove the dislike
-    existing_dislike = LikeDislike.objects.filter(user=request.user, tip=tip, action=LikeDislike.DISLIKE)
-    if existing_dislike.exists():
-        existing_dislike.delete()
-        messages.info(request, 'You removed your dislike.')
-    else:
-        LikeDislike.objects.create(user=request.user, tip=tip, action=LikeDislike.DISLIKE)
-        messages.success(request, 'You disliked this tip.')
+    existing_dislike = LikeDislike.objects.filter(user=request.user, tip=tip, action=LikeDislike.DISLIKE).exists()
+
+    # Use a transaction to ensure atomicity for both the dislike and messages
+    with transaction.atomic():
+        if existing_dislike:
+            LikeDislike.objects.filter(user=request.user, tip=tip, action=LikeDislike.DISLIKE).delete()
+            messages.info(request, 'You removed your dislike.')
+        else:
+            LikeDislike.objects.create(user=request.user, tip=tip, action=LikeDislike.DISLIKE)
+            messages.success(request, 'You disliked this tip.')
 
     return redirect('tip_detail', pk=pk)
+
+# Async view for dislike_tip that delegates work to sync function
+@login_required
+async def dislike_tip(request, pk):
+    return await dislike_tip_sync(request, pk)
 
 def login_required_with_message(view_func):
     def _wrapped_view(request, *args, **kwargs):
         if not request.user.is_authenticated:
-            messages.error(request, 'You need to be logged in to access this page.')
+            messages.error(request, 'You need to be logged in to access comments.')
             return redirect('login')  # Or your custom login page
         return view_func(request, *args, **kwargs)
     return _wrapped_view
 
-@login_required
-@require_POST
-def add_comment(request, pk):
+@database_sync_to_async
+def add_comment_sync(request, pk, form_data):
     tip = get_object_or_404(Tip, pk=pk)
-    form = CommentForm(request.POST)
+    form = CommentForm(form_data)
     if form.is_valid():
         comment = form.save(commit=False)
         comment.tip = tip
@@ -208,41 +228,79 @@ def add_comment(request, pk):
         messages.success(request, 'Your comment has been added.')
     else:
         messages.error(request, 'Failed to add comment. Please try again.')
-    return redirect('tip_detail', pk=tip.pk)  # Redirecting to the tip page
+
+# Async view for add_comment that delegates work to sync function
+@login_required
+@require_POST
+async def add_comment(request, pk):
+    # Call the async version of the comment adding logic
+    await add_comment_sync(request, pk, request.POST)
+    return redirect('tip_detail', pk=pk)  # Redirecting to the tip page
 
 
-@login_required_with_message
-def delete_comment(request, pk):
+@database_sync_to_async
+def delete_comment_sync(request, pk):
     comment = get_object_or_404(Comment, pk=pk)
     if request.user != comment.author and not request.user.is_superuser and not request.user.is_staff:
-        messages.error(request, 'You are not authorized to delete this comment.')
-        return redirect('tip_detail', pk=comment.tip.pk)
+        return False, comment.tip.pk  # Return False and the tip pk for redirect
 
     tip = comment.tip  # Keep track of the tip before deleting
     comment.delete()
-    messages.success(request, 'The comment has been deleted.')
-    return redirect('tip_detail', pk=tip.pk)  # Redirect to the tip page
+    return True, tip.pk  # Return True and the tip pk for redirect
+
+# Async view for delete_comment that delegates work to sync function
+@login_required
+async def delete_comment(request, pk):
+    success, tip_pk = await delete_comment_sync(request, pk)
+    if not success:
+        messages.error(request, 'You are not authorized to delete this comment.')
+    else:
+        messages.success(request, 'The comment has been deleted.')
+    return redirect('tip_detail', pk=tip_pk)  # Redirect to the tip page
 
 
-@login_required_with_message
-def edit_comment(request, pk):
+# The sync version for editing a comment, wrapped with sync_to_async
+@sync_to_async
+def edit_comment_sync(request, pk, form_data=None):
     comment = get_object_or_404(Comment, pk=pk)
 
-    # Ensure that the user is the author, superuser, or staff to edit the comment
     if request.user == comment.author or request.user.is_superuser or request.user.is_staff:
-        if request.method == 'POST':
-            form = CommentForm(request.POST, instance=comment)
+        if form_data:
+            form = CommentForm(form_data, instance=comment)
             if form.is_valid():
                 form.save()
-                messages.success(request, 'Your comment has been updated.')
-                return redirect('tip_detail', pk=comment.tip.pk)
+                return True, form
+            return False, form
         else:
             form = CommentForm(instance=comment)
+            return False, form
+    return False, None  # Return False if the user isn't authorized
 
-        return render(request, 'tips/tip-comment-edit.html', {'form': form})
-    else:
-        messages.error(request, 'You are not authorized to edit this comment.')
-        return redirect('tip_detail', pk=comment.tip.pk)
+# Async view for edit_comment that delegates work to sync function
+@login_required
+async def edit_comment(request, pk):
+    success, form = await edit_comment_sync(request, pk, request.POST if request.method == 'POST' else None)
+
+    if not success:
+        if form is None:
+            messages.error(request, 'You are not authorized to edit this comment.')
+        else:
+            messages.error(request, 'Failed to update comment. Please try again.')
+        return redirect('tip_detail', pk=pk)  # Redirect to the tip page (check the pk here)
+
+    # Debugging: Log the tip pk to check if it's correct
+    print(f"Comment updated, redirecting to tip with pk: {form.instance.tip.pk}")
+    print(f"Tip associated with the comment: {form.instance.tip}")
+
+    # Ensure the correct tip pk is used for redirection
+    tip = form.instance.tip
+    if not tip:
+        print("Error: No tip associated with the comment.")
+        messages.error(request, 'Associated tip not found.')
+        return redirect('all_tips')  # Or any other fallback page
+
+    messages.success(request, 'Your comment has been updated.')
+    return redirect('tip_detail', pk=tip.pk)  # Correct pk to tip instance's pk after successful update
 
 
 @login_required
