@@ -50,26 +50,32 @@
             {% endif %}
         </div>
 
-        <!-- Categories (Dynamic search bar) -->
+        <!-- Categories -->
         <div class="form-group">
             <label for="id_categories">Categories</label>
             <select id="id_categories" name="categories" class="form-control select2-multiple" multiple="multiple">
+                {% for category in form.categories.field.queryset %}
+                <option value="{{ category.id }}"
+                    {% if category.id in selected_category_ids %}selected{% endif %}>
+                    {{ category.name }}
+                </option>
+                {% endfor %}
             </select>
-            {% if form.categories.errors %}
-                <div class="invalid-feedback">
-                    {% for error in form.categories.errors %}
-                        <p>{{ error }}</p>
-                    {% endfor %}
-                </div>
-            {% endif %}
         </div>
 
         <!-- Tags -->
         <div class="form-group">
             <label for="id_tags">Tags</label>
             <select id="id_tags" name="tags" class="form-control select2-multiple" multiple="multiple">
+                {% for tag in form.tags.field.queryset %}
+                <option value="{{ tag.id }}"
+                    {% if tag.id in selected_tag_ids %}selected{% endif %}>
+                    {{ tag.name }}
+                </option>
+                {% endfor %}
             </select>
         </div>
+
 
         <!-- Submit -->
         <button type="submit" class="btn btn-success mt-3">Submit</button>
@@ -91,7 +97,11 @@
                 dataType: 'json',
                 delay: 250,
                 data: function(params) {
-                    return { q: params.term || '' };
+                    const selectedCategories = $('#id_categories').val() || [];
+                    return { 
+                        q: params.term || '', 
+                        exclude_ids: selectedCategories.join(',')
+                    };
                 },
                 processResults: function(data) {
                     return {
@@ -103,41 +113,31 @@
             }
         });
 
-        // Initialize Select2 for tags with AJAX and the ability to add new tags
-        $('#id_tags').select2({
-            placeholder: 'Search or add tags',
-            minimumInputLength: 1,
-            tags: true,
-            ajax: {
-                url: '{% url "tag_search" %}',
-                dataType: 'json',
-                delay: 250,
-                data: function(params) {
-                    return { q: params.term || '' };
-                },
-                processResults: function(data) {
-                    return {
-                        results: data.tags.map(function(tag) {
-                            return { id: tag.id, text: tag.name };
-                        })
-                    };
-                }
-            },
-            createTag: function(params) {
-                const term = $.trim(params.term);
-                if ($('#id_tags').val().includes(term)) return null;
-                return { id: term, text: term };
-            }
-        });
-
-        // Collect selected categories and tags before form submission
-        $('form').submit(function() {
-            const selectedCategories = $('#id_categories').val();
-            $('#id_categories').val(selectedCategories).trigger('change');
-
-            const selectedTags = $('#id_tags').val();
-            $('#id_tags').val(selectedTags).trigger('change');
-        });
+        // Initialize Select2 for tags with AJAX (disable tag creation)
+ $('#id_tags').select2({
+    placeholder: 'Search for tags',
+    minimumInputLength: 1,
+    ajax: {
+        url: '{% url "tag_search" %}',
+        dataType: 'json',
+        delay: 250,
+        data: function(params) {
+            // Get all selected tag IDs to exclude them from the search results
+            const selectedTags = $('#id_tags').val() || [];
+            return {
+                q: params.term || '',  // Current search term
+                exclude_ids: selectedTags.join(',')  // Exclude already selected tags
+            };
+        },
+        processResults: function(data) {
+            return {
+                results: data.tags.map(function(tag) {
+                    return { id: tag.id, text: tag.name };
+                })
+            };
+        }
+    }
+});
     });
 </script>
 {% endblock %}

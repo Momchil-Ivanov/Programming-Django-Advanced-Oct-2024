@@ -45,4 +45,4 @@ class UserProfile(models.Model):
         # Return the profile picture URL or a placeholder if not provided
         if self.profile_picture:
             return self.profile_picture.url
-        return self.profile_picture_url or '/static/images/accounts/default_profile_picture.jpg'
+        return self.profile_picture_url or '/static/images/accounts/default_profile_picture.png'

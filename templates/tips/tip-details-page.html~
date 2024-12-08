@@ -7,7 +7,7 @@
     <div class="d-flex justify-content-center">
         <div class="col-12 col-md-8">
         
-            <!-- EdDelete Button -->
+            <!-- Edit and Delete Button -->
             {% if user == tip.author or user.is_superuser or user.is_staff %}
                 <div class="text-center mb-3">
                     <a href="{% url 'edit_tip' tip.pk %}" class="btn btn-warning btn-sm mr-2">Edit</a>
@@ -32,7 +32,7 @@
                 <strong>Categories:</strong>
                 {% if tip.categories.exists %}
                     {% for category in tip.categories.all %}
-                        <span class="badge bg-primary">{{ category.name }}</span>
+                        <span class="badge bg-primary text-white">{{ category.name }}</span>
                     {% endfor %}
                 {% else %}
                     <p class="text-muted">No categories assigned to this tip.</p>
@@ -44,7 +44,7 @@
                 <strong>Tags:</strong>
                 {% if tip.tags.exists %}
                     {% for tag in tip.tags.all %}
-                        <span class="badge bg-secondary">{{ tag.name }}</span>
+                        <span class="badge bg-secondary text-white">{{ tag.name }}</span>
                     {% endfor %}
                 {% else %}
                     <p class="text-muted">No tags assigned to this tip.</p>
@@ -81,22 +81,32 @@
                 <h2 class="text-center">Comments</h2>
                 <div id="comments">
                     {% for comment in comments %}
-                        <div class="comment border rounded p-3 mb-3">
-                            <strong>{{ comment.author.username }}</strong>
-                            <p>{{ comment.content }}</p>
-                            <small class="text-muted">Posted on {{ comment.created_at|date:"Y-m-d H:i" }}</small>
-
-                            {% if user == comment.author or user.is_superuser or user.is_staff %}
-                                <div class="mt-3">
-                                    <a href="{% url 'edit_comment' pk=comment.pk %}" class="btn btn-warning btn-sm">Edit</a>
-                                    <a href="{% url 'delete_comment' pk=comment.pk %}" class="btn btn-danger btn-sm">Delete</a>
-                                </div>
-                            {% endif %}
+                        <div class="comment border rounded p-3 mb-3 d-flex align-items-start">
+                            <!-- Profile Picture -->
+                            <img src="{{ comment.author.profile.get_profile_picture }}" 
+                                 alt="{{ comment.author.username }}'s Profile Picture" 
+                                 class="rounded-circle me-3" 
+                                 style="width: 50px; height: 50px; object-fit: cover;">
+            
+                            <!-- Comment Details -->
+                            <div>
+                                <strong>{{ comment.author.username }}</strong>
+                                <p>{{ comment.content }}</p>
+                                <small class="text-muted">Posted on {{ comment.created_at|date:"Y-m-d H:i" }}</small>
+            
+                                {% if user == comment.author or user.is_superuser or user.is_staff %}
+                                    <div class="mt-3">
+                                        <a href="{% url 'edit_comment' pk=comment.pk %}" class="btn btn-warning btn-sm">Edit</a>
+                                        <a href="{% url 'delete_comment' pk=comment.pk %}" class="btn btn-danger btn-sm">Delete</a>
+                                    </div>
+                                {% endif %}
+                            </div>
                         </div>
                     {% empty %}
                         <p>No comments yet. Be the first to comment!</p>
                     {% endfor %}
                 </div>
+            </div>
 
                 <!-- Pagination for Comments -->
                 {% if comments.has_other_pages %}
