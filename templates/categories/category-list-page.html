@@ -67,12 +67,13 @@
                 </div>
         {% endif %}
 
-        <!-- Message when no categories are available -->
+        {% if no_categories_message %}
              <div class="row">
                 <div class="col text-center">
                     <p>{{ no_categories_message }}</p>
                 </div>
             </div>
+        {% elif categories %}
             <ul class="list-group">
                 {% for category in categories %}
                     <li class="list-group-item text-center">
