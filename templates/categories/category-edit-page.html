@@ -4,11 +4,14 @@
 
 {% block content %}
     <div class="container my-4">
-            <!-- Delete button -->
-            <form action="{% if category.pk %}{% url 'category_delete' pk=category.pk %}{% endif %}" method="POST" style="display: inline;">
-                {% csrf_token %}
-                <button type="submit" class="btn btn-danger btn-sm">Delete</button>
-            </form>
+        <!-- Delete button -->
+        <form action="{% url 'category_delete' pk=category.pk %}" method="GET" style="display: inline;">
+            {% if user == category.author or user.is_staff or user.is_superuser %}
+                <div class="d-flex justify-content-center">
+                    <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+                </div>
+            {% endif %}
+        </form>
 
         <h2>Edit Category</h2>
 

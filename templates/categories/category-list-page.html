@@ -1,14 +1,23 @@
 {% extends 'base.html' %}
 
-{% block title %}Categories - Excel Tips and Tricks{% endblock %}
-
 {% block content %}
     <div class="container my-4">
-        <div class="row">
-            <div class="col text-center">
-                <h2>Categories</h2>
+            <div class="row">
+                <div class="col text-center">
+                    <h2>Categories</h2>
+                </div>
             </div>
-        </div>
+        {% if user.is_authenticated %}
+            <div class="row">
+                <div class="col text-center">
+                    <a href="{% url 'category_create' %}" class="btn btn-success mt-3">Create a New Category</a>
+                </div>
+            </div>
+        {% endif %}
+    
+    <div class="my-4"></div>
+    
+    {% if categories %}
 
         <!-- First Pagination right under Categories Header, centered -->
         <div class="row">
@@ -58,103 +67,88 @@
             </div>
         </div>
 
-        <!-- Create a new category button, centered -->
-        {% if user.is_authenticated %}
-                <div class="row">
-                    <div class="col text-center">
-                        <a href="{% url 'category_create' %}" class="btn btn-success mt-3">Create a New Category</a>
-                    </div>
-                </div>
-        {% endif %}
+        <ul class="list-group">
+            {% for category in categories %}
+                <li class="list-group-item text-center">
+                    <strong>{{ category.name }}</strong>
 
-        {% if no_categories_message %}
-             <div class="row">
-                <div class="col text-center">
-                    <p>{{ no_categories_message }}</p>
-                </div>
-            </div>
-        {% elif categories %}
-            <ul class="list-group">
-                {% for category in categories %}
-                    <li class="list-group-item text-center">
+                    {% if category.description %}
+                        <p>{{ category.description }}</p>
+                    {% endif %}
 
-                        <strong>{{ category.name }}</strong>
-                    
-                        {% if category.description %}
-                            <p>{{ category.description }}</p>
+                    <div class="d-flex flex-column align-items-center mt-2">
+                        {% if category.image_url %}
+                            <img src="{{ category.image_url }}" alt="{{ category.name }}" class="img-fluid mb-2" width="150">
+                        {% else %}
+                            <p>No image available</p>
                         {% endif %}
 
-                        <div class="d-flex flex-column align-items-center mt-2">
-                            {% if category.image_url %}
-                                <img src="{{ category.image_url }}" alt="{{ category.name }}" class="img-fluid mb-2" width="150">
-                            {% else %}
-                                <p>No image available</p>
-                            {% endif %}
-
-                        <!-- Show edit and delete buttons only if the user is authenticated -->
                         {% if user.is_authenticated %}
-                            <div class="d-flex justify-content-center mt-2">
-                                <!-- Details button for all authenticated users -->
-                                <a href="{% url 'category_detail' pk=category.pk %}" class="btn btn-info btn-sm mr-2">Details</a>
-                                
-                                <!-- Edit button for the category creator, staff, or superusers -->
+                             <div class="d-flex justify-content-center mt-2">
                                 {% if user == category.author or user.is_staff or user.is_superuser %}
-                                    <a href="{% url 'category_edit' pk=category.pk %}" class="btn btn-warning btn-sm">Edit</a>
+                                    <a href="{% url 'category_edit' pk=category.pk %}" class="btn btn-warning btn-sm mr-2">Edit</a>
                                 {% endif %}
+                                <a href="{% url 'category_detail' pk=category.pk %}" class="btn btn-info btn-sm">Details</a>
                             </div>
                         {% endif %}
-                        </div>
-                    </li>
-                {% endfor %}
-            </ul>
+                    </div>
+                </li>
+            {% endfor %}
+        </ul>
 
-            <!-- Pagination controls at the bottom, after the last category -->
-            <div class="row">
-                <div class="col text-center">
-                    <nav>
-                        <ul class="pagination justify-content-center">
-                            {% if page_obj.has_previous %}
-                                <li class="page-item">
-                                    <a class="page-link" href="?page=1" aria-label="First">
-                                        <span aria-hidden="true">&laquo;&laquo;</span> First
-                                    </a>
+        <!-- Pagination controls at the bottom -->
+        <div class="row">
+            <div class="col text-center">
+                <nav>
+                    <ul class="pagination justify-content-center">
+                        {% if page_obj.has_previous %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page=1" aria-label="First">
+                                    <span aria-hidden="true">&laquo;&laquo;</span> First
+                                </a>
+                            </li>
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ page_obj.previous_page_number }}" aria-label="Previous">
+                                    <span aria-hidden="true">&laquo;</span> Previous
+                                </a>
+                            </li>
+                        {% endif %}
+
+                        {% for page_num in custom_page_range %}
+                            {% if page_num == page_obj.number %}
+                                <li class="page-item active" aria-current="page">
+                                    <span class="page-link">{{ page_num }}</span>
                                 </li>
+                            {% else %}
                                 <li class="page-item">
-                                    <a class="page-link" href="?page={{ page_obj.previous_page_number }}" aria-label="Previous">
-                                        <span aria-hidden="true">&laquo;</span> Previous
-                                    </a>
+                                    <a class="page-link" href="?page={{ page_num }}">{{ page_num }}</a>
                                 </li>
                             {% endif %}
+                        {% endfor %}
 
-                            <!-- Custom page range links -->
-                            {% for page_num in custom_page_range %}
-                                {% if page_num == page_obj.number %}
-                                    <li class="page-item active" aria-current="page">
-                                        <span class="page-link">{{ page_num }}</span>
-                                    </li>
-                                {% else %}
-                                    <li class="page-item">
-                                        <a class="page-link" href="?page={{ page_num }}">{{ page_num }}</a>
-                                    </li>
-                                {% endif %}
-                            {% endfor %}
-
-                            {% if page_obj.has_next %}
-                                <li class="page-item">
-                                    <a class="page-link" href="?page={{ page_obj.next_page_number }}" aria-label="Next">
-                                        Next <span aria-hidden="true">&raquo;</span>
-                                    </a>
-                                </li>
-                                <li class="page-item">
-                                    <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}" aria-label="Last">
-                                        Last <span aria-hidden="true">&raquo;&raquo;</span>
-                                    </a>
-                                </li>
-                            {% endif %}
-                        </ul>
-                    </nav>
-                </div>
+                        {% if page_obj.has_next %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ page_obj.next_page_number }}" aria-label="Next">
+                                    Next <span aria-hidden="true">&raquo;</span>
+                                </a>
+                            </li>
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}" aria-label="Last">
+                                    Last <span aria-hidden="true">&raquo;&raquo;</span>
+                                </a>
+                            </li>
+                        {% endif %}
+                    </ul>
+                </nav>
             </div>
-        {% endif %}
-    </div>
+        </div>
+    {% else %}
+        <div class="row">
+            <div class="col text-center">
+                <p>{{ no_categories_message }}</p>
+            </div>
+        </div>
+    {% endif %}
+</div>
 {% endblock %}
+
