@@ -1,3 +1,4 @@
+
 /* Apply consistent height and padding to all buttons */
 .nav-link, .btn-excel, .btn-logout {
     height: 38px; /* Ensure equal height */

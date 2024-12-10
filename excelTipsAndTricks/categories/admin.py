@@ -1,12 +1,12 @@
 from django.contrib import admin
-from .models import Category  # Import Category model
+from .models import Category
+
 
 @admin.register(Category)
 class CategoryAdmin(admin.ModelAdmin):
     list_display = ('name', 'description',)
-    search_fields = ('name', 'description',)  # You can still search by category name and description
+    search_fields = ('name', 'description',)
 
-    # Exclude the 'tags' field completely from the admin form
     exclude = ('tags',)
 
     def image_url(self, obj):

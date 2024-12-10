@@ -60,7 +60,8 @@ class ProfileUpdateForm(forms.ModelForm):
         # Ensure that both fields are not filled simultaneously
         if profile_picture and profile_picture_url:
             raise forms.ValidationError(
-                "You cannot upload both a profile picture via file upload and provide a URL at the same time. Please choose one method."
+                "You cannot upload both a profile picture via file upload and provide a URL at the same time. "
+                "Please choose one method."
             )
 
         return cleaned_data
@@ -73,6 +74,7 @@ class ProfileUpdateForm(forms.ModelForm):
         if commit:
             user_profile.save()
         return user_profile
+
 
 class CustomPasswordChangeForm(PasswordChangeForm):
     new_password1 = forms.CharField(

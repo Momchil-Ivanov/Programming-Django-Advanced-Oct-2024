@@ -13,7 +13,8 @@ def create_user_profile(sender, instance, created, **kwargs):
         assign_role_to_user(instance, 'Regular')
         send_mail(
             subject="Welcome to Excel Tips and Tricks",
-            message="We are excited to have you join our community! Here are some tips and tricks to help you improve your Excel skills.",
+            message="We are excited to have you join our community! "
+                    "Here are some tips and tricks to help you improve your Excel skills.",
             from_email=settings.COMPANY_EMAIL,
             recipient_list=[instance.email],
             fail_silently=False,

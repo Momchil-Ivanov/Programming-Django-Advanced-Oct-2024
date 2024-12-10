@@ -4,6 +4,7 @@ from excelTipsAndTricks.categories.models import Category
 from excelTipsAndTricks.common.models import LikeDislike
 from excelTipsAndTricks.tags.models import Tag
 
+
 class Tip(models.Model):
     title = models.CharField(
         unique=True,

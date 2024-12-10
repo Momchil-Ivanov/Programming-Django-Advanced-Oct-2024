@@ -32,7 +32,7 @@
                     <label for="{{ form.email.id_for_label }}">Email</label>
                     <input type="email" 
                            name="email" 
-                           value="{% if form.email.value %}{{ form.email.value }}{% else %}""{% endif %}" 
+                           value="{% if form.email.value %}{{ form.email.value }}{% else %}{% endif %}"
                            class="form-control" 
                            id="{{ form.email.id_for_label }}">
                     {% if form.email.errors %}
@@ -60,8 +60,7 @@
                     </div>
                     {% endif %}
                 </div>
-
-                <!-- Password2 -->
+            
                 <!-- Password2 -->
                 <div class="form-group">
                     <label for="{{ form.password2.id_for_label }}">Confirm Password</label>

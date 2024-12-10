@@ -11,10 +11,9 @@ class CategoryListView(LoginRequiredMixin, ListView):
     model = Category
     template_name = 'categories/category-list-page.html'
     context_object_name = 'categories'
-    paginate_by = 5  # Number of categories per page
+    paginate_by = 5
 
     def get_queryset(self):
-        # Order categories alphabetically by name
         return Category.objects.all().order_by('name')
 
     def get_context_data(self, **kwargs):
@@ -22,7 +21,6 @@ class CategoryListView(LoginRequiredMixin, ListView):
         paginator = context['paginator']
         page = context['page_obj']
 
-        # Show first and last five pages around the current page
         page_range = paginator.page_range
         current_page = page.number
         total_pages = paginator.num_pages
@@ -52,6 +50,7 @@ class CategoryCreateView(LoginRequiredMixin, CreateView):
         messages.error(self.request, "There was an error with your form submission. Please fix the issues.")
         return self.render_to_response({'form': form})
 
+
 class CategoryUpdateView(LoginRequiredMixin, UpdateView):
     model = Category
     form_class = CategoryForm
@@ -60,7 +59,7 @@ class CategoryUpdateView(LoginRequiredMixin, UpdateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['category'] = self.get_object()  # Ensure this passes the category object
+        context['category'] = self.get_object()
         return context
 
     def form_valid(self, form):
@@ -71,12 +70,12 @@ class CategoryUpdateView(LoginRequiredMixin, UpdateView):
         return self.render_to_response({'form': form})
 
     def dispatch(self, request, *args, **kwargs):
-        category = self.get_object()  # Fetch the category
-        # Check if the current user is the author or an admin (staff or superuser)
+        category = self.get_object()
         if category.author != request.user and not request.user.is_staff and not request.user.is_superuser:
             messages.error(self.request, "You do not have permission to edit this category.")
-            return redirect('view_category')  # Correct the redirect URL name here
+            return redirect('view_category')
         return super().dispatch(request, *args, **kwargs)
+
 
 class CategoryDeleteView(LoginRequiredMixin, DeleteView):
     model = Category
@@ -85,27 +84,20 @@ class CategoryDeleteView(LoginRequiredMixin, DeleteView):
     success_url = reverse_lazy('view_category')
 
     def get_object(self, queryset=None):
-        # Ensure we are deleting the correct category
         return get_object_or_404(Category, pk=self.kwargs['pk'])
 
-    def get(self, request, *args, **kwargs):
-        # This should show the confirmation page before performing the delete
-        category = self.get_object()
-        return self.render_to_response({'object': category})
-
     def post(self, request, *args, **kwargs):
-        # Perform the deletion after confirmation
         category = self.get_object()
         messages.success(self.request, f'Category "{category.name}" has been successfully deleted.')
         return super().post(request, *args, **kwargs)
 
     def dispatch(self, request, *args, **kwargs):
-        category = self.get_object()  # Fetch the category
-        # Check if the current user is the author or an admin (staff or superuser)
+        category = self.get_object()
         if category.author != request.user and not request.user.is_staff and not request.user.is_superuser:
             messages.error(self.request, "You do not have permission to delete this category.")
-            return redirect('view_category')  # Redirect to category list if no permission
+            return redirect('view_category')
         return super().dispatch(request, *args, **kwargs)
+
 
 class CategoryDetailView(LoginRequiredMixin, DetailView):
     model = Category
@@ -116,3 +108,4 @@ class CategoryDetailView(LoginRequiredMixin, DetailView):
         context = super().get_context_data(**kwargs)
         context['related_tips'] = self.object.tips.all()
         return context
+

@@ -5,4 +5,4 @@ class AccountsConfig(AppConfig):
     name = 'excelTipsAndTricks.accounts'
 
     def ready(self):
-        import excelTipsAndTricks.accounts.signals
+        import excelTipsAndTricks.accounts.signals  # noqa: F401

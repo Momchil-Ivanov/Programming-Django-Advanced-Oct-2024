@@ -1,6 +1,6 @@
 from django.contrib.auth.models import User
 from django.db import models
-from excelTipsAndTricks.tags.models import Tag  # Import Tag model
+from excelTipsAndTricks.tags.models import Tag
 
 
 class Category(models.Model):
@@ -18,13 +18,13 @@ class Category(models.Model):
     tags = models.ManyToManyField(
         Tag,
         related_name='categories'
-    )  # Link categories to tags
+    )
 
     author = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
         related_name='categories'
-    )  # Add author field
+    )
 
     def __str__(self):
         return self.name

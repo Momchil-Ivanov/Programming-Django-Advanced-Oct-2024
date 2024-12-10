@@ -1,9 +1,10 @@
 from django.db import models
 from django.contrib.auth.models import User
 
+
 class Comment(models.Model):
     tip = models.ForeignKey(
-        'tips.Tip',  # Use app_label.ModelName
+        'tips.Tip',
         on_delete=models.CASCADE,
         related_name='comments',
     )
@@ -44,7 +45,7 @@ class LikeDislike(models.Model):
     )
 
     tip = models.ForeignKey(
-        'tips.Tip',  # Use app_label.ModelName
+        'tips.Tip',
         on_delete=models.CASCADE,
         related_name='like_dislikes',
     )
@@ -60,7 +61,8 @@ class LikeDislike(models.Model):
         return f"{self.user.username} {self.action}d {self.tip.title}"
 
     class Meta:
-        unique_together = ('user', 'tip')  # Ensures one action per user per tip
+        unique_together = ('user', 'tip')
+
 
 class AboutPage(models.Model):
     title = models.CharField(max_length=100)

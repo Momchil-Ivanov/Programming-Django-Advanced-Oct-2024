@@ -13,11 +13,9 @@
                 <div class="form-group">
                     <label for="{{ field.id_for_label }}">{{ field.label }}</label>
                     {% if field.name == 'description' %}
-                        <!-- For description, use a textarea with a larger size -->
                         <textarea name="{{ field.name }}" id="{{ field.id_for_label }}" 
                                   class="form-control {% if field.errors %}is-invalid{% endif %}" rows="10">{{ field.value|default:'' }}</textarea>
                     {% else %}
-                        <!-- For other fields, keep as input -->
                         <input type="{{ field.type }}" name="{{ field.name }}" id="{{ field.id_for_label }}" 
                                class="form-control {% if field.errors %}is-invalid{% endif %}" value="{{ field.value|default:'' }}">
                     {% endif %}
