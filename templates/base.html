@@ -23,6 +23,13 @@
 <body class="d-flex flex-column min-vh-100">
     <!-- Header -->
     <header class="bg-success text-white text-center py-4">
+        <div class="greeting">
+            {% if user.is_authenticated %}
+                <p>Welcome, {{ user.username }}!</p>
+            {% else %}
+                <p>No user is logged in.</p>
+            {% endif %}
+        </div>
         <h1 class="display-4">{% block header_title %}Welcome to Excel Tips and Tricks{% endblock %}</h1>
         <nav>
             <ul class="nav justify-content-center">  <!-- Center buttons -->

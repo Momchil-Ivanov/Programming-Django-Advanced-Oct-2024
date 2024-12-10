@@ -47,9 +47,9 @@ class ProfileUpdateForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         # Ensure the form gets the current user's email address
-        user = kwargs.get('instance').user  # Assuming the UserProfile model has a OneToOne relationship with the User model
+        user = kwargs.get('instance').user
         super().__init__(*args, **kwargs)
-        self.fields['email'].initial = user.email  # Set the initial email value
+        self.fields['email'].initial = user.email
 
     def clean(self):
         cleaned_data = super().clean()

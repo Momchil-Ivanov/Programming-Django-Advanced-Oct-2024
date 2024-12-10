@@ -19,9 +19,11 @@ def create_user_profile(sender, instance, created, **kwargs):
             fail_silently=False,
         )
 
+
 @receiver(post_save, sender=User)
 def save_user_profile(sender, instance, **kwargs):
     instance.profile.save()
+
 
 def assign_role_to_user(user, role):
     try:

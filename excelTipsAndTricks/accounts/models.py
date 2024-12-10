@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User
 
+
 class UserProfile(models.Model):
     user = models.OneToOneField(
         to=User,
@@ -14,7 +15,7 @@ class UserProfile(models.Model):
     )
 
     profile_picture = models.ImageField(
-        upload_to='profile_pictures/',  # Change this path as needed
+        upload_to='profile_pictures/',
         blank=True,
         null=True
     )
@@ -42,7 +43,6 @@ class UserProfile(models.Model):
         return f"{self.user.username}'s Profile"
 
     def get_profile_picture(self):
-        # Return the profile picture URL or a placeholder if not provided
         if self.profile_picture:
             return self.profile_picture.url
         return self.profile_picture_url or '/static/images/accounts/default_profile_picture.png'

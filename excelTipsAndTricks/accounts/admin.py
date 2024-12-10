@@ -3,6 +3,7 @@ from django.contrib.auth.admin import UserAdmin
 from django.contrib.auth.models import User
 from .models import UserProfile
 
+
 class CustomUserAdmin(UserAdmin):
     # Define the fields for user creation
     add_fieldsets = (
@@ -40,14 +41,15 @@ class CustomUserAdmin(UserAdmin):
         self.message_user(request, "Selected users have been made superusers.")
     make_superuser.short_description = "Make selected users superusers"
 
-# Register the custom UserAdmin (no need to re-register the User model)
+
+# Register the custom UserAdmin
 admin.site.unregister(User)
 admin.site.register(User, CustomUserAdmin)
 
-# Register UserProfile model separately
+
 @admin.register(UserProfile)
 class UserProfileAdmin(admin.ModelAdmin):
     list_display = ('user', 'bio', 'website', 'age', 'profile_picture_url')
     search_fields = ('user__username', 'bio', 'website')
-    ordering = ('user__username',)  # Order by username
+    ordering = ('user__username',)
     list_filter = ('is_approved', 'age')
