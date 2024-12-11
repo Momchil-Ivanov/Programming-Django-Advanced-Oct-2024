@@ -1,11 +1,12 @@
+import os
+
 import requests
 from django.views.generic import TemplateView
 from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework.response import Response
-
+from decouple import config
 from excelTipsAndTricks.common.serializers import WeatherSerializer
-from excelTipsAndTricks.settings import API_KEY
 
 
 def get_user_location():
@@ -22,7 +23,7 @@ def get_user_location():
 
 
 def fetch_weather_data(city):
-    api_key = API_KEY
+    api_key = os.getenv('API_KEY', config('API_KEY'))
     url = f'http://api.openweathermap.org/data/2.5/weather?q={city}&appid={api_key}&units=metric'
 
     try:
