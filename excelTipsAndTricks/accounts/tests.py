@@ -1,5 +1,4 @@
 from django.conf import settings
-from django.http import HttpResponse
 from django.urls import reverse
 from django.test import TestCase
 from django.contrib.auth.models import User
@@ -63,7 +62,6 @@ class UserProfileIntegrationTests(TestCase):
         self.client.login(username=self.username, password=self.password)
 
         response = self.client.get(reverse('profile'))
-        self.assertEqual(response.status_code, HttpResponse.status_code.OK, "Expected a successful "
-                                                                            "response with status code 200.")
+        self.assertEqual(response.status_code, 200)
 
         self.assertContains(response, self.username)
