@@ -45,4 +45,32 @@
             <img src="{% static 'images/common/tips-tricks-with-lightbulb-icon-vector-illustration-quick-advice-helpful-tricks_1063836-83.png' %}" alt="Tips and Tricks Logo" class="img-fluid" style="max-width: 150px;">
         </div>
     </div>
+
+    <!-- Geolocation Script -->
+<script>
+    if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(function(position) {
+            var latitude = position.coords.latitude;
+            var longitude = position.coords.longitude;
+
+            // Send the coordinates to the backend to update location
+            fetch(`/update-location/?latitude=${latitude}&longitude=${longitude}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.weather) {
+                        document.querySelector('.weather-info h3').textContent = `Weather in ${data.weather.city}`;
+                        document.querySelector('.weather-info p').textContent = `Temperature: ${data.weather.temperature}°C`;
+                        // Update other weather details accordingly
+                    } else {
+                        console.error('Error:', data.error);
+                    }
+                })
+                .catch(error => console.error('Error updating location:', error));
+        }, function(error) {
+            console.error('Geolocation error:', error);
+        });
+    } else {
+        alert('Geolocation is not supported by this browser.');
+    }
+</script>
 {% endblock %}
