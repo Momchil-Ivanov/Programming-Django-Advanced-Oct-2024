@@ -1,47 +1,38 @@
 import os
-
 import requests
+from django.http import HttpResponseRedirect
+from django.shortcuts import render
+
 from django.views.generic import TemplateView
 from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from decouple import config
+
+from excelTipsAndTricks.common.forms import CityForm
 from excelTipsAndTricks.common.serializers import WeatherSerializer
-from django.core.cache import cache
 
 
-def get_client_ip(request):
-    # Get the X-Forwarded-For header which contains the real IP address of the client
-    x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
-    if x_forwarded_for:
-        ip = x_forwarded_for.split(',')[0]  # The first IP in the X-Forwarded-For list is the real client IP
-    else:
-        ip = request.META.get('REMOTE_ADDR')  # Fallback to REMOTE_ADDR if X-Forwarded-For is not present
+# def get_user_location():
+#     try:
+#         response = requests.get('https://ipinfo.io/json')
+#         if response.status_code == 200:
+#             location_data = response.json()
+#             city = location_data.get('city', 'Berlin')
+#             print(city)
+#             return city
+#         else:
+#             return 'Berlin'
+#     except requests.exceptions.RequestException:
+#         return 'Berlin'
 
-    # If running locally (localhost or 127.0.0.1), dynamically get the public IP
-    if ip in ["127.0.0.1", "::1"]:  # Local development environment
-        cached_ip = cache.get('client_ip')
-        if not cached_ip:
-            try:
-                # Get the public IP address using an external service like ipify
-                response = requests.get("https://api.ipify.org?format=json")
-                if response.status_code == 200:
-                    ip = response.json().get("ip", "8.8.8.8")  # Default to a known IP if fetching fails
-                    # Cache the IP for 5 minutes
-                    cache.set('client_ip', ip, timeout=300)
-            except requests.RequestException:
-                ip = "8.8.8.8"  # Fallback IP for testing in case the external service fails
-
-    return ip
-
-
-def get_user_location(request):
-    ip = get_client_ip(request)
+def get_user_location():
     try:
-        response = requests.get(f'https://ipinfo.io/{ip}/json')
+        response = requests.get('http://ip-api.com/json')
         if response.status_code == 200:
             location_data = response.json()
             city = location_data.get('city', 'Berlin')
+            print(city)
             return city
         else:
             return 'Berlin'
@@ -55,7 +46,6 @@ def fetch_weather_data(city):
 
     try:
         response = requests.get(url)
-
         if response.status_code == 200:
             weather_data = response.json()
             weather_info = {
@@ -65,6 +55,8 @@ def fetch_weather_data(city):
                 'icon': weather_data['weather'][0]['icon'],
             }
             return weather_info
+        elif response.status_code == 404:
+            return {'error': 'City not found'}
         else:
             return {'error': 'Unable to fetch weather data'}
     except requests.exceptions.RequestException as e:
@@ -77,14 +69,29 @@ class HomePageView(TemplateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
-        city = get_user_location(self.request)
+        city_form = CityForm()
+
+        city = get_user_location()
         weather_data = fetch_weather_data(city)
 
-        print(weather_data)
-
         context['weather'] = weather_data
+        context['city_form'] = city_form
 
         return context
+
+    def post(self, request, *args, **kwargs):
+        city_form = CityForm(request.POST)
+        if city_form.is_valid():
+            city = city_form.cleaned_data['city']
+            weather_data = fetch_weather_data(city)
+
+            context = self.get_context_data()
+            context['weather'] = weather_data
+            context['city_form'] = city_form
+
+            return render(request, self.template_name, context)
+
+        return HttpResponseRedirect('/')
 
 
 class WeatherApiView(APIView):

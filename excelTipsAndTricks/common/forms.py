@@ -12,3 +12,7 @@ class CommentForm(forms.ModelForm):
                 'rows': 3,
             }),
         }
+
+
+class CityForm(forms.Form):
+    city = forms.CharField(max_length=100, required=False, label='Enter city')
