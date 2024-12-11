@@ -10,20 +10,22 @@ from excelTipsAndTricks.common.serializers import WeatherSerializer
 
 
 def get_client_ip(request):
+    # Get the X-Forwarded-For header which contains the real IP address of the client
     x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
     if x_forwarded_for:
-        ip = x_forwarded_for.split(',')[0]
+        ip = x_forwarded_for.split(',')[0]  # The first IP in the X-Forwarded-For list is the real client IP
     else:
-        ip = request.META.get('REMOTE_ADDR')
+        ip = request.META.get('REMOTE_ADDR')  # Fallback to REMOTE_ADDR if X-Forwarded-For is not present
 
-    if ip in ["127.0.0.1", "::1"]:
+    # If running locally (localhost or 127.0.0.1), dynamically get the public IP
+    if ip in ["127.0.0.1", "::1"]:  # Local development environment
         try:
-            # Use an external API to get the public IP
+            # Get the public IP address using an external service like ipify
             response = requests.get("https://api.ipify.org?format=json")
             if response.status_code == 200:
-                ip = response.json().get("ip", "8.8.8.8")
+                ip = response.json().get("ip", "8.8.8.8")  # Default to a known IP if fetching fails
         except requests.RequestException:
-            ip = "8.8.8.8"
+            ip = "8.8.8.8"  # Fallback IP for testing in case the external service fails
 
     return ip
 
