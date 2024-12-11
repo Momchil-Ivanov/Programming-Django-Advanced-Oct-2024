@@ -1,7 +1,10 @@
 import requests
 from django.views.generic import TemplateView
+from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework.response import Response
+
+from excelTipsAndTricks.common.serializers import WeatherSerializer
 from excelTipsAndTricks.settings import API_KEY
 
 
@@ -63,9 +66,10 @@ class WeatherApiView(APIView):
         weather_info = fetch_weather_data(city)
 
         if 'error' in weather_info:
-            return Response({'error': weather_info['error']}, status=400)
+            return Response({'error': weather_info['error']}, status=status.HTTP_400_BAD_REQUEST)
 
-        return Response(weather_info)
+        serializer = WeatherSerializer(weather_info)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 class AboutPageView(TemplateView):
