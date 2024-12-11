@@ -10,6 +10,11 @@
     <div class="container mt-5 text-center">
         <h2>Explore the Best Excel Tips</h2>
         <p>Get to know helpful tips and tricks to improve your Excel skills.</p>
+    
+        <div class="d-flex justify-content-center align-items-center mt-4">
+            <img src="{% static 'images/common/Microsoft_Office_Excel_Logo_512px.png' %}" alt="Excel Logo" class="img-fluid" style="max-width: 150px;">
+            <img src="{% static 'images/common/tips-tricks-with-lightbulb-icon-vector-illustration-quick-advice-helpful-tricks_1063836-83.png' %}" alt="Tips and Tricks Logo" class="img-fluid" style="max-width: 150px;">
+        </div>
 
         <!-- Weather Info -->
         {% if weather %}
@@ -32,45 +37,44 @@
         <!-- City Input Form -->
         <div class="mt-4">
             <h3>Change City</h3>
-            <form method="post">
-                {% csrf_token %}
-                {{ city_form.as_p }}
-                <button type="submit" class="btn btn-primary">Submit</button>
-            </form>
-        </div>
-
-        <!-- Logos below the buttons -->
-        <div class="d-flex justify-content-center align-items-center mt-4">
-            <img src="{% static 'images/common/Microsoft_Office_Excel_Logo_512px.png' %}" alt="Excel Logo" class="img-fluid" style="max-width: 150px;">
-            <img src="{% static 'images/common/tips-tricks-with-lightbulb-icon-vector-illustration-quick-advice-helpful-tricks_1063836-83.png' %}" alt="Tips and Tricks Logo" class="img-fluid" style="max-width: 150px;">
+                <form method="post">
+                    {% csrf_token %}
+                    {{ city_form.as_p }}
+                    <button type="submit" class="btn btn-primary">Submit</button>
+                </form>
         </div>
     </div>
 
     <!-- Geolocation Script -->
-<script>
-    if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition(function(position) {
-            var latitude = position.coords.latitude;
-            var longitude = position.coords.longitude;
-
-            // Send the coordinates to the backend to update location
-            fetch(`/update-location/?latitude=${latitude}&longitude=${longitude}`)
-                .then(response => response.json())
-                .then(data => {
-                    if (data.weather) {
-                        document.querySelector('.weather-info h3').textContent = `Weather in ${data.weather.city}`;
-                        document.querySelector('.weather-info p').textContent = `Temperature: ${data.weather.temperature}°C`;
-                        // Update other weather details accordingly
-                    } else {
-                        console.error('Error:', data.error);
-                    }
-                })
-                .catch(error => console.error('Error updating location:', error));
-        }, function(error) {
-            console.error('Geolocation error:', error);
-        });
-    } else {
-        alert('Geolocation is not supported by this browser.');
-    }
-</script>
+    <script>
+        var cityField = '{{ weather.city }}';
+        var citySubmitted = cityField !== 'Nowhere'; 
+        
+        if (!cityField || cityField === 'Nowhere') {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(function(position) {
+                    var latitude = position.coords.latitude;
+                    var longitude = position.coords.longitude;
+                    
+                    fetch(`/update-location/?latitude=${latitude}&longitude=${longitude}`)
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.weather) {
+                                document.querySelector('.weather-info h3').textContent = `Weather in ${data.weather.city}`;
+                                document.querySelector('.weather-info p').textContent = `Temperature: ${data.weather.temperature}°C`;
+                            } else {
+                                console.error('Error:', data.error);
+                            }
+                        })
+                        .catch(error => console.error('Error updating location:', error));
+                }, function(error) {
+                    console.error('Geolocation error:', error);
+                });
+            } else {
+                console.log('Geolocation is not supported by this browser.');
+            }
+        } else {
+            console.log('Geolocation is disabled, city is selected.');
+        }
+    </script>
 {% endblock %}
