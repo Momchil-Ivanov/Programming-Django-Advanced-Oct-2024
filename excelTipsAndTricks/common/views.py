@@ -9,9 +9,29 @@ from decouple import config
 from excelTipsAndTricks.common.serializers import WeatherSerializer
 
 
-def get_user_location():
+def get_client_ip(request):
+    x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
+    if x_forwarded_for:
+        ip = x_forwarded_for.split(',')[0]
+    else:
+        ip = request.META.get('REMOTE_ADDR')
+
+    if ip in ["127.0.0.1", "::1"]:
+        try:
+            # Use an external API to get the public IP
+            response = requests.get("https://api.ipify.org?format=json")
+            if response.status_code == 200:
+                ip = response.json().get("ip", "8.8.8.8")
+        except requests.RequestException:
+            ip = "8.8.8.8"
+
+    return ip
+
+
+def get_user_location(request):
+    ip = get_client_ip(request)
     try:
-        response = requests.get('https://ipinfo.io/json')
+        response = requests.get(f'https://ipinfo.io/{ip}/json')
         if response.status_code == 200:
             location_data = response.json()
             city = location_data.get('city', 'Berlin')
@@ -50,7 +70,7 @@ class HomePageView(TemplateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
-        city = get_user_location()
+        city = get_user_location(self.request)
         weather_data = fetch_weather_data(city)
 
         print(weather_data)
