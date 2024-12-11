@@ -7,6 +7,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from decouple import config
 from excelTipsAndTricks.common.serializers import WeatherSerializer
+from django.core.cache import cache
 
 
 def get_client_ip(request):
@@ -19,13 +20,17 @@ def get_client_ip(request):
 
     # If running locally (localhost or 127.0.0.1), dynamically get the public IP
     if ip in ["127.0.0.1", "::1"]:  # Local development environment
-        try:
-            # Get the public IP address using an external service like ipify
-            response = requests.get("https://api.ipify.org?format=json")
-            if response.status_code == 200:
-                ip = response.json().get("ip", "8.8.8.8")  # Default to a known IP if fetching fails
-        except requests.RequestException:
-            ip = "8.8.8.8"  # Fallback IP for testing in case the external service fails
+        cached_ip = cache.get('client_ip')
+        if not cached_ip:
+            try:
+                # Get the public IP address using an external service like ipify
+                response = requests.get("https://api.ipify.org?format=json")
+                if response.status_code == 200:
+                    ip = response.json().get("ip", "8.8.8.8")  # Default to a known IP if fetching fails
+                    # Cache the IP for 5 minutes
+                    cache.set('client_ip', ip, timeout=300)
+            except requests.RequestException:
+                ip = "8.8.8.8"  # Fallback IP for testing in case the external service fails
 
     return ip
 
