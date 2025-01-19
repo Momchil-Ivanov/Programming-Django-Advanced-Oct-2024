@@ -1,0 +1,103 @@
+{% load static %}
+
+<div class="card shadow">
+    <div class="card-header bg-light">
+        <h4 class="h5 mb-0">Comments</h4>
+    </div>
+    <div class="card-body">
+        {% if user.is_authenticated %}
+            <form method="post" action="{% url 'add_comment' tip.id %}" class="mb-4">
+                {% csrf_token %}
+                <div class="form-group">
+                    {{ comment_form.content }}
+                </div>
+                <button type="submit" class="btn btn-primary mt-2">Add Comment</button>
+            </form>
+        {% else %}
+            <p class="text-center mb-4">
+                <a href="{% url 'login' %}">Log in</a> to add a comment.
+            </p>
+        {% endif %}
+
+        {% for comment in comments %}
+            <div class="comment mb-3 p-3 border rounded">
+                <div class="d-flex">
+                    <!-- Profile Picture -->
+                    <div class="me-3">
+                        {% if comment.author.profile.get_profile_picture %}
+                            <img src="{{ comment.author.profile.get_profile_picture }}" 
+                                 alt="Profile Picture" 
+                                 class="rounded-circle"
+                                 style="width: 40px; height: 40px; object-fit: cover;">
+                        {% else %}
+                            <img src="{% static 'images/accounts/default_profile_picture.png' %}" 
+                                 alt="Default Profile Picture" 
+                                 class="rounded-circle"
+                                 style="width: 40px; height: 40px; object-fit: cover;">
+                        {% endif %}
+                    </div>
+                    
+                    <div class="flex-grow-1">
+                        <!-- Author and Date -->
+                        <div class="d-flex justify-content-between align-items-center">
+                            <strong class="me-2">
+                                {% if comment.author %}
+                                    {{ comment.author.username }}
+                                {% else %}
+                                    Deleted Account
+                                {% endif %}
+                            </strong>
+                            <small class="text-muted">{{ comment.created_at|date:"M d, Y H:i" }}</small>
+                        </div>
+                        
+                        <!-- Comment Content -->
+                        <p class="mb-1">{{ comment.content }}</p>
+                        
+                        <!-- Edit/Delete Buttons -->
+                        {% if user == comment.author or user.is_staff %}
+                            <div class="mt-2">
+                                <a href="{% url 'edit_comment' comment.id %}" class="btn btn-sm btn-warning">Edit</a>
+                                <form action="{% url 'delete_comment' comment.id %}" method="POST" class="d-inline">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn btn-sm btn-danger">Delete</button>
+                                </form>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        {% empty %}
+            <p class="text-center text-muted">No comments yet. Be the first to comment!</p>
+        {% endfor %}
+
+        {% if comments.paginator.num_pages > 1 %}
+            <nav aria-label="Comment pagination" class="mt-4">
+                <ul class="pagination justify-content-center">
+                    {% if comments.has_previous %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page=1">&laquo; First</a>
+                        </li>
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ comments.previous_page_number }}">Previous</a>
+                        </li>
+                    {% endif %}
+
+                    {% for num in page_range %}
+                        <li class="page-item {% if comments.number == num %}active{% endif %}">
+                            <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+                        </li>
+                    {% endfor %}
+
+                    {% if comments.has_next %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ comments.next_page_number }}">Next</a>
+                        </li>
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ comments.paginator.num_pages }}">Last &raquo;</a>
+                        </li>
+                    {% endif %}
+                </ul>
+            </nav>
+        {% endif %}
+    </div>
+</div> 

@@ -24,14 +24,6 @@ class CustomUserCreationForm(UserCreationForm):
         return email
 
 
-class CustomAuthenticationForm(AuthenticationForm):
-    remember_me = forms.BooleanField(required=False, widget=forms.CheckboxInput(attrs={'class': 'form-check-input'}))
-
-    class Meta:
-        model = User
-        fields = ['username', 'password', 'remember_me']
-
-
 class ProfileUpdateForm(forms.ModelForm):
     email = forms.EmailField(required=True, widget=forms.EmailInput(attrs={'placeholder': 'Email'}))
 

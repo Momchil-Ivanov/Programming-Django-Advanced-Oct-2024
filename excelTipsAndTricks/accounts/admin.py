@@ -11,7 +11,7 @@ class CustomUserAdmin(UserAdmin):
             'fields': ('username', 'email', 'password1', 'password2')
         }),
         ('Permissions', {
-            'fields': ('is_staff', 'is_superuser', 'groups', 'user_permissions')
+            'fields': ('is_staff', 'is_superuser', 'user_permissions')
         }),
     )
 
@@ -21,7 +21,7 @@ class CustomUserAdmin(UserAdmin):
             'fields': ('username', 'email', 'password')
         }),
         ('Permissions', {
-            'fields': ('is_staff', 'is_superuser', 'groups', 'user_permissions')
+            'fields': ('is_staff', 'is_superuser', 'user_permissions')
         }),
     )
 

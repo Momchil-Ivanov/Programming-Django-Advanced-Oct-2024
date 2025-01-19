@@ -10,7 +10,6 @@ from .. import settings
 def create_user_profile(sender, instance, created, **kwargs):
     if created:
         UserProfile.objects.create(user=instance)
-        assign_role_to_user(instance, 'Regular')
         send_mail(
             subject="Welcome to Excel Tips and Tricks",
             message="We are excited to have you join our community! "
@@ -24,11 +23,3 @@ def create_user_profile(sender, instance, created, **kwargs):
 @receiver(post_save, sender=User)
 def save_user_profile(sender, instance, **kwargs):
     instance.profile.save()
-
-
-def assign_role_to_user(user, role):
-    try:
-        group = Group.objects.get(name=role)
-        user.groups.add(group)
-    except Group.DoesNotExist:
-        pass

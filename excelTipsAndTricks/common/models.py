@@ -11,8 +11,10 @@ class Comment(models.Model):
 
     author = models.ForeignKey(
         to=User,
-        on_delete=models.CASCADE,
+        on_delete=models.SET_NULL,
         related_name='comments',
+        null=True,
+        blank=True,
     )
 
     content = models.TextField()
@@ -26,7 +28,8 @@ class Comment(models.Model):
     )
 
     def __str__(self):
-        return f"Comment by {self.author.username} on {self.tip.title}"
+        author_name = self.author.username if self.author else "Deleted User"
+        return f"Comment by {author_name} on {self.tip.title}"
 
 
 class LikeDislike(models.Model):

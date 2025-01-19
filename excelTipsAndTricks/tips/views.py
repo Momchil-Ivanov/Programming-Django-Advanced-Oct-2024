@@ -8,7 +8,9 @@ from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse_lazy
 from django.views.decorators.http import require_POST
-from django.views.generic import ListView, CreateView, UpdateView, DetailView, DeleteView
+from django.views.generic import ListView, CreateView, UpdateView, DetailView, DeleteView, View
+from django.core.paginator import PageNotAnInteger, EmptyPage
+from django.db.models import Q
 
 from .models import Tip
 from .forms import TipForm
@@ -88,22 +90,49 @@ class EditTipView(LoginRequiredMixin, UpdateView):
         return super().dispatch(request, *args, **kwargs)
 
 
-class TipDetailView(LoginRequiredMixin, DetailView):
-    model = Tip
-    template_name = 'tips/tip-details-page.html'
-    context_object_name = 'tip'
+class TipDetailView(View):
+    def get(self, request, pk):
+        tip = get_object_or_404(Tip, pk=pk)
+        comments = tip.comments.all().order_by('-created_at')
+        comment_form = CommentForm()
 
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
+        # Pagination for comments
+        paginator = Paginator(comments, 5)  # Show 5 comments per page
+        page = request.GET.get('page')
+        
+        try:
+            comments = paginator.page(page)
+        except PageNotAnInteger:
+            comments = paginator.page(1)
+        except EmptyPage:
+            comments = paginator.page(paginator.num_pages)
 
-        comments = Comment.objects.filter(tip=self.object).order_by('-created_at')
-        paginator = Paginator(comments, 5)
-        page_number = self.request.GET.get('page')
-        page_obj = paginator.get_page(page_number)
+        # Calculate visible page range
+        page_range = get_pagination_range(comments)
 
-        context['comments'] = page_obj
-        context['comment_form'] = CommentForm()
-        return context
+        # Track view count
+        if not request.session.get(f'tip_viewed_{tip.id}'):
+            tip.views_count += 1
+            tip.save()
+            request.session[f'tip_viewed_{tip.id}'] = True
+
+        # Check if user has liked/disliked
+        user_like_dislike = None
+        if request.user.is_authenticated:
+            user_like_dislike = tip.like_dislikes.filter(user=request.user).first()
+
+        context = {
+            'tip': tip,
+            'comments': comments,
+            'comment_form': comment_form,
+            'page_range': page_range,
+            'total_likes': tip.total_likes(),
+            'total_dislikes': tip.total_dislikes(),
+            'is_liked': user_like_dislike and user_like_dislike.action == LikeDislike.LIKE if request.user.is_authenticated else False,
+            'is_disliked': user_like_dislike and user_like_dislike.action == LikeDislike.DISLIKE if request.user.is_authenticated else False,
+        }
+
+        return render(request, 'tips/tip-details-page.html', context)
 
 
 class TipDeleteView(LoginRequiredMixin, DeleteView):
@@ -181,15 +210,6 @@ async def dislike_tip(request, pk):
     return await dislike_tip_sync(request, pk)
 
 
-def login_required_with_message(view_func):
-    def _wrapped_view(request, *args, **kwargs):
-        if not request.user.is_authenticated:
-            messages.error(request, 'You need to be logged in to access comments.')
-            return redirect('login')
-        return view_func(request, *args, **kwargs)
-    return _wrapped_view
-
-
 @login_required
 @require_POST
 def add_comment(request, pk):
@@ -206,7 +226,7 @@ def add_comment(request, pk):
     return redirect('tip_detail', pk=tip.pk)
 
 
-@login_required_with_message
+@login_required
 def delete_comment(request, pk):
     comment = get_object_or_404(Comment, pk=pk)
     if request.user != comment.author and not request.user.is_superuser and not request.user.is_staff:
@@ -219,7 +239,7 @@ def delete_comment(request, pk):
     return redirect('tip_detail', pk=tip.pk)
 
 
-@login_required_with_message
+@login_required
 def edit_comment(request, pk):
     comment = get_object_or_404(Comment, pk=pk)
 
@@ -267,3 +287,14 @@ def tag_search(request):
 
     results = [{"id": tag.id, "name": tag.name} for tag in tags]
     return JsonResponse({"tags": results})
+
+
+def get_pagination_range(page_obj, window=2):
+    """Helper function to calculate pagination range"""
+    current = page_obj.number
+    total = page_obj.paginator.num_pages
+    
+    start = max(current - window, 1)
+    end = min(current + window + 1, total + 1)
+    
+    return range(start, end)

@@ -89,8 +89,8 @@ def manage_tags(request):
 
 
 @user_passes_test(lambda u: u.is_staff or u.is_superuser)
-def delete_tag(request, tag_id):
-    tag = get_object_or_404(Tag, id=tag_id)
+def delete_tag(request, pk):
+    tag = get_object_or_404(Tag, pk=pk)
 
     if request.method == 'POST':
         tag.delete()

@@ -23,7 +23,19 @@
             <p>No image available</p>
         {% endif %}
 
-        <h4>Tips in this category:</h4>
+        <!-- Tags Section -->
+        {% if category.tags.all %}
+            <div class="mt-3">
+                <h5>Tags:</h5>
+                <div class="d-flex justify-content-center flex-wrap">
+                    {% for tag in category.tags.all %}
+                        <span class="badge bg-secondary m-1">{{ tag.name }}</span>
+                    {% endfor %}
+                </div>
+            </div>
+        {% endif %}
+
+        <h4 class="mt-4">Tips in this category:</h4>
         {% if related_tips %}
             <ul class="list-group mt-3 mx-auto" style="max-width: 500px;">
                 {% for tip in related_tips %}

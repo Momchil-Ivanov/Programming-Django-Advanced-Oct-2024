@@ -55,14 +55,18 @@ class CategoryUpdateView(LoginRequiredMixin, UpdateView):
     model = Category
     form_class = CategoryForm
     template_name = 'categories/category-edit-page.html'
-    success_url = reverse_lazy('view_category')
-
+    
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['category'] = self.get_object()
+        context['selected_tag_ids'] = [tag.id for tag in self.get_object().tags.all()]
         return context
 
+    def get_success_url(self):
+        return reverse_lazy('category_detail', kwargs={'pk': self.object.pk})
+
     def form_valid(self, form):
+        messages.success(self.request, 'Category updated successfully!')
         return super().form_valid(form)
 
     def form_invalid(self, form):
@@ -108,4 +112,3 @@ class CategoryDetailView(LoginRequiredMixin, DetailView):
         context = super().get_context_data(**kwargs)
         context['related_tips'] = self.object.tips.all()
         return context
-
